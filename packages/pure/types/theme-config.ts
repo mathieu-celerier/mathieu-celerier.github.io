@@ -122,6 +122,8 @@ export const ThemeConfigSchema = () =>
        *   { title: 'Blog', link: '/blog' }
        * ]
        */
+      useTitle: z.boolean().default(true),
+      searchButton: z.boolean().default(true),
       menu: HeaderMenuSchema()
     }),
 

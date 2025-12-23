@@ -8,6 +8,23 @@ function removeDupsAndLowerCase(array: string[]) {
   return Array.from(distinctItems)
 }
 
+const news = defineCollection({
+  loader: glob({ base: './src/content/news', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+
+    // Optional: show a “Read more” page for this item
+    hasPage: z.boolean().default(false),
+
+    // Optional: if it’s just a link announcement
+    externalUrl: z.string().url().optional(),
+
+    // Optional: tagging
+    tags: z.array(z.string()).default([])
+  })
+})
+
 // Define blog collection
 const blog = defineCollection({
   // Load Markdown and MDX files in the `src/content/blog/` directory.
@@ -40,20 +57,4 @@ const blog = defineCollection({
     })
 })
 
-// Define docs collection
-const docs = defineCollection({
-  loader: glob({ base: './src/content/docs', pattern: '**/*.{md,mdx}' }),
-  schema: () =>
-    z.object({
-      title: z.string().max(60),
-      description: z.string().max(160),
-      publishDate: z.coerce.date().optional(),
-      updatedDate: z.coerce.date().optional(),
-      tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
-      draft: z.boolean().default(false),
-      // Special fields
-      order: z.number().default(999)
-    })
-})
-
-export const collections = { blog, docs }
+export const collections = { news, blog }

@@ -1,0 +1,90 @@
+---
+import { getCollection } from 'astro:content'
+import MarkdownIt from 'markdown-it'
+
+import { Timeline } from 'astro-pure/user'
+
+type Props = {
+  /** Content collection name. Defaults to "news". */
+  collection?: 'news'
+
+  /** CSS class added to all links rendered inside the summary markdown. */
+  linkClass?: string
+
+  /** Marker used to split summary vs rest of content. Defaults to "<!-- more -->". */
+  moreMarker?: string
+
+  /** Rendered date format. Defaults to YYYY/MM/DD. */
+  dateFormat?: 'YYYY/MM/DD' | 'ja-JP' | 'en-GB'
+
+  /** Sort order by date. Defaults to "desc" (newest first). */
+  order?: 'asc' | 'desc'
+
+  /** Pass-through props to astro-pure Timeline if needed later. */
+  timelineProps?: Record<string, any>
+}
+
+const {
+  collection = 'news',
+  linkClass = 'styled-link',
+  moreMarker = '<!-- more -->',
+  dateFormat = 'YYYY/MM/DD',
+  order = 'desc',
+  timelineProps = {}
+} = Astro.props as Props
+
+const md = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true
+})
+
+// Preserve the default renderer
+const defaultLinkOpen =
+  md.renderer.rules.link_open ??
+  ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
+
+// Override link_open to inject/merge class
+md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+  const token = tokens[idx]
+
+  const classIndex = token.attrIndex('class')
+  if (classIndex < 0) {
+    token.attrPush(['class', linkClass])
+  } else {
+    token.attrs ??= []
+    token.attrs[classIndex][1] += ` ${linkClass}`
+  }
+
+  return defaultLinkOpen(tokens, idx, options, env, self)
+}
+
+const formatDate = (date: Date) => {
+  if (dateFormat === 'YYYY/MM/DD') {
+    const y = String(date.getFullYear()).padStart(4, '0')
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}/${m}/${d}`
+  }
+  return date.toLocaleDateString(dateFormat)
+}
+
+const items = (await getCollection(collection)).sort((a, b) => {
+  const diff = a.data.date.getTime() - b.data.date.getTime()
+  return order === 'asc' ? diff : -diff
+})
+
+const events = await Promise.all(
+  items.map(async (item) => {
+    const summaryMd = ((item.body ?? '').split(moreMarker)[0] ?? '').trim()
+    const summaryHtml = md.render(summaryMd)
+
+    return {
+      date: formatDate(item.data.date),
+      content: summaryHtml // astro-pure Timeline accepts HTML string
+    }
+  })
+)
+---
+
+<Timeline events={events} {...timelineProps} />
