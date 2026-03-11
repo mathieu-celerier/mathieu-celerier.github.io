@@ -1,0 +1,251 @@
+---
+import { getCollection, getEntry, render } from 'astro:content'
+import { Button } from 'astro-pure/user'
+
+import PageLayout from '@/layouts/ContentLayout.astro'
+
+export async function getStaticPaths() {
+  const items = await getCollection('news')
+
+  return items
+    .filter((item) => item.data.hasPage === true || (item.body ?? '').includes('{/* more */}'))
+    .map((item) => ({
+      params: { id: item.id },
+      props: { id: item.id }
+    }))
+}
+
+const { id } = Astro.props
+
+const entry = await getEntry('news', id)
+if (!entry) {
+  throw new Error(`News entry not found: ${id}`)
+}
+
+const items = (await getCollection('news')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+)
+
+const currentIndex = items.findIndex((item) => item.id === entry.id)
+const moreItems = items.filter((item) => item.id !== entry.id).slice(0, 5)
+const newer = currentIndex > 0 ? items[currentIndex - 1] : null
+const older = currentIndex >= 0 && currentIndex < items.length - 1 ? items[currentIndex + 1] : null
+
+const formattedDate = entry.data.date.toLocaleDateString('en-GB', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+})
+
+const { Content } = await render(entry)
+---
+
+<PageLayout
+  meta={{ articleDate: entry.data.date.toISOString(), title: entry.data.title }}
+  highlightColor='#8A8A8A'
+  back='/news'
+>
+  <Fragment slot='header'>
+    <header class='news-article-header'>
+      <p class='news-article-kicker'>News update</p>
+      <time class='news-article-date' datetime={entry.data.date.toISOString()}>{formattedDate}</time>
+      <h1 class='news-article-title'>{entry.data.title}</h1>
+      {
+        entry.data.tags?.length ? (
+          <div class='news-tag-row' aria-label='Tags'>
+            {entry.data.tags.map((tag) => (
+              <span class='news-tag'>{tag}</span>
+            ))}
+          </div>
+        ) : null
+      }
+    </header>
+  </Fragment>
+
+  <Fragment slot='sidebar'>
+    <aside class='news-sidebar-card'>
+      <p class='news-sidebar-label'>More updates</p>
+      <div class='news-sidebar-list'>
+        {moreItems.map((item) => (
+          <a href={`/news/${item.id}`} class='news-sidebar-link'>
+            <span class='news-sidebar-title'>{item.data.title}</span>
+            <time class='news-sidebar-date' datetime={item.data.date.toISOString()}>
+              {item.data.date.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })}
+            </time>
+          </a>
+        ))}
+      </div>
+    </aside>
+  </Fragment>
+
+  <article class='news-article-body'>
+    <Content />
+  </article>
+
+  <Fragment slot='bottom'>
+    <div class='news-bottom-nav'>
+      {older ? (
+        <Button href={`/news/${older.id}`} variant='back' title={older.data.title} class='news-nav-link' />
+      ) : (
+        <div />
+      )}
+      {newer ? (
+        <Button href={`/news/${newer.id}`} variant='ahead' title={newer.data.title} class='news-nav-link' />
+      ) : null}
+    </div>
+  </Fragment>
+</PageLayout>
+
+<style>
+  .news-article-header {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1.5rem;
+    border: 1px solid hsl(var(--border) / 1);
+    border-radius: 1.75rem;
+    background:
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.14), transparent 30%),
+      linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(var(--muted) / 0.94));
+    box-shadow: 0 22px 50px -40px rgba(15, 23, 42, 0.45);
+  }
+
+  .news-article-kicker,
+  .news-sidebar-label {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .news-article-date {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 0.88);
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 0.94rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .news-article-title {
+    margin: 0;
+    font-size: clamp(2.25rem, 6vw, 4rem);
+    line-height: 0.96;
+    text-wrap: balance;
+    max-width: 14ch;
+  }
+
+  .news-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .news-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.85rem;
+    padding: 0 0.65rem;
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary) / 1);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .news-sidebar-card {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid hsl(var(--border) / 1);
+    border-radius: 1.25rem;
+    background: hsl(var(--background) / 0.8);
+  }
+
+  .news-sidebar-list {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .news-sidebar-link {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 0.95rem;
+    border: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    background: hsl(var(--muted) / 0.7);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .news-sidebar-link:hover {
+    border-color: hsl(var(--border) / 1);
+    background: hsl(var(--background) / 0.92);
+    transform: translateY(-1px);
+  }
+
+  .news-sidebar-title {
+    font-size: 0.96rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .news-sidebar-date {
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 0.82rem;
+  }
+
+  .news-article-body {
+    border: 1px solid hsl(var(--border) / 0.75);
+    border-radius: 1.6rem;
+    background: hsl(var(--background) / 0.84);
+    padding: clamp(1.1rem, 3vw, 2rem);
+    box-shadow: 0 22px 50px -45px rgba(15, 23, 42, 0.35);
+  }
+
+  .news-article-body :global(> :first-child) {
+    margin-top: 0;
+  }
+
+  .news-article-body :global(> :last-child) {
+    margin-bottom: 0;
+  }
+
+  .news-bottom-nav {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .news-nav-link {
+    min-height: 100%;
+    justify-content: space-between;
+    align-items: start;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    white-space: normal;
+  }
+
+  @media (max-width: 767px) {
+    .news-article-header,
+    .news-article-body {
+      border-radius: 1.3rem;
+    }
+
+    .news-bottom-nav {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,36 +1,28 @@
 ---
 import { getCollection } from 'astro:content'
 import MarkdownIt from 'markdown-it'
-
-import { Timeline } from 'astro-pure/user'
+import { Button } from 'astro-pure/user'
 
 type Props = {
-  /** Content collection name. Defaults to "news". */
   collection?: 'news'
-
-  /** CSS class added to all links rendered inside the summary markdown. */
   linkClass?: string
-
-  /** Marker used to split summary vs rest of content. Defaults to "<!-- more -->". */
   moreMarker?: string
-
-  /** Rendered date format. Defaults to YYYY/MM/DD. */
   dateFormat?: 'YYYY/MM/DD' | 'ja-JP' | 'en-GB'
-
-  /** Sort order by date. Defaults to "desc" (newest first). */
   order?: 'asc' | 'desc'
-
-  /** Pass-through props to astro-pure Timeline if needed later. */
-  timelineProps?: Record<string, any>
+  maxItems?: number
+  compact?: boolean
+  showHeading?: boolean
 }
 
 const {
   collection = 'news',
   linkClass = 'styled-link',
-  moreMarker = '<!-- more -->',
+  moreMarker = '{/* more */}',
   dateFormat = 'YYYY/MM/DD',
   order = 'desc',
-  timelineProps = {}
+  maxItems,
+  compact = false,
+  showHeading = true
 } = Astro.props as Props
 
 const md = new MarkdownIt({
@@ -39,16 +31,14 @@ const md = new MarkdownIt({
   breaks: true
 })
 
-// Preserve the default renderer
 const defaultLinkOpen =
   md.renderer.rules.link_open ??
   ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
 
-// Override link_open to inject/merge class
 md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
   const token = tokens[idx]
-
   const classIndex = token.attrIndex('class')
+
   if (classIndex < 0) {
     token.attrPush(['class', linkClass])
   } else {
@@ -66,25 +56,536 @@ const formatDate = (date: Date) => {
     const d = String(date.getDate()).padStart(2, '0')
     return `${y}/${m}/${d}`
   }
-  return date.toLocaleDateString(dateFormat)
+
+  return date.toLocaleDateString(dateFormat, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
+
+const basePath = '/news'
+const isDev = import.meta.env.DEV
+
+const debugEntries = isDev
+  ? [
+      {
+        id: '__debug-2024',
+        title: 'Debug timeline item for 2024',
+        date: new Date('2024-10-14'),
+        formattedDate: formatDate(new Date('2024-10-14')),
+        isoDate: new Date('2024-10-14').toISOString(),
+        tags: ['debug'],
+        href: '',
+        isExternal: false,
+        hasDedicatedPage: false,
+        summaryHtml: md.render('Temporary development-only item to validate the 2024 section of the news timeline.')
+      },
+      {
+        id: '__debug-2023',
+        title: 'Debug timeline item for 2023',
+        date: new Date('2023-05-22'),
+        formattedDate: formatDate(new Date('2023-05-22')),
+        isoDate: new Date('2023-05-22').toISOString(),
+        tags: ['debug'],
+        href: '',
+        isExternal: false,
+        hasDedicatedPage: false,
+        summaryHtml: md.render('Temporary development-only item to validate the 2023 section of the news timeline.')
+      }
+    ]
+  : []
 
 const items = (await getCollection(collection)).sort((a, b) => {
   const diff = a.data.date.getTime() - b.data.date.getTime()
   return order === 'asc' ? diff : -diff
 })
 
-const events = await Promise.all(
-  items.map(async (item) => {
-    const summaryMd = ((item.body ?? '').split(moreMarker)[0] ?? '').trim()
-    const summaryHtml = md.render(summaryMd)
+const entries = [...items.map((item) => {
+  const body = item.body ?? ''
+  const hasMore = body.includes(moreMarker)
+  const hasPageFlag = item.data.hasPage === true
+  const href = item.data.externalUrl || `${basePath}/${item.id}`
+  const summaryMd = (body.split(moreMarker)[0] ?? '').trim()
 
-    return {
-      date: formatDate(item.data.date),
-      content: summaryHtml // astro-pure Timeline accepts HTML string
-    }
-  })
-)
+  return {
+    id: item.id,
+    title: item.data.title,
+    date: item.data.date,
+    formattedDate: formatDate(item.data.date),
+    isoDate: item.data.date.toISOString(),
+    tags: item.data.tags ?? [],
+    href,
+    isExternal: Boolean(item.data.externalUrl),
+    hasDedicatedPage: hasPageFlag || hasMore || Boolean(item.data.externalUrl),
+    summaryHtml: md.render(summaryMd)
+  }
+}), ...debugEntries].sort((a, b) => {
+  const diff = a.date.getTime() - b.date.getTime()
+  return order === 'asc' ? diff : -diff
+}).slice(0, maxItems ?? Number.POSITIVE_INFINITY)
+
+const timelineEntries = entries.map((entry, index, array) => {
+  const year = entry.date.getFullYear()
+  const previousYear = index > 0 ? array[index - 1].date.getFullYear() : null
+
+  return {
+    ...entry,
+    year,
+    showYearLabel: year !== previousYear,
+    featured: !compact && index === 0
+  }
+})
 ---
 
-<Timeline events={events} {...timelineProps} />
+{
+  timelineEntries.length > 0 && (
+    <section class:list={['news-list', compact && 'news-list-compact']}>
+      <section class='news-timeline-section'>
+        {
+          showHeading && (
+            <div class='news-timeline-heading'>
+              <h3>Timeline</h3>
+              <p>Recent milestones, talks, papers, and project updates in chronological order.</p>
+            </div>
+          )
+        }
+
+        <ol class='news-timeline'>
+          {timelineEntries.map((entry, index) => (
+            <Fragment>
+              {entry.showYearLabel ? (
+                <li class='news-year-divider'>
+                  <span>{entry.year}</span>
+                </li>
+              ) : null}
+              <li class:list={['news-timeline-item', entry.featured && 'news-timeline-item-featured']}>
+                {index !== timelineEntries.length - 1 && <span class='news-timeline-line' aria-hidden='true' />}
+                <span class:list={['news-timeline-node', entry.featured && 'news-timeline-node-featured']} aria-hidden='true' />
+                <time class='news-timeline-date' datetime={entry.isoDate}>
+                  {entry.formattedDate}
+                </time>
+
+                <article class:list={['news-timeline-card', entry.featured && 'news-timeline-card-featured']}>
+                  <div class='news-timeline-top'>
+                    {entry.featured ? <p class='news-kicker'>Latest update</p> : null}
+                    {!!entry.tags.length && (
+                      <div class='news-tag-row' aria-label='Tags'>
+                        {entry.tags.map((tag) => (
+                          <span class='news-tag'>{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <h4 class:list={['news-card-title', entry.featured && 'news-card-title-featured']}>
+                    {entry.title}
+                  </h4>
+                  <div
+                    class:list={[
+                      'news-summary',
+                      !entry.featured && 'news-summary-compact'
+                    ]}
+                    set:html={entry.summaryHtml}
+                  />
+
+                  {entry.hasDedicatedPage ? (
+                    <div class='news-card-actions'>
+                      <Button
+                        href={entry.href}
+                        target={entry.isExternal ? '_blank' : undefined}
+                        variant='ahead'
+                        class={entry.featured ? 'news-cta' : undefined}
+                        title={entry.isExternal ? 'Open update' : 'Read update'}
+                      />
+                    </div>
+                  ) : null}
+                </article>
+              </li>
+            </Fragment>
+          ))}
+        </ol>
+      </section>
+    </section>
+  )
+}
+
+<style>
+  .news-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .news-list-compact {
+    gap: 0.55rem;
+  }
+
+  .news-kicker {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .news-timeline-date {
+    display: inline-flex;
+    width: fit-content;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 0.9);
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .news-timeline-date {
+    grid-column: 1;
+    padding: 0.3rem 0.65rem;
+    position: relative;
+    z-index: 1;
+    align-self: start;
+    justify-self: end;
+    margin-top: 1rem;
+    margin-right: 0;
+    background: hsl(var(--background) / 0.92);
+  }
+
+  .news-list-compact .news-timeline-date {
+    padding: 0.2rem 0.55rem;
+    margin-top: 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .news-card-title {
+    margin: 0;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  .news-card-title {
+    font-size: 1.35rem;
+  }
+
+  .news-list-compact .news-card-title {
+    font-size: 1.02rem;
+  }
+
+  .news-card-title-featured {
+    font-size: clamp(1.8rem, 4vw, 2.7rem);
+    max-width: 13ch;
+  }
+
+  .news-summary :global(p:first-child) {
+    margin-top: 0;
+  }
+
+  .news-summary :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .news-summary {
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 1rem;
+    line-height: 1.8;
+    max-width: 68ch;
+  }
+
+  .news-summary-compact {
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+
+  .news-list-compact .news-summary,
+  .news-list-compact .news-summary-compact {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .news-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    align-items: center;
+  }
+
+  .news-cta {
+    background: hsl(var(--foreground) / 1);
+    color: hsl(var(--background) / 1);
+    border-color: transparent;
+  }
+
+  .news-cta :global(svg) {
+    color: hsl(var(--background) / 1);
+  }
+
+  .news-timeline-section {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .news-list-compact .news-timeline-section {
+    gap: 0.65rem;
+  }
+
+  .news-timeline-heading {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: end;
+    justify-content: space-between;
+  }
+
+  .news-timeline-heading h3,
+  .news-timeline-heading p {
+    margin: 0;
+  }
+
+  .news-timeline-heading p {
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .news-timeline {
+    --timeline-date-col: 7.1rem;
+    --timeline-spine-offset: 2.1rem;
+    --timeline-node-size: 2.35rem;
+    --timeline-node-offset: 1rem;
+    --timeline-gap: 4.35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .news-list-compact .news-timeline {
+    --timeline-date-col: 6.1rem;
+    --timeline-spine-offset: 1.55rem;
+    --timeline-gap: 2.6rem;
+    gap: 0.95rem;
+  }
+
+  .news-year-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0.8rem 0 0.35rem;
+    color: hsl(var(--primary) / 1);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .news-list-compact .news-year-divider {
+    margin: 0.35rem 0 0;
+    font-size: 0.72rem;
+  }
+
+  .news-year-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent);
+  }
+
+  .news-timeline-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--timeline-date-col) minmax(0, 1fr);
+    gap: var(--timeline-gap);
+    align-items: start;
+    min-height: 8rem;
+  }
+
+  .news-list-compact .news-timeline-item {
+    min-height: 5.8rem;
+  }
+
+  .news-timeline-item-featured {
+    min-height: 10rem;
+  }
+
+  .news-timeline-line {
+    position: absolute;
+    display: block;
+    left: calc(var(--timeline-date-col) + var(--timeline-spine-offset));
+    top: calc(var(--timeline-node-offset) + (var(--timeline-node-size) / 2));
+    width: 2px;
+    height: calc(100% + 1.4rem - var(--timeline-node-offset) - (var(--timeline-node-size) / 2));
+    transform: translateX(-50%);
+    background:
+      linear-gradient(180deg, hsl(var(--primary) / 0.85), hsl(var(--border) / 0.45));
+  }
+
+  .news-timeline-node {
+    position: absolute;
+    left: calc(var(--timeline-date-col) + var(--timeline-spine-offset));
+    top: var(--timeline-node-offset);
+    display: block;
+    z-index: 1;
+    width: var(--timeline-node-size);
+    height: var(--timeline-node-size);
+    margin-top: 0;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    background:
+      radial-gradient(circle, hsl(var(--background) / 1) 0 22%, transparent 23%),
+      radial-gradient(circle, hsl(var(--primary) / 0.95) 0 36%, hsl(var(--primary) / 0.2) 37% 100%);
+    box-shadow:
+      0 0 0 0.45rem hsl(var(--background) / 0.97),
+      0 16px 30px -24px rgba(15, 23, 42, 0.55);
+    transform: translateX(-50%);
+  }
+
+  .news-list-compact .news-timeline-node {
+    width: 1.95rem;
+    height: 1.95rem;
+    top: 0.75rem;
+    box-shadow:
+      0 0 0 0.35rem hsl(var(--background) / 0.97),
+      0 12px 24px -22px rgba(15, 23, 42, 0.45);
+  }
+
+  .news-timeline-node-featured {
+    width: 2.8rem;
+    height: 2.8rem;
+    top: 0.8rem;
+    background:
+      radial-gradient(circle, hsl(var(--background) / 1) 0 21%, transparent 22%),
+      radial-gradient(circle, hsl(var(--primary) / 1) 0 38%, hsl(var(--primary) / 0.24) 39% 100%);
+    box-shadow:
+      0 0 0 0.55rem hsl(var(--background) / 0.97),
+      0 18px 36px -24px rgba(15, 23, 42, 0.6);
+  }
+
+  .news-timeline-card {
+    grid-column: 2;
+    display: grid;
+    gap: 0.95rem;
+    padding: 1.2rem;
+    border-radius: 1.35rem;
+    background:
+      linear-gradient(180deg, hsl(var(--background) / 0.92), hsl(var(--muted) / 0.7));
+    box-shadow: 0 16px 40px -38px rgba(15, 23, 42, 0.32);
+  }
+
+  .news-list-compact .news-timeline-card {
+    gap: 0.65rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+  }
+
+  .news-timeline-card-featured {
+    padding: 1.45rem;
+    border-radius: 1.65rem;
+    background:
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 32%),
+      linear-gradient(180deg, hsl(var(--background) / 0.98), hsl(var(--muted) / 0.9));
+    box-shadow: 0 22px 50px -40px rgba(15, 23, 42, 0.45);
+  }
+
+  .news-timeline-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .news-list-compact .news-timeline-top {
+    gap: 0.45rem;
+  }
+
+  .news-timeline-card-featured .news-timeline-top {
+    justify-content: space-between;
+    gap: 0.85rem;
+  }
+
+  .news-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .news-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.85rem;
+    padding: 0 0.65rem;
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary) / 1);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .news-list-compact .news-tag {
+    min-height: 1.45rem;
+    padding: 0 0.45rem;
+    font-size: 0.68rem;
+  }
+
+  @media (max-width: 767px) {
+    .news-year-divider {
+      gap: 0.6rem;
+      margin-bottom: -0.05rem;
+    }
+
+    .news-timeline-item {
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+      padding-left: 2.8rem;
+      min-height: 0;
+    }
+
+    .news-timeline-line {
+      left: 1.32rem;
+      top: 2.8rem;
+      height: calc(100% - 1.2rem);
+      transform: none;
+    }
+
+    .news-timeline-node {
+      position: absolute;
+      left: 0;
+      top: 2.05rem;
+      width: 2.25rem;
+      height: 2.25rem;
+      margin-top: 0;
+      box-shadow: 0 0 0 0.45rem hsl(var(--background) / 0.97);
+      transform: none;
+    }
+
+    .news-timeline-node-featured {
+      width: 2.5rem;
+      height: 2.5rem;
+      top: 1.9rem;
+    }
+
+    .news-timeline-date {
+      grid-column: auto;
+      justify-self: start;
+      margin: 0;
+      margin-top: 0.1rem;
+      order: 1;
+    }
+
+    .news-timeline-card {
+      grid-column: auto;
+      order: 2;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .news-timeline-card {
+      border-radius: 1.15rem;
+    }
+
+    .news-timeline-card-featured {
+      padding: 1.2rem;
+      border-radius: 1.35rem;
+    }
+  }
+</style>
