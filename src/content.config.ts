@@ -25,6 +25,25 @@ const news = defineCollection({
   })
 })
 
+const publications = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    authors: z.string(),
+    year: z.number(),
+    venue: z.string().optional(),
+    type: z.enum(['journal', 'conference', 'workshop', 'preprint', 'thesis', 'demo', 'other']),
+    doi: z.string().optional(),
+    url: z.string().url().optional(),
+    website: z.string().url().optional(),
+    pdf: z.string().optional(), // local path under /public or external URL
+    code: z.string().url().optional(),
+    video: z.string().url().optional(),
+    featured: z.boolean().optional(),
+    bibkey: z.string()
+  })
+})
+
 // Define blog collection
 const blog = defineCollection({
   // Load Markdown and MDX files in the `src/content/blog/` directory.
@@ -57,4 +76,4 @@ const blog = defineCollection({
     })
 })
 
-export const collections = { news, blog }
+export const collections = { news, publications, blog }

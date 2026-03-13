@@ -51,8 +51,8 @@ export const theme: ThemeUserConfig = {
     searchButton: false,
     menu: [
       // { title: 'Blog', link: '/blog' },
-      // { title: 'Projects', link: '/projects' },
       { title: 'News', link: '/news' },
+      { title: 'CV', link: '/cv' },
       { title: 'About', link: '/about' }
     ]
   },

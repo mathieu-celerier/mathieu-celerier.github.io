@@ -1,0 +1,151 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% Awesome CV LaTeX Template for CV/Resume
+
+%-------------------------------------------------------------------------------
+% CONFIGURATIONS
+%-------------------------------------------------------------------------------
+% A4 paper size by default, use 'letterpaper' for US letter
+\documentclass[11pt, a4paper]{awesome-cv}
+
+% Configure page margins with geometry
+\geometry{left=1.4cm, top=.8cm, right=1.4cm, bottom=1.8cm, footskip=.5cm}
+
+% Color for highlights
+\colorlet{awesome}{awesome-nephritis}
+
+% Set false if you don't want to highlight section with awesome color
+\setbool{acvSectionColorHighlight}{true}
+
+% If you would like to change the social information separator from a pipe (|) to something else
+\renewcommand{\acvHeaderSocialSep}{\quad\textbar\quad}
+
+%-------------------------------------------------------------------------------
+%  PERSONAL INFORMATION
+%-------------------------------------------------------------------------------
+\name{<%- cv.basics.first_name %>}{<%- cv.basics.last_name %>}
+\position{<%- cv.basics.pdf_position || cv.basics.position %>}
+<% if (cv.basics.address) { %>\address{<%- cv.basics.address %>}<% } %>
+
+<% if (cv.basics.mobile) { %>\mobile{<%- cv.basics.mobile %>}<% } %>
+\email{<%- cv.basics.email %>}
+<% if (cv.basics.date_of_birth) { %>\dateofbirth{<%- cv.basics.date_of_birth %>}<% } %>
+<% if (cv.basics.github) { %>\github{<%- cv.basics.github %>}<% } %>
+<% if (cv.basics.linkedin) { %>\linkedin{<%- cv.basics.linkedin %>}<% } %>
+<% if (cv.basics.website) { %>\homepage{<%- cv.basics.website %>}<% } %>
+<% if (cv.basics.scholar) { %>\googlescholar{<%- cv.basics.scholar %>}<% } %>
+<% if (cv.basics.orcid) { %>\orcid{<%- cv.basics.orcid %>}<% } %>
+
+%-------------------------------------------------------------------------------
+\begin{document}
+
+% Print the header with above personal information
+% Give optional argument to change alignment(C: center, L: left, R: right)
+\makecvheader[C]
+
+% Print the footer with 3 arguments(<left>, <center>, <right>)
+% Leave any of these blank if they are not needed
+\makecvfooter{\today}{Mathieu Celerier - Resume}{\thepage}
+
+%-------------------------------------------------------------------------------
+%	SECTION TITLE
+%-------------------------------------------------------------------------------
+\cvsection{Summary}
+
+
+%-------------------------------------------------------------------------------
+%	CONTENT
+%-------------------------------------------------------------------------------
+\begin{cvparagraph}
+
+%---------------------------------------------------------
+<%- cv.summary.pdf_paragraph || cv.summary.paragraph || '' %>
+\end{cvparagraph}
+
+%-------------------------------------------------------------------------------
+%	SECTION TITLE
+%-------------------------------------------------------------------------------
+\cvsection{Work Experience}
+
+
+%-------------------------------------------------------------------------------
+%	CONTENT
+%-------------------------------------------------------------------------------
+\begin{cventries}
+<% const pdfExperience = (cv.experience || []).filter((e) => !e.pdf_skip); %>
+<% pdfExperience.forEach((e) => { 
+     const title = e.pdf_title || e.title;
+     const organization = e.pdf_organization || e.organization;
+     const location = e.pdf_location || e.location;
+     const dates = e.pdf_dates || e.dates;
+     const description = e.pdf_description || e.description || '';
+     const items = (e.pdf_items || e.items || []).filter((it) => it && String(it).trim());
+%>
+
+%---------------------------------------------------------
+  \cventry
+    {<%- title %>} % Job title
+    {<%- organization %>} % Organization
+    {<%- location %>} % Location
+    {<%- dates %>} % Date(s)
+    {
+<% if (items.length) { %>
+      \begin{cvitems}
+<% items.forEach((it) => { %>
+        \item {<%- it %>}
+<% }) %>
+      \end{cvitems}
+<% } else if (description) { %>
+      <%- description %>
+<% } %>
+    }
+<% }) %>
+
+%---------------------------------------------------------
+\end{cventries}
+
+%-------------------------------------------------------------------------------
+%	SECTION TITLE
+%-------------------------------------------------------------------------------
+\cvsection{Education}
+
+
+%-------------------------------------------------------------------------------
+%	CONTENT
+%-------------------------------------------------------------------------------
+\begin{cventries}
+<% const pdfEducation = (cv.education || []).filter((ed) => !ed.pdf_skip); %>
+<% pdfEducation.forEach((ed) => { 
+     const degree = ed.pdf_degree || ed.degree;
+     const area = ed.pdf_area ?? ed.area;
+     const institution = ed.pdf_institution || ed.institution;
+     const location = ed.pdf_location || ed.location;
+     const dates = ed.pdf_dates || ed.dates;
+     const description = ed.pdf_description || ed.description || '';
+     const items = (ed.pdf_items || ed.items || []).filter((it) => it && String(it).trim());
+%>
+
+%---------------------------------------------------------
+  \cventry
+    {<%- degree %><%- area ? (' — ' + area) : '' %>} % Degree
+    {<%- institution %>} % Institution
+    {<%- location %>} % Location
+    {<%- dates %>} % Date(s)
+    {
+<% if (items.length) { %>
+      \begin{cvitems}
+<% items.forEach((it) => { %>
+        \item {<%- it %>}
+<% }) %>
+      \end{cvitems}
+<% } else if (description) { %>
+      <%- description %>
+<% } %>
+    }
+<% }) %>
+
+%---------------------------------------------------------
+\end{cventries}
+
+%-------------------------------------------------------------------------------
+\end{document}

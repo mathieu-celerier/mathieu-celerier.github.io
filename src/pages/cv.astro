@@ -1,0 +1,461 @@
+---
+import { Card, Button } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import ToolSection from '@/components/about/ToolSection.astro'
+import mcrtcLogo from '@/assets/tools/mcrtc.png'
+
+import { loadCV, type CVLink } from '../lib/cv-data-loader.ts'
+
+type ContactItem =
+  | { label: string; value: string; href: string }
+  | { label: string; value: string }
+
+const cv = loadCV()
+
+const fullName = `${cv.basics.first_name} ${cv.basics.last_name}`
+const links = [
+  cv.basics.website ? { label: 'Website', url: cv.basics.website } : null,
+  cv.basics.github ? { label: 'GitHub', url: `https://github.com/${cv.basics.github}` } : null,
+  cv.basics.linkedin
+    ? {
+        label: 'LinkedIn',
+        url: `https://www.linkedin.com/in/${cv.basics.linkedin}`
+      }
+    : null,
+  cv.basics.scholar ? { label: 'Google Scholar', url: cv.basics.scholar } : null,
+  cv.basics.orcid ? { label: 'ORCID', url: cv.basics.orcid } : null
+].filter((link): link is CVLink => link !== null)
+
+const contactItems = [
+  { label: 'Email', value: cv.basics.email, href: `mailto:${cv.basics.email}` },
+  cv.basics.location ? { label: 'Location', value: cv.basics.location } : null,
+  cv.basics.mobile ? { label: 'Phone', value: cv.basics.mobile } : null,
+  cv.basics.date_of_birth ? { label: 'Born', value: cv.basics.date_of_birth } : null
+].filter((item): item is ContactItem => item !== null)
+
+const skillIconMap = {
+  'C++': import('@/assets/tools/cpp.svg?raw'),
+  Python: import('@/assets/tools/python.svg?raw'),
+  'ROS 2': import('@/assets/tools/ros2.svg?raw'),
+  mc_rtc: mcrtcLogo,
+  Linux: import('@/assets/tools/ubuntu.svg?raw'),
+  'Torque control': import('@/assets/tools/torque-control.svg?raw'),
+  'Inverse dynamics QP': import('@/assets/tools/inverse-dynamics-qp.svg?raw'),
+  pHRI: import('@/assets/tools/phri.svg?raw'),
+  'User studies': import('@/assets/tools/user-studies.svg?raw')
+} as const
+
+const skillLinkMap: Record<string, string> = {
+  'C++': 'https://isocpp.org/',
+  Python: 'https://www.python.org/',
+  'ROS 2': 'https://docs.ros.org/en/rolling/index.html',
+  mc_rtc: 'https://jrl-umi3218.github.io/mc_rtc/',
+  Linux: 'https://ubuntu.com/',
+  'Torque control': '/about',
+  'Inverse dynamics QP': '/about',
+  pHRI: '/about',
+  'User studies': '/about'
+}
+
+const skillDescriptionMap: Record<string, string> = {
+  'C++': 'Real-time robotics software and control implementation',
+  Python: 'Analysis, prototyping, and experiment tooling',
+  'ROS 2': 'Middleware integration for robotic systems',
+  mc_rtc: 'Whole-body and whole-system control framework',
+  Linux: 'Primary research and development environment',
+  'Torque control': 'Compliant interaction on torque-controlled robots',
+  'Inverse dynamics QP': 'Optimization-based whole-body control design',
+  pHRI: 'Physical human-robot interaction experiments and analysis',
+  'User studies': 'Experimental protocol design and evaluation'
+}
+
+const iconSkillCategories = new Set(['Software'])
+
+const skillSections = (cv.skills || [])
+  .map((skill) => ({
+    title: skill.category,
+    tools: (skill.items || [])
+      .filter((item) => item in skillIconMap)
+      .map((item) => ({
+        name: item,
+        description: skillDescriptionMap[item] || skill.category,
+        href: skillLinkMap[item] || '/about',
+        icon: skillIconMap[item as keyof typeof skillIconMap]
+      }))
+  }))
+  .filter((section) => iconSkillCategories.has(section.title))
+  .filter((section) => section.tools.length)
+
+const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
+---
+
+<PageLayout meta={{ title: 'CV' }} highlightColor='#8A8A8A'>
+  <section class='cv-shell'>
+    <section class='cv-hero'>
+      <div class='cv-hero-main'>
+        <p class='cv-kicker'>Curriculum Vitae</p>
+        <h1 class='cv-title'>{fullName}</h1>
+        <p class='cv-position'>{cv.basics.position}</p>
+        <p class='cv-affiliation'>CNRS-AIST Joint Robotics Laboratory, Tsukuba, Japan</p>
+        {
+          cv.summary?.paragraph ? (
+            <p class='cv-summary'>{cv.summary.paragraph}</p>
+          ) : null
+        }
+      </div>
+
+      <div class='cv-hero-side'>
+        <div class='cv-actions'>
+          <Button href='/cv.pdf' variant='ahead' class='cv-download' title='Download PDF' />
+          {
+            links.length ? (
+              <div class='cv-links'>
+                {links.map((link) => (
+                  <a class='cv-link-pill' href={link.url} target='_blank' rel='noreferrer'>
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            ) : null
+          }
+        </div>
+        <div class='cv-facts cv-facts-grid'>
+          {contactItems.map((item) => (
+            <div class='cv-fact'>
+              <span class='cv-fact-label'>{item.label}</span>
+              {
+                'href' in item ? (
+                  <a href={item.href} class='styled-link'>
+                    {item.value}
+                  </a>
+                ) : (
+                  <span>{item.value}</span>
+                )
+              }
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {
+      cv.experience?.length ? (
+        <section class='cv-section'>
+          <div class='cv-section-header'>
+            <h2>Experience</h2>
+          </div>
+          <div class='cv-stack'>
+            {cv.experience.map((entry) => (
+              <Card
+                heading={entry.title}
+                subheading={`${entry.organization} · ${entry.location}`}
+                date={entry.dates}
+                class='cv-card'
+              >
+                {entry.items?.length ? (
+                  <ul class='cv-list'>
+                    {entry.items.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null
+    }
+
+    {
+      cv.education?.length ? (
+        <section class='cv-section'>
+          <div class='cv-section-header'>
+            <h2>Education</h2>
+          </div>
+          <div class='cv-stack'>
+            {cv.education.map((entry) => (
+              <Card
+                heading={`${entry.degree}${entry.area ? ` — ${entry.area}` : ''}`}
+                subheading={`${entry.institution} · ${entry.location}`}
+                date={entry.dates}
+                class='cv-card'
+              >
+                {entry.items?.length ? (
+                  <ul class='cv-list cv-list-compact'>
+                    {entry.items.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null
+    }
+
+    {
+      skillSections.length || nonIconSkillSections.length ? (
+        <section class='cv-section'>
+          <div class='cv-section-header'>
+            <h2>Skills</h2>
+          </div>
+          <div class='cv-tools'>
+            {nonIconSkillSections.map((skill) => (
+              <Card heading={skill.category} class='cv-card'>
+                <div class='cv-skill-grid'>
+                  {(skill.items || []).map((item) => (
+                    <span class='cv-skill-tile'>{item}</span>
+                  ))}
+                </div>
+              </Card>
+            ))}
+            {skillSections.map((section) => (
+              <ToolSection title={section.title} tools={section.tools} />
+            ))}
+          </div>
+        </section>
+      ) : null
+    }
+  </section>
+</PageLayout>
+
+<style>
+  .cv-shell {
+    display: grid;
+    gap: 2.75rem;
+    max-width: 78rem;
+    margin: 0 auto;
+    padding-top: 0.75rem;
+  }
+
+  .cv-hero,
+  .cv-panel {
+    border: 1px solid hsl(var(--border) / 1);
+    background:
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 30%),
+      linear-gradient(180deg, hsl(var(--background) / 0.98), hsl(var(--muted) / 0.92));
+    box-shadow: 0 20px 45px -40px rgba(15, 23, 42, 0.45);
+  }
+
+  .cv-hero {
+    display: grid;
+    gap: 1.4rem;
+    padding: 2rem;
+    border-radius: 1.9rem;
+  }
+
+  .cv-hero-main,
+  .cv-hero-side {
+    display: grid;
+    align-content: start;
+  }
+
+  .cv-hero-main {
+    gap: 1rem;
+  }
+
+  .cv-hero-side {
+    gap: 1.1rem;
+  }
+
+  .cv-kicker {
+    margin: 0;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .cv-title,
+  .cv-position,
+  .cv-affiliation,
+  .cv-summary,
+  .cv-section-header h2,
+  .cv-entry-top h3,
+  .cv-skill-block h3 {
+    margin: 0;
+  }
+
+  .cv-title {
+    font-size: clamp(2.6rem, 6.4vw, 4.8rem);
+    line-height: 0.92;
+    max-width: 10ch;
+  }
+
+  .cv-position {
+    font-size: 1.22rem;
+    font-weight: 700;
+  }
+
+  .cv-affiliation,
+  .cv-summary,
+  .cv-entry-meta,
+  .cv-entry-location,
+  .cv-entry-date,
+  .cv-fact-label {
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .cv-summary {
+    max-width: 46rem;
+    font-size: 1.06rem;
+    line-height: 1.9;
+  }
+
+  .cv-actions {
+    display: grid;
+    gap: 1rem;
+    margin-top: 0;
+  }
+
+  .cv-download {
+    width: fit-content;
+    background: hsl(var(--foreground) / 1);
+    color: hsl(var(--background) / 1);
+    border-color: transparent;
+  }
+
+  .cv-download :global(svg) {
+    color: hsl(var(--background) / 1);
+  }
+
+  .cv-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .cv-link-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.85rem;
+    padding: 0 0.7rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 0.94);
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.84rem;
+  }
+
+  .cv-skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .cv-skill-tile {
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 1rem;
+    border: 1px solid hsl(var(--border) / 1);
+    background:
+      linear-gradient(180deg, hsl(var(--background) / 0.98), hsl(var(--muted) / 0.88));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.04);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
+  }
+
+  .cv-link-pill:hover {
+    color: hsl(var(--primary) / 1);
+    border-color: hsl(var(--primary) / 0.35);
+  }
+
+  .cv-facts,
+  .cv-stack {
+    display: grid;
+    gap: 1.1rem;
+    margin-top: 1rem;
+  }
+
+  .cv-tools {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .cv-facts-grid {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid hsl(var(--border) / 0.7);
+    border-radius: 1rem;
+    background: hsl(var(--background) / 0.45);
+  }
+
+  .cv-fact {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .cv-fact-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .cv-section {
+    display: grid;
+    gap: 1.15rem;
+  }
+
+  .cv-section-header {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .cv-section-header h2 {
+    font-size: 1.7rem;
+    line-height: 1.05;
+  }
+
+  .cv-card :global(ul) {
+    margin: 0;
+  }
+
+  .cv-card :global(h2) {
+    font-size: 1.1rem;
+  }
+
+  .cv-card :global(p) {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .cv-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    color: hsl(var(--muted-foreground) / 1);
+    line-height: 1.7;
+  }
+
+  .cv-list-compact {
+    margin-top: 0.2rem;
+  }
+
+  @media (min-width: 900px) {
+    .cv-hero {
+      grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 0.85fr);
+      align-items: start;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .cv-shell {
+      gap: 2rem;
+      padding-top: 0.25rem;
+    }
+
+    .cv-hero,
+    .cv-panel {
+      padding: 1rem;
+      border-radius: 1.05rem;
+    }
+  }
+</style>

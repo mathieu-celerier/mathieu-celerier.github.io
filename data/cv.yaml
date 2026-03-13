@@ -1,0 +1,180 @@
+basics:
+  first_name: 'Mathieu'
+  last_name: 'Celerier'
+  position: 'Postdoctoral researcher'
+  email: 'mathieu.celerier.ing@gmail.com'
+  date_of_birth: '1999/08/09'
+  github: 'mathieu-celerier'
+  linkedin: 'Mathieu Celerier'
+  # Optional (leave blank or delete if unused)
+  address: ''
+  mobile: ''
+  website: ''
+  scholar: ''
+  orcid: ''
+
+summary:
+  paragraph: >
+    Postdoctoral researcher in CNRS-AIST JRL (Joint Robotics Laboratory) at
+    National Institute of Advanced Industrial Science and Technology (AIST) in
+    Tsukuba, Japan, in collaboration with the University of Montpellier (UM),
+    France. My research interest includes semi-collaborative physical human-robot
+    interaction and human-centered perception of physical human-robot interaction.
+    I obtained my M.Sc. in Microelectronics and Automation Engineering from
+    Polytech Montpellier and worked on dual-arm manipulation of deformable objects
+    during my engineering internships at LIRMM.
+  pdf_paragraph: |
+    Postdoctoral researcher in CNRS-AIST JRL (Joint Robotics Laboratory) at National Institute of Advanced Industrial Science and Technology (AIST) in Tsukuba, Japan, with University of Montpellier (UM), France, through a collaboration between UM and AIST.
+
+    My research interest includes semi collaborative physical human-robot interaction and human centered perception of physical human-robot interaction.
+
+    I obtained my M.Sc in Microelectronic and Automation Engineering in 2021 from Polytech Montpellier Engineering School. I carried out my final Engineering School Internship as Research Engineer, working on Dual Arm Manipulation of Deformable Objects at Laboratory of Informatics, Robotics and Microelectronics of Montpellier (LIRMM), France.
+
+experience:
+  - title: 'Postdoctoral researcher'
+    organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
+    location: 'Tsukuba, Japan'
+    dates: 'February 2026 - Present'
+    pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
+    pdf_dates: 'June 2022 - Present'
+    pdf_organization: 'CNRS-AIST Joint Robotics Laboratory'
+
+  - title: 'Technical staff'
+    organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
+    location: 'Tsukuba, Japan'
+    dates: 'June 2025 - December 2025'
+    pdf_description: 'Technical support and research engineering within the joint robotics laboratory.'
+    pdf_dates: 'June 2025 - Dec. 2025'
+    pdf_skip: true
+
+  - title: 'Research assistant'
+    organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
+    location: 'Tsukuba, Japan'
+    dates: 'June 2022 - May 2025'
+    items:
+      - 'Conducted research on understanding and improving physical human-robot interaction.'
+    pdf_title: 'Research Assistant'
+    pdf_organization: 'CNRS-AIST Joint Robotics Laboratory'
+    pdf_dates: 'June 2022 - May 2025'
+    pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
+    pdf_skip: true
+
+  - title: 'Robotics internship'
+    organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
+    location: 'Montpellier, France'
+    dates: 'February 2021 - July 2021'
+    items:
+      - 'Assisted a Ph.D. student on dual-arm manipulation of deformable objects.'
+      - 'Developed C++ robotic applications using the Robot Kinematic Control Library (RKCL) for dual-arm manipulation of deformable objects.'
+      - 'Assisted with Python programming for optimization and Python/C++ integration.'
+    pdf_organization: 'Informatic, Robotic and Microelectronic Laboratory of Montpellier (LIRMM)'
+    pdf_dates: 'Feb. 2021 - July 2021'
+    pdf_items:
+      - 'Assisted PhD student on the subject of dual arm manipulation of deformable objects.'
+      - 'Development in C++ of robotic applications using the Robot Kinematic Control Library (RKCL) for dual arm manipulation of deformable objects.'
+      - 'Assisted the PhD student with Python programming for optimization/improvement and for linking Python and C++.'
+
+  - title: 'Robotics internship'
+    organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
+    location: 'Montpellier, France'
+    dates: 'May 2020 - Aug. 2020'
+    items:
+      - 'Developed a V-REP (CoppeliaSim) simulation model of the HOAP-3 robot.'
+      - 'Developed C++ robotic applications using the Robot Kinematic Control Library (RKCL) for dual-arm manipulation of deformable objects.'
+      - 'Assisted with Python programming for optimization and Python/C++ integration.'
+    pdf_organization: 'Informatic, Robotic and Microelectronic Laboratory of Montpellier (LIRMM)'
+    pdf_dates: 'May 2020 - Aug. 2020'
+    pdf_items:
+      - 'V-REP (CoppeliaSim) simulation model of HOAP-3 robot.'
+      - 'Development in C++ of robotic applications using the Robot Kinematic Control Library (RKCL) for dual arm manipulation of deformable objects.'
+      - 'Assisted the PhD student with Python programming for optimization/improvement and for linking Python and C++.'
+
+  - title: 'Undergraduate internship'
+    organization: 'Bristol Robotics Laboratory'
+    location: 'Bristol, United Kingdom'
+    dates: 'June 2019 - August 2019'
+    items:
+      - "Developed a web application based on Blockly for Anki's Vector robot to support robotics outreach for children during UK Robotics Week."
+      - "Developed a ROS1 wrapper for Anki's Vector robot API and implemented the ROS Navigation Stack on the robot."
+    pdf_dates: 'June 2019 - Aug. 2019'
+    pdf_items:
+      - "Development of a web application implementing scratch programming framework (Blockly) for Anki's Vector robot. The target was to help children discover robotics and programming for the Robotics Week in UK."
+      - "Development of a ROS1 wrapper for Anki's Vector robot API, and implementation of the ROS Navigation Stack on the robot."
+
+education:
+  - degree: 'Ph.D'
+    area: ''
+    institution: 'University of Montpellier ~ CNRS-AIST Joint Robotics Laboratory'
+    location: 'Tsukuba, Japan'
+    dates: 'September 2022 - January 2026'
+    items:
+      - 'Advisors: Gentiane Venture, Mehdi Benallegue'
+      - 'Conducted research on understanding and improving physical human-robot interaction.'
+    pdf_dates: 'Sep. 2022 - Jan. 2026'
+    pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
+    pdf_items: []
+
+  - degree: 'Study semester'
+    area: ''
+    institution: 'University of Quebec in Chicoutimi'
+    location: 'Remote from France due to COVID-19'
+    dates: 'September 2020 - December 2020'
+    items:
+      - 'Courses on neural networks, quantitative methods for engineers, engineering project management, and advanced numeric communication systems.'
+    pdf_dates: 'Sep. 2020 - Dec. 2020'
+    pdf_description: 'Courses on Neural Networks, Quantitative methods for engineers, Engineering project management and Advance numeric communication systems.'
+    pdf_items: []
+
+  - degree: 'Master degree in Engineering'
+    area: 'Microelectronics and Automation, specialized in Robotics'
+    institution: 'Polytech Montpellier'
+    location: 'Montpellier, France'
+    dates: 'September 2018 - August 2021'
+    items:
+      - 'Smart Bird Feeder project: C programming on STM32, low-power constraints, logging system, picture capture on bird arrival, and SD card storage.'
+      - 'Gravity torque computing for compliance project: developed a Python URDF parser, recursive tree exploration, and gravity torque computation in Python/C++.'
+      - 'Humanoid walk study project: center-of-mass trajectory modeling from step balance points in MATLAB.'
+      - '6 DoF manipulator arm project: modeled a manipulator arm with modified Denavit-Hartenberg parameters and implemented dynamic control from scratch in Julia.'
+    pdf_dates: 'Sep. 2018 - Aug. 2021'
+    pdf_degree: 'Master degree in Engineering'
+    pdf_area: ''
+    pdf_items:
+      - 'Microelectronics and Automation Major, Specialized in Robotics.'
+      - 'Smart Bird Feeder project: C programming on STM32, Low-Power constraints, Logging system, Picture capture when a bird arrives and saving on SD card.'
+      - 'Gravity torque computing for compliance project: Developed Python URDF parser, recursive tree exploration, gravity torque computing with Python/C++.'
+      - 'Humanoid walk study project: Center of mass trajectory modeling from each step balance point under MATLAB.'
+      - '6 DoF manipulator arm project: Modelling of a manipulator arm using modified Denavit-Hartenberg parameters, dynamic control of the arm, made from scratch using Julia programming language.'
+
+  - degree: "Technical Associate's Degree in Industrial Computing and Electrical Engineering"
+    area: ''
+    institution: 'IUT of Nimes'
+    location: 'Nimes, France'
+    dates: 'September 2016 - August 2018'
+    items:
+      - 'Machine learning project to recognize poker cards.'
+      - 'C++ programming.'
+      - 'Neural-network-based recognition.'
+      - 'Self-taught and implemented neural network algorithms (MLP/CNN) from scratch in Python and MATLAB.'
+    pdf_dates: 'Sep. 2016 - Aug. 2018'
+    pdf_institution: 'IUT of Nîmes'
+    pdf_location: 'Nîmes, France'
+    pdf_items:
+      - 'Machine learning project to recognize poker cards:'
+      - 'C++ programming.'
+      - 'Neural Network based recognition.'
+      - 'Neural Network algorithms (MLP/CNN) self-taught, made from scratch (Python/MATLAB).'
+
+skills:
+  - category: 'Robotics'
+    items:
+      - 'Torque control'
+      - 'Inverse dynamics QP'
+      - 'pHRI'
+      - 'User studies'
+  - category: 'Software'
+    items:
+      - 'C++'
+      - 'Python'
+      - 'ROS 2'
+      - 'mc_rtc'
+      - 'Linux'
