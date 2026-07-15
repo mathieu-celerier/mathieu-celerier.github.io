@@ -49,12 +49,18 @@ function guessType(entry) {
   return "other";
 }
 
-function joinAuthors(bibAuthorField) {
-  // BibTeX uses "and" separators.
-  return normalizeWhitespace(bibAuthorField)
-    .split(/\s+and\s+/i)
-    .map(normalizeWhitespace)
-    .join(", ");
+export function formatCreator(c) {
+  if (c.name) return normalizeWhitespace(c.name);
+  return normalizeWhitespace(
+    [c.prefix, c.firstName, c.lastName, c.suffix].filter(Boolean).join(" "),
+  );
+}
+
+export function joinAuthors(authorField) {
+  // @retorquere/bibtex-parser yields creator-list fields as Creator[] objects,
+  // not raw BibTeX strings.
+  if (!Array.isArray(authorField)) return normalizeWhitespace(authorField);
+  return authorField.map(formatCreator).filter(Boolean).join(", ");
 }
 
 function field(entry, name) {
@@ -97,7 +103,7 @@ function writeEntry(entry) {
   const o = overrides[bibkey] || {};
 
   const title = normalizeWhitespace(field(entry, "title"));
-  const authors = joinAuthors(field(entry, "author") || "");
+  const authors = joinAuthors(field(entry, "author") || []);
   const year = toYear(entry);
   const venue = normalizeWhitespace(pickVenue(entry));
   const doi = normalizeWhitespace(field(entry, "doi"));
@@ -133,7 +139,7 @@ function writeEntry(entry) {
     pdf ? `pdf: ${escapeYaml(pdf)}` : "",
     code ? `code: ${escapeYaml(code)}` : "",
     video ? `video: ${escapeYaml(video)}` : "",
-    website ? `url: ${escapeYaml(website)}` : "",
+    website ? `website: ${escapeYaml(website)}` : "",
     featured ? `featured: true` : "",
     highlights.length
       ? `highlights:\n${highlights.map((h) => `  - ${escapeYaml(h)}`).join("\n")}`
@@ -167,4 +173,6 @@ function main() {
   );
 }
 
-main();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}

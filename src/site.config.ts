@@ -53,6 +53,7 @@ export const theme: ThemeUserConfig = {
       // { title: 'Blog', link: '/blog' },
       { title: 'News', link: '/news' },
       { title: 'CV', link: '/cv' },
+      { title: 'Publications', link: '/publications' },
       { title: 'About', link: '/about' }
     ]
   },

@@ -40,6 +40,7 @@ const publications = defineCollection({
     code: z.string().url().optional(),
     video: z.string().url().optional(),
     featured: z.boolean().optional(),
+    highlights: z.array(z.string()).optional(),
     bibkey: z.string()
   })
 })
