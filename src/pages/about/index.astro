@@ -2,6 +2,12 @@
 import PageLayout from '@/layouts/CommonPage.astro'
 import Substats from '@/components/about/Substats.astro'
 import ToolSection from '@/components/about/ToolSection.astro'
+import mcrtcLogo from '@/assets/tools/mcrtc.png'
+
+import { loadCV, type CVSkill } from '../../lib/cv-data-loader.ts'
+
+const cv = loadCV()
+const githubHandle = cv.basics.github
 
 // Keep headings minimal + academic
 const headings = [
@@ -10,16 +16,42 @@ const headings = [
   { depth: 2, slug: 'tools', text: 'Tools & Technical Stack' },
   { depth: 2, slug: 'online-presence', text: 'Online Presence' }
 ]
+
+// Same icon set as the CV page, so both pages point at the same official assets.
+const skillIconMap = {
+  'C++': import('@/assets/tools/cpp.svg?raw'),
+  Python: import('@/assets/tools/python.svg?raw'),
+  'ROS 2': import('@/assets/tools/ros2.svg?raw'),
+  mc_rtc: mcrtcLogo
+} as const
+
+const skillLinkMap: Record<string, string> = {
+  'C++': 'https://isocpp.org/',
+  Python: 'https://www.python.org/',
+  'ROS 2': 'https://www.ros.org/',
+  mc_rtc: 'https://jrl-umi3218.github.io/mc_rtc/'
+}
+
+const skillDescriptionMap: Record<string, string> = {
+  'C++': 'Real-time control and robotics software',
+  Python: 'Data analysis, prototyping, and visualization',
+  'ROS 2': 'Robotics middleware',
+  mc_rtc: 'Whole-body control framework'
+}
+
+const softwareTools = (cv.skills?.find((skill: CVSkill) => skill.category === 'Software')?.items ?? [])
+  .filter((item: string): item is keyof typeof skillIconMap => item in skillIconMap)
+  .map((item: keyof typeof skillIconMap) => ({
+    name: item,
+    description: skillDescriptionMap[item],
+    href: skillLinkMap[item],
+    icon: skillIconMap[item]
+  }))
 ---
 
 <PageLayout title='About' {headings}>
   <h2 id='profile'>Profile</h2>
-  <p>
-    I am a robotics researcher focusing on physical human–robot interaction (pHRI), human-centered
-    control, and torque-controlled manipulators. My work lies at the intersection of control theory,
-    human motion modeling, and experimental robotics, with an emphasis on safety, stability, and
-    user experience during sustained physical interaction.
-  </p>
+  <p>{cv.summary?.paragraph}</p>
   <p>
     This website serves as an academic homepage, providing access to publications, projects,
     software artifacts, and teaching or dissemination material.
@@ -39,40 +71,7 @@ const headings = [
     Tools and environments representative of those used in my research and software development.
   </p>
 
-  <ToolSection
-    class='mb-5'
-    title='Programming & Robotics'
-    tools={[
-      {
-        name: 'C++',
-        description: 'Real-time control and robotics software',
-        href: 'https://isocpp.org/',
-        // If you don’t have cpp.svg, replace with any existing icon in "@/assets/tools/"
-        icon: import('@/assets/tools/vscode.svg?raw')
-      },
-      {
-        name: 'Python',
-        description: 'Data analysis, prototyping, and visualization',
-        href: 'https://www.python.org/',
-        // Replace with python.svg if you have it
-        icon: import('@/assets/tools/notion.svg?raw')
-      },
-      {
-        name: 'ROS / ROS 2',
-        description: 'Robotics middleware',
-        href: 'https://www.ros.org/',
-        // Replace with ros.svg if you have it
-        icon: import('@/assets/tools/chrome.svg?raw')
-      },
-      {
-        name: 'mc_rtc',
-        description: 'Whole-body control framework',
-        href: 'https://jrl-umi3218.github.io/mc_rtc/',
-        // Replace with mcrtc.svg if you have it
-        icon: import('@/assets/tools/firefox.svg?raw')
-      }
-    ]}
-  />
+  <ToolSection class='mb-5' title='Programming & Robotics' tools={softwareTools} />
 
   <ToolSection
     class='mb-5'
@@ -89,13 +88,6 @@ const headings = [
         description: 'Editing, code review, and writing',
         href: 'https://neovim.io/',
         icon: import('@/assets/tools/neovim.svg?raw')
-      },
-      {
-        name: 'Git',
-        description: 'Version control and collaboration',
-        href: 'https://git-scm.com/',
-        // If git.svg does not exist, replace with any existing icon
-        icon: import('@/assets/tools/vscode.svg?raw')
       }
     ]}
   />
@@ -109,10 +101,9 @@ const headings = [
       {
         platform: 'GitHub',
         icon: 'github',
-        link: 'https://github.com/<YOUR_HANDLE>',
+        link: `https://github.com/${githubHandle}`,
         text: 'repositories',
-        // Keep api if your Substats supports it (template does). Update as needed.
-        api: 'github/<YOUR_HANDLE>'
+        api: `github/${githubHandle}`
       }
     ]}
   />
