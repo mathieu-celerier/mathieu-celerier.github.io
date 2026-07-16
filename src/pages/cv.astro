@@ -38,11 +38,7 @@ const skillIconMap = {
   Python: import('@/assets/tools/python.svg?raw'),
   'ROS 2': import('@/assets/tools/ros2.svg?raw'),
   mc_rtc: mcrtcLogo,
-  Linux: import('@/assets/tools/ubuntu.svg?raw'),
-  'Torque control': import('@/assets/tools/torque-control.svg?raw'),
-  'Inverse dynamics QP': import('@/assets/tools/inverse-dynamics-qp.svg?raw'),
-  pHRI: import('@/assets/tools/phri.svg?raw'),
-  'User studies': import('@/assets/tools/user-studies.svg?raw')
+  Linux: import('@/assets/tools/ubuntu.svg?raw')
 } as const
 
 const skillLinkMap: Record<string, string> = {
@@ -50,11 +46,7 @@ const skillLinkMap: Record<string, string> = {
   Python: 'https://www.python.org/',
   'ROS 2': 'https://docs.ros.org/en/rolling/index.html',
   mc_rtc: 'https://jrl-umi3218.github.io/mc_rtc/',
-  Linux: 'https://ubuntu.com/',
-  'Torque control': '/about',
-  'Inverse dynamics QP': '/about',
-  pHRI: '/about',
-  'User studies': '/about'
+  Linux: 'https://ubuntu.com/'
 }
 
 const skillDescriptionMap: Record<string, string> = {
@@ -62,11 +54,7 @@ const skillDescriptionMap: Record<string, string> = {
   Python: 'Analysis, prototyping, and experiment tooling',
   'ROS 2': 'Middleware integration for robotic systems',
   mc_rtc: 'Whole-body and whole-system control framework',
-  Linux: 'Primary research and development environment',
-  'Torque control': 'Compliant interaction on torque-controlled robots',
-  'Inverse dynamics QP': 'Optimization-based whole-body control design',
-  pHRI: 'Physical human-robot interaction experiments and analysis',
-  'User studies': 'Experimental protocol design and evaluation'
+  Linux: 'Primary research and development environment'
 }
 
 const iconSkillCategories = new Set(['Software'])

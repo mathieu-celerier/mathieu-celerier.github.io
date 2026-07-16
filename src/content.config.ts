@@ -45,7 +45,8 @@ const publications = defineCollection({
   })
 })
 
-// Define blog collection
+// Empty for now (no blog posts), but the theme's own utilities (packages/pure/utils/server.ts)
+// are statically typed against this collection existing, so keep it declared.
 const blog = defineCollection({
   // Load Markdown and MDX files in the `src/content/blog/` directory.
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),

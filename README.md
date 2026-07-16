@@ -1,103 +1,49 @@
-# Astro Theme Pure
+# mathieu-celerier.github.io
 
-English | [简体中文](./README-zh-CN.md)
+Mathieu Celerier's academic personal website: news, a web CV, a generated PDF resume, and
+publications. Built with [Astro](https://astro.build/) on top of the
+[Astro Theme Pure](https://github.com/cworld1/astro-theme-pure) template.
 
-A simple, fast and powerful blog & document theme built by Astro.
+## Structure
 
-[![GitHub deployments](https://img.shields.io/github/deployments/cworld1/astro-theme-pure/production?style=flat&logo=vercel&label=vercel)](https://astro-pure.js.org/)
-[![NPM Version](https://img.shields.io/npm/v/astro-pure?logo=npm&style=flat)](https://www.npmjs.com/package/astro-pure)
-[![GitHub Release](https://img.shields.io/github/v/release/cworld1/astro-theme-pure?include_prereleases&style=flat&label=template)](https://github.com/cworld1/astro-theme-pure/releases)
-[![GitHub License](https://img.shields.io/github/license/cworld1/astro-theme-pure?style=flat)](https://github.com/cworld1/astro-theme-pure/blob/main/LICENSE)
-
-![image](./.github/assets/header.webp)
-![image](./.github/assets/body.webp)
-
-> [!NOTE]
-> Known issues: 1. Header & customize options is still under development (template exposed still). 2. Theme template v4.0.5^ UnoCSS preset changed to PresetMini. If there's any problem, please report as issue.
-
-## Introduction
-
-Checkout [Demo Site →](https://astro-pure.js.org/)
-
-### :fire: Features
-
-- [x] :rocket: Fast & high performance
-- [x] :star: Simple & clean design
-- [x] :iphone: Responsive design
-- [x] :mag: Full-site search built with [pagefind](https://pagefind.app/)
-- [x] :world_map: Sitemap & RSS feed
-- [x] :spider_web: SEO-friendly
-- [x] :book: TOC (table of contents)
-- [x] :framed_picture: Dynamic open graph generation for posts
-- [x] :framed_picture: Mediumzoom lightbox for images
-
-### :package: Components
-
-Theme includes a lot of components, which can not only be used in the theme, but also in other astro projects.
-
-> For other astro projects, UnoCSS is required. See [Package README](https://github.com/cworld1/astro-theme-pure/blob/main/packages/pure/README.md#use-with-common-astro-project) for more details.
-
-- Basic components: `Aside`, `Tabs`, `Timeline`, `Steps`, `Spoiler`...
-- Advanced components: `GithubCard`, `LinkPreview`, `Quote`, `QRCode`...
-
-### :white_check_mark: Lighthouse score
-
-[![lighthouse-score](./.github/assets/lighthouse-score.png)](https://pagespeed.web.dev/analysis/https-cworld-top/o229zrt5o4?form_factor=mobile&hl=en)
-
-## Documentation
-
-[Docs](https://astro-pure.js.org/docs) | [Showcase](https://github.com/cworld1/astro-theme-pure/issues/10)
-
-## Package
-
-See [astro-theme-pure](https://www.npmjs.com/package/astro-pure) on npm.
+- `/` – landing page with a compact recent-news list.
+- `/news` – full news timeline (`src/content/news/*.mdx`).
+- `/cv` – web CV, driven by `data/cv.yaml` via `src/lib/cv-data-loader.ts`.
+- `/publications` – generated from `data/publications.bib` (+ `data/publications.overrides.yaml`).
+- `/about` – profile, research interests, and tools/technical stack.
+- `/cv.pdf` – PDF resume, rendered from `data/cv.yaml` through `src/templates/cv.tex.ejs`
+  and compiled with XeLaTeX/latexmk (Awesome-CV class, vendored under `latex/awesome-cv`).
 
 ## Local development
 
-Environment requirements:
+Requirements:
 
-- [Nodejs](https://nodejs.org/): 18.0.0+
+- [Node.js](https://nodejs.org/) 18+
+- For PDF generation: a TeX installation with `latexmk` and `xelatex`, plus the packages
+  required by `latex/awesome-cv/awesome-cv.cls` (TEXINPUTS is set automatically; no external
+  Awesome-CV checkout is needed).
 
-Clone the repository:
+```sh
+npm install
 
-```shell
-git clone https://github.com/cworld1/astro-theme-pure.git
-cd astro-theme-pure
+# runs all generators (publications, CV PDF), then starts the Astro dev server
+npm run dev
+
+# Astro diagnostics only, does not run generators
+npm run check
+
+# generators, theme check, Astro check, static build, Pagefind
+npm run build
+
+# regression tests for the publication generator
+npm test
 ```
 
-Useful commands:
-
-```shell
-# install dependencies
-bun install
-
-# start the dev server
-bun dev
-
-# build the project
-bun run build
-
-# preview (after the build)
-bun preview
-
-# create a new post
-bun new
-```
-
-## Contributions
-
-To spend more time coding and less time fiddling with whitespace, this project uses code conventions and styles to encourage consistency. Code with a consistent style is easier (and less error-prone!) to review, maintain, and understand.
-
-## Thanks
-
-- [Astro Cactus](https://github.com/chrismwilliams/astro-theme-cactus)
-- [Astro Resume](https://github.com/srleom/astro-theme-resume)
-- [Starlight](https://github.com/withastro/starlight)
-
-Other third party references are on [Docs#Contributions](https://astro-pure.js.org/docs/advanced/thanks). Appreciate for all open source libraries.
+Publication Markdown under `src/content/publications/` and `public/cv.pdf` are generated
+output (see `npm run gen`); don't hand-edit them — edit `data/publications.bib`,
+`data/publications.overrides.yaml`, or `data/cv.yaml` instead.
 
 ## License
 
-This project is licensed under the Apache 2.0 License.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=cworld1/astro-theme-pure&type=Date)](https://star-history.com/#cworld1/astro-theme-pure&Date)
+This project is licensed under the Apache 2.0 License, inherited from the
+[Astro Theme Pure](https://github.com/cworld1/astro-theme-pure) template it's built on.
