@@ -42,3 +42,7 @@ ignore.*
 bunfig.toml
 /src/content/blog/test.*
 /test/
+
+# Publications are generated from data/publications.bib by `npm run gen`;
+# do not hand-edit or track the output (see scripts/bibtex-to-astro.mjs).
+/src/content/publications/*.md
