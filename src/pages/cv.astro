@@ -78,7 +78,7 @@ const skillSections = (cv.skills || [])
 const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
 ---
 
-<PageLayout meta={{ title: 'CV' }} highlightColor='hsl(199 89% 55%)'>
+<PageLayout meta={{ title: 'CV', ogImage: '/og/cv.png' }} highlightColor='hsl(199 89% 55%)'>
   <section class='cv-shell'>
     <section class='cv-hero'>
       <div class='cv-hero-main'>

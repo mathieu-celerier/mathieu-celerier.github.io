@@ -13,12 +13,13 @@ interface Props {
   headings?: MarkdownHeading[]
   view?: boolean
   comment?: boolean
+  ogImage?: string
 }
 
-const { title, kicker, copy, headings, view, comment: enableComment, ...props } = Astro.props
+const { title, kicker, copy, headings, view, comment: enableComment, ogImage, ...props } = Astro.props
 ---
 
-<PageLayout meta={{ title }} {...props}>
+<PageLayout meta={{ title, ogImage }} {...props}>
   {headings?.length && <TOC headings={headings} slot='sidebar' />}
 
   <Fragment slot='header'>

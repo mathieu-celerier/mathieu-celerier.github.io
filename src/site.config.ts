@@ -48,7 +48,7 @@ export const theme: ThemeUserConfig = {
   /** Configure the header of your site. */
   header: {
     useTitle: false,
-    searchButton: false,
+    searchButton: true,
     menu: [
       // { title: 'Blog', link: '/blog' },
       { title: 'News', link: '/news' },

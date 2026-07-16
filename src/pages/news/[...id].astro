@@ -41,7 +41,11 @@ const { Content } = await render(entry)
 ---
 
 <PageLayout
-  meta={{ articleDate: entry.data.date.toISOString(), title: entry.data.title }}
+  meta={{
+    articleDate: entry.data.date.toISOString(),
+    title: entry.data.title,
+    ogImage: `/og/news/${entry.id}.png`
+  }}
   highlightColor='hsl(199 89% 55%)'
   back='/news'
 >
