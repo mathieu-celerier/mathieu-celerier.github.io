@@ -77,62 +77,122 @@ const skillSections = (cv.skills || [])
 
 const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
 
-// Compact horizontal timeline: dots-only (labels appear on hover), split
-// into an experience lane above the axis and an education lane below it.
-// Start dates are parsed at month resolution so same-year entries spread
-// out instead of stacking; unparseable dates are skipped, never fatal.
+// Compact horizontal Gantt timeline: each entry is a duration bar
+// (experience lane above the axis, education below). Overlapping periods
+// within a lane stack into sub-rows; dates are parsed at month resolution
+// and unparseable entries are skipped, never fatal.
 const TIMELINE_START = 2016
 const TIMELINE_END = 2027
-
-interface TimelineMarker {
-  label: string
-  year: number
-  current: boolean
-  percent: number
-  lane: 'exp' | 'edu'
-}
 
 const MONTHS: Record<string, number> = {
   jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
   jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
 }
 
-function parseStart(dates: string): number | null {
-  const yearMatch = dates.match(/\b(19|20)\d{2}\b/)
+function parseMoment(segment: string): number | null {
+  const yearMatch = segment.match(/\b(19|20)\d{2}\b/)
   if (!yearMatch) return null
   const year = Number(yearMatch[0])
   if (!Number.isFinite(year)) return null
-  const monthMatch = dates.toLowerCase().match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z.]*\b/)
+  const monthMatch = segment
+    .toLowerCase()
+    .match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z.]*\b/)
   const month = monthMatch ? MONTHS[monthMatch[1]] : 0
   return year + month / 12
 }
 
-function toMarkers(
-  entries: { title?: string; degree?: string; area?: string; dates: string }[],
-  lane: 'exp' | 'edu'
-): TimelineMarker[] {
-  return entries
-    .map((entry) => {
-      const start = parseStart(entry.dates)
-      if (start === null) return null
-      const label = entry.title ?? [entry.degree, entry.area].filter(Boolean).join(' — ') ?? ''
-      const clamped = Math.min(Math.max(start, TIMELINE_START), TIMELINE_END)
-      const percent = ((clamped - TIMELINE_START) / (TIMELINE_END - TIMELINE_START)) * 100
-      return {
-        label,
-        year: Math.floor(start),
-        current: entry.dates.includes('Present'),
-        percent,
-        lane
-      }
-    })
-    .filter((marker): marker is TimelineMarker => marker !== null)
+function parseRange(dates: string): { start: number; end: number; current: boolean } | null {
+  const parts = dates.split(/\s*[-–]\s*/)
+  const start = parseMoment(parts[0] ?? '')
+  if (start === null) return null
+  const current = /present/i.test(dates)
+  let end: number | null
+  if (current) {
+    const now = new Date()
+    end = now.getFullYear() + now.getMonth() / 12
+  } else {
+    end = parseMoment(parts[parts.length - 1] ?? '')
+    if (end === null) end = start
+  }
+  // Cover the end month inclusively, and give very short stints a
+  // readable minimum width.
+  end = Math.max(end + 1 / 12, start + 3 / 12)
+  return { start, end, current }
 }
 
-const timelineMarkers = [
-  ...toMarkers(cv.experience || [], 'exp'),
-  ...toMarkers(cv.education || [], 'edu')
-].sort((a, b) => a.percent - b.percent)
+interface TimelineBar {
+  label: string
+  dates: string
+  current: boolean
+  lane: 'exp' | 'edu'
+  row: number
+  leftPct: number
+  widthPct: number
+  align: 'left' | 'center' | 'right'
+}
+
+function toBars(
+  entries: { title?: string; degree?: string; area?: string; dates: string }[],
+  lane: 'exp' | 'edu'
+): TimelineBar[] {
+  const span = TIMELINE_END - TIMELINE_START
+  const parsed = entries
+    .map((entry) => {
+      const range = parseRange(entry.dates)
+      if (!range) return null
+      const label = entry.title ?? [entry.degree, entry.area].filter(Boolean).join(' — ') ?? ''
+      return { ...range, label, dates: entry.dates }
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => a.start - b.start)
+
+  // Greedy row assignment: each bar takes the first sub-row whose last
+  // bar ends before this one starts, so overlapping periods stack.
+  const rowEnds: number[] = []
+  return parsed.map((item) => {
+    let row = rowEnds.findIndex((endsAt) => endsAt <= item.start + 1e-6)
+    if (row === -1) {
+      row = rowEnds.length
+      rowEnds.push(item.end)
+    } else {
+      rowEnds[row] = item.end
+    }
+    const clampedStart = Math.min(Math.max(item.start, TIMELINE_START), TIMELINE_END)
+    const clampedEnd = Math.min(Math.max(item.end, TIMELINE_START), TIMELINE_END)
+    const leftPct = ((clampedStart - TIMELINE_START) / span) * 100
+    const widthPct = Math.max(((clampedEnd - clampedStart) / span) * 100, 0.8)
+    return {
+      label: item.label,
+      dates: item.dates,
+      current: item.current,
+      lane,
+      row,
+      leftPct,
+      widthPct,
+      align: leftPct > 72 ? 'right' : leftPct < 8 ? 'left' : 'center'
+    } satisfies TimelineBar
+  })
+}
+
+const expBars = toBars(cv.experience || [], 'exp')
+const eduBars = toBars(cv.education || [], 'edu')
+const expRows = expBars.length ? Math.max(...expBars.map((bar) => bar.row)) + 1 : 0
+const eduRows = eduBars.length ? Math.max(...eduBars.map((bar) => bar.row)) + 1 : 0
+
+// Vertical geometry in rem: exp sub-rows stack upward from the axis,
+// edu sub-rows downward; year labels sit at the bottom.
+const BAR_H = 0.7
+const ROW_STEP = 1.0
+const axisTop = 0.4 + expRows * ROW_STEP
+const eduBottom = axisTop + 0.15 + eduRows * ROW_STEP
+const trackHeight = eduBottom + 1.4
+
+function barTop(bar: TimelineBar): number {
+  if (bar.lane === 'exp') return axisTop - 0.15 - BAR_H - bar.row * ROW_STEP
+  return axisTop + 0.15 + bar.row * ROW_STEP
+}
+
+const timelineBars = [...expBars, ...eduBars]
 
 const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
   year,
@@ -194,24 +254,25 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
          Experience/Education sections below, so this is hidden from
          assistive tech rather than duplicating it in a hard-to-navigate
          form. Labels appear on hover. */
-      timelineMarkers.length ? (
+      timelineBars.length ? (
         <section class='cv-timeline' aria-hidden='true'>
-          <div class='cv-timeline-track'>
-            <div class='cv-timeline-axis' />
+          <div class='cv-timeline-track' style={`height: ${trackHeight}rem`}>
             {timelineTicks.map((tick) => (
-              <span class='cv-timeline-tick' style={`left: ${tick.percent}%`}>
-                {tick.year}
+              <span class='cv-timeline-grid' style={`left: ${tick.percent}%`}>
+                <span class='cv-timeline-year'>{tick.year}</span>
               </span>
             ))}
-            {timelineMarkers.map((marker) => (
+            <div class='cv-timeline-axis' style={`top: ${axisTop}rem`} />
+            {timelineBars.map((bar) => (
               <span
                 class:list={[
-                  'cv-timeline-marker',
-                  `cv-timeline-marker-${marker.lane}`,
-                  marker.current && 'cv-timeline-marker-current'
+                  'cv-timeline-bar',
+                  `cv-timeline-bar-${bar.lane}`,
+                  bar.current && 'cv-timeline-bar-current',
+                  `cv-timeline-tip-${bar.align}`
                 ]}
-                style={`left: ${marker.percent}%`}
-                data-label={`${marker.label} · ${marker.year}`}
+                style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
+                data-label={`${bar.label} · ${bar.dates}`}
               />
             ))}
           </div>
@@ -558,7 +619,6 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
   .cv-timeline-track {
     position: relative;
     min-width: 40rem;
-    height: 4.2rem;
     margin: 0 1.25rem;
   }
 
@@ -566,7 +626,6 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     position: absolute;
     left: 0;
     right: 0;
-    top: 50%;
     height: 2px;
     background: linear-gradient(
       90deg,
@@ -577,10 +636,22 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     );
   }
 
-  .cv-timeline-tick {
+  /* Faint vertical gridline per tick year, spanning the whole strip,
+     with its year label at the bottom. */
+  .cv-timeline-grid {
     position: absolute;
-    top: calc(50% + 0.55rem);
+    top: 0;
+    bottom: 1.2rem;
+    width: 1px;
+    background: hsl(var(--border) / 0.4);
+  }
+
+  .cv-timeline-year {
+    position: absolute;
+    top: 100%;
+    left: 50%;
     transform: translateX(-50%);
+    margin-top: 0.25rem;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -588,69 +659,40 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     font-variant-numeric: tabular-nums;
   }
 
-  .cv-timeline-tick::before {
-    content: '';
+  .cv-timeline-bar {
     position: absolute;
-    left: 50%;
-    top: -0.55rem;
-    width: 1px;
-    height: 0.35rem;
-    background: hsl(var(--border) / 1);
-  }
-
-  .cv-timeline-marker {
-    position: absolute;
-    width: 0.7rem;
     height: 0.7rem;
+    min-width: 0.55rem;
     border-radius: 999px;
-    transform: translateX(-50%);
     cursor: default;
     z-index: 1;
   }
 
-  /* Experience lane sits above the axis, education below it. */
-  .cv-timeline-marker-exp {
-    top: calc(50% - 1.1rem);
-    background: hsl(var(--primary) / 0.85);
-    border: 2px solid hsl(var(--background) / 1);
+  /* Experience bars above the axis (filled accent), education below
+     (soft outline fill). */
+  .cv-timeline-bar-exp {
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.85), hsl(var(--primary) / 0.6));
   }
 
-  .cv-timeline-marker-edu {
-    top: calc(50% + 0.45rem);
-    background: hsl(var(--background) / 1);
-    border: 2px solid hsl(var(--muted-foreground) / 0.8);
+  .cv-timeline-bar-edu {
+    background: hsl(var(--muted-foreground) / 0.22);
+    border: 1px solid hsl(var(--muted-foreground) / 0.55);
   }
 
-  .cv-timeline-marker-current {
-    background: hsl(var(--primary) / 1);
-    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.18);
+  .cv-timeline-bar-current {
+    background: linear-gradient(90deg, hsl(var(--primary) / 1), hsl(var(--primary) / 0.75));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.16);
   }
 
-  /* Connector stem from each dot to the axis. */
-  .cv-timeline-marker::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    width: 1px;
-    background: hsl(var(--border) / 0.9);
-  }
-
-  .cv-timeline-marker-exp::before {
-    top: 100%;
-    height: 0.45rem;
-  }
-
-  .cv-timeline-marker-edu::before {
-    bottom: 100%;
-    height: 0.25rem;
+  .cv-timeline-bar:hover {
+    filter: brightness(1.15);
   }
 
   /* Hover label */
-  .cv-timeline-marker::after {
+  .cv-timeline-bar::after {
     content: attr(data-label);
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: calc(100% + 0.4rem);
     white-space: nowrap;
     padding: 0.3rem 0.6rem;
     border-radius: calc(1.2 * var(--radius, 0.5rem));
@@ -658,34 +700,28 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     background: hsl(var(--background) / 1);
     color: hsl(var(--foreground) / 1);
     font-size: 0.74rem;
+    font-weight: 500;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
-    z-index: 2;
+    z-index: 3;
   }
 
-  .cv-timeline-marker-exp::after {
-    bottom: calc(100% + 0.45rem);
+  .cv-timeline-tip-center::after {
+    left: 50%;
+    transform: translateX(-50%);
   }
 
-  .cv-timeline-marker-edu::after {
-    top: calc(100% + 0.45rem);
-  }
-
-  .cv-timeline-marker:hover::after {
-    opacity: 1;
-  }
-
-  /* Keep edge tooltips inside the track. */
-  .cv-timeline-marker:first-of-type::after {
+  .cv-timeline-tip-left::after {
     left: 0;
-    transform: none;
   }
 
-  .cv-timeline-marker:last-of-type::after {
-    left: auto;
+  .cv-timeline-tip-right::after {
     right: 0;
-    transform: none;
+  }
+
+  .cv-timeline-bar:hover::after {
+    opacity: 1;
   }
 
   .cv-timeline-legend {
@@ -699,18 +735,18 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
   }
 
   .cv-timeline-legend-dot {
-    width: 0.55rem;
-    height: 0.55rem;
+    width: 1.1rem;
+    height: 0.5rem;
     border-radius: 999px;
   }
 
   .cv-timeline-legend-exp {
-    background: hsl(var(--primary) / 0.85);
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.85), hsl(var(--primary) / 0.6));
   }
 
   .cv-timeline-legend-edu {
-    background: hsl(var(--background) / 1);
-    border: 2px solid hsl(var(--muted-foreground) / 0.8);
+    background: hsl(var(--muted-foreground) / 0.22);
+    border: 1px solid hsl(var(--muted-foreground) / 0.55);
   }
 
   .cv-timeline-legend-dot + .cv-timeline-legend-dot,

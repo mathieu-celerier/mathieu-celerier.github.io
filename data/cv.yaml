@@ -36,7 +36,7 @@ experience:
     location: 'Tsukuba, Japan'
     dates: 'February 2026 - Present'
     pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
-    pdf_dates: 'June 2022 - Present'
+    pdf_dates: 'February 2026 - Present'
     pdf_organization: 'CNRS-AIST Joint Robotics Laboratory'
 
   - title: 'Technical staff'
@@ -106,7 +106,7 @@ education:
     area: ''
     institution: 'University of Montpellier ~ CNRS-AIST Joint Robotics Laboratory'
     location: 'Tsukuba, Japan'
-    dates: 'September 2022 - January 2026'
+    dates: 'September 2021 - December 2025'
     items:
       - 'Advisors: Gentiane Venture, Mehdi Benallegue'
       - 'Conducted research on understanding and improving physical human-robot interaction.'
