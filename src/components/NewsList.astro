@@ -145,7 +145,7 @@ const timelineEntries = entries.map((entry, index, array) => {
         {
           showHeading && (
             <div class='news-timeline-heading'>
-              <h3>Timeline</h3>
+              <h2>Timeline</h2>
               <p>Recent milestones, talks, papers, and project updates in chronological order.</p>
             </div>
           )
@@ -178,9 +178,9 @@ const timelineEntries = entries.map((entry, index, array) => {
                     )}
                   </div>
 
-                  <h4 class:list={['news-card-title', entry.featured && 'news-card-title-featured']}>
+                  <h3 class:list={['news-card-title', entry.featured && 'news-card-title-featured']}>
                     {entry.title}
-                  </h4>
+                  </h3>
                   <div
                     class:list={[
                       'news-summary',
@@ -337,7 +337,7 @@ const timelineEntries = entries.map((entry, index, array) => {
     justify-content: space-between;
   }
 
-  .news-timeline-heading h3,
+  .news-timeline-heading h2,
   .news-timeline-heading p {
     margin: 0;
   }
