@@ -8,7 +8,7 @@ interface Props {
 const { kicker, title, copy } = Astro.props
 ---
 
-<section class='page-intro'>
+<section class='page-intro hero-grid-bg'>
   <p class='page-intro-kicker'>{kicker}</p>
   <h1 class='page-intro-title'>{title}</h1>
   {copy ? <p class='page-intro-copy'>{copy}</p> : <slot />}
