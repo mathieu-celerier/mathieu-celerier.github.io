@@ -9,10 +9,24 @@ type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
   href?: string
   variant?: 'button' | 'pill' | 'back' | 'ahead'
   target?: string
+  rel?: string
   class?: string
 }
 
-const { as: Tag = 'a', class: className, title, href, variant = 'button', ...props } = Astro.props
+const {
+  as: Tag = 'a',
+  class: className,
+  title,
+  href,
+  variant = 'button',
+  target,
+  rel,
+  ...props
+} = Astro.props
+
+// Prevent reverse tabnabbing: a target="_blank" link without rel="noopener"
+// lets the opened page access window.opener and redirect the original tab.
+const safeRel = target === '_blank' ? (rel ?? 'noopener noreferrer') : rel
 ---
 
 <Tag
@@ -23,6 +37,8 @@ const { as: Tag = 'a', class: className, title, href, variant = 'button', ...pro
     className
   )}
   href={href}
+  target={target}
+  rel={safeRel}
   data-astro-prefetch
   {...props}
 >
