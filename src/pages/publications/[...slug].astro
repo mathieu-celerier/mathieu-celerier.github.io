@@ -1,0 +1,287 @@
+---
+import fs from 'node:fs'
+import path from 'node:path'
+import { getCollection } from 'astro:content'
+import { Button } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import YouTube from '@/components/YouTube.astro'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('publications')
+  return entries.map((entry) => ({
+    params: { slug: entry.data.bibkey },
+    props: { entry }
+  }))
+}
+
+const { entry } = Astro.props
+
+const typeLabels: Record<string, string> = {
+  journal: 'Journal',
+  conference: 'Conference',
+  workshop: 'Workshop',
+  preprint: 'Preprint',
+  thesis: 'Thesis',
+  demo: 'Demo',
+  other: 'Other'
+}
+
+const bibtexPath = path.join(process.cwd(), 'public', 'bibtex', `${entry.data.bibkey}.bib`)
+const bibtexHref = `/bibtex/${entry.data.bibkey}.bib`
+const bibtexSource = fs.existsSync(bibtexPath) ? fs.readFileSync(bibtexPath, 'utf8') : null
+
+function youtubeId(url: string): string | null {
+  try {
+    const u = new URL(url)
+    if (u.hostname.includes('youtu.be')) return u.pathname.slice(1) || null
+    if (u.hostname.includes('youtube.com')) return u.searchParams.get('v')
+    return null
+  } catch {
+    return null
+  }
+}
+
+const ytId = entry.data.video ? youtubeId(entry.data.video) : null
+---
+
+<PageLayout
+  meta={{
+    title: entry.data.title,
+    ogImage: `/og/publications/${entry.data.bibkey}.png`
+  }}
+  highlightColor='hsl(199 89% 55%)'
+>
+  <article class='pub-detail'>
+    <header class='pub-detail-header'>
+      <p class='pub-detail-kicker'>{entry.data.venue || typeLabels[entry.data.type] || 'Publication'}</p>
+      <h1 class='pub-detail-title'>{entry.data.title}</h1>
+      <p class='pub-detail-authors'>{entry.data.authors}</p>
+
+      <div class='pub-meta-row'>
+        <span class='pub-type-badge'>{typeLabels[entry.data.type] ?? entry.data.type}</span>
+        <span class='pub-type-badge'>{entry.data.year}</span>
+        {entry.data.featured ? <span class='pub-featured-badge'>Featured</span> : null}
+        {
+          entry.data.citations ? (
+            <span class='pub-citation-badge'>{entry.data.citations} citations</span>
+          ) : null
+        }
+      </div>
+    </header>
+
+    {
+      entry.data.image ? (
+        <img src={entry.data.image} alt='' class='pub-detail-image' loading='lazy' />
+      ) : null
+    }
+
+    {
+      entry.data.abstract ? (
+        <section class='pub-detail-section'>
+          <h2>Abstract</h2>
+          <p class='pub-detail-abstract'>{entry.data.abstract}</p>
+        </section>
+      ) : null
+    }
+
+    {
+      ytId ? (
+        <section class='pub-detail-section'>
+          <h2>Video</h2>
+          <YouTube id={ytId} title={entry.data.title} />
+        </section>
+      ) : null
+    }
+
+    <section class='pub-detail-section'>
+      <h2>Links</h2>
+      <div class='pub-links'>
+        {entry.data.website ? (
+          <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
+        ) : null}
+        {entry.data.url ? (
+          <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
+        ) : null}
+        {entry.data.pdf ? (
+          <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
+        ) : null}
+        {entry.data.code ? (
+          <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
+        ) : null}
+        {entry.data.video && !ytId ? (
+          <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
+        ) : null}
+        <Button href={bibtexHref} download variant='ahead' title='Download .bib' />
+        <Button as='button' type='button' data-copy-bibtex={bibtexHref} variant='ahead' title='Copy BibTeX' />
+      </div>
+    </section>
+
+    {
+      bibtexSource ? (
+        <section class='pub-detail-section'>
+          <h2>BibTeX</h2>
+          <div class='pub-bibtex-wrap'>
+            <button type='button' class='pub-bibtex-copy' data-copy-bibtex={bibtexHref}>
+              Copy
+            </button>
+            <pre class='pub-bibtex'><code>{bibtexSource}</code></pre>
+          </div>
+        </section>
+      ) : null
+    }
+  </article>
+</PageLayout>
+
+<script>
+  import { showToast } from 'astro-pure/utils'
+
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as HTMLElement)?.closest<HTMLElement>('[data-copy-bibtex]')
+    if (!button) return
+
+    const href = button.dataset.copyBibtex
+    if (!href) return
+
+    try {
+      const response = await fetch(href)
+      const text = await response.text()
+      await navigator.clipboard.writeText(text)
+      showToast({ message: 'BibTeX copied to clipboard' })
+    } catch {
+      showToast({ message: 'Could not copy BibTeX' })
+    }
+  })
+</script>
+
+<style>
+  .pub-detail {
+    display: grid;
+    gap: 2rem;
+    max-width: 56rem;
+    margin: 0 auto;
+    padding-top: 0.5rem;
+  }
+
+  .pub-detail-header {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .pub-detail-kicker {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .pub-detail-title {
+    margin: 0;
+    font-size: clamp(1.9rem, 4.4vw, 2.9rem);
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .pub-detail-authors {
+    margin: 0;
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 1.02rem;
+  }
+
+  .pub-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.25rem;
+  }
+
+  .pub-type-badge,
+  .pub-featured-badge,
+  .pub-citation-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.6rem;
+    padding: 0 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .pub-type-badge {
+    background: hsl(var(--muted) / 1);
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .pub-featured-badge {
+    background: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary) / 1);
+  }
+
+  .pub-citation-badge {
+    background: hsl(var(--muted) / 1);
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .pub-detail-image {
+    width: 100%;
+    max-height: 24rem;
+    object-fit: cover;
+    border-radius: calc(1.5 * var(--radius, 0.5rem));
+  }
+
+  .pub-detail-section {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .pub-detail-section h2 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  .pub-detail-abstract {
+    margin: 0;
+    line-height: 1.75;
+    color: hsl(var(--foreground) / 0.9);
+  }
+
+  .pub-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .pub-bibtex-wrap {
+    position: relative;
+  }
+
+  .pub-bibtex {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    border-radius: calc(1.2 * var(--radius, 0.5rem));
+    background: hsl(var(--muted) / 1);
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .pub-bibtex-copy {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 0.9);
+    font-size: 0.76rem;
+    cursor: pointer;
+  }
+
+  .pub-bibtex-copy:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    color: hsl(var(--primary) / 1);
+  }
+</style>

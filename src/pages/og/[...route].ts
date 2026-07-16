@@ -20,7 +20,15 @@ const newsPages = Object.fromEntries(
   ])
 )
 
-const pages = { ...staticPages, ...newsPages }
+const pubEntries = await getCollection('publications')
+const pubPages = Object.fromEntries(
+  pubEntries.map((entry) => [
+    `publications/${entry.data.bibkey}`,
+    { title: entry.data.title, description: entry.data.authors }
+  ])
+)
+
+const pages = { ...staticPages, ...newsPages, ...pubPages }
 
 // Vendored locally (src/assets/og-fonts/) so the build never fetches fonts
 // over the network — astro-og-canvas's default font option points at a
