@@ -163,7 +163,10 @@ const timelineEntries = entries.map((entry, index, array) => {
                 </li>
               ) : null}
               <li class='news-timeline-item'>
-                <article class:list={['news-timeline-card', entry.featured && 'news-timeline-card-featured']}>
+                <article
+                  class:list={['news-timeline-card', entry.featured && 'news-timeline-card-featured']}
+                  data-reveal
+                >
                   <div class='news-timeline-top'>
                     <time class='news-timeline-date' datetime={entry.isoDate}>
                       {entry.formattedDate}

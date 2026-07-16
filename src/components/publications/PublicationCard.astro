@@ -27,6 +27,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
   class:list={['pub-card-wrapper', compact && 'pub-card-wrapper-compact', entry.data.image && 'pub-card-wrapper-with-image']}
   data-year={entry.data.year}
   data-type={entry.data.type}
+  data-reveal
 >
   <Card
     heading={entry.data.title}

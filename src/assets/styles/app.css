@@ -52,3 +52,27 @@ a {
 .styled-link {
   color: hsl(var(--link) / var(--un-text-opacity, 1));
 }
+
+/* Scroll reveal (Phase 4)
+   Progressive enhancement: elements are visible by default. JS adds
+   `.reveal-init` on load (before observing), so content stays visible
+   without JS, and `prefers-reduced-motion` disables the animation
+   entirely (immediate visibility, no transform/opacity transition). */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 500ms ease,
+    transform 500ms ease;
+}
+.reveal-init.revealed {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-init {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

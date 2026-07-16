@@ -18,38 +18,48 @@ import '@pagefind/default-ui/css/ui.css'
 
 <script>
   class SiteSearch extends HTMLElement {
-    constructor() {
-      super()
+    initialized = false
+
+    connectedCallback() {
+      // Under Astro's ClientRouter, navigating to /search a second time in
+      // the same session creates a *new* <site-search> element (connected
+      // fresh each time) rather than firing `DOMContentLoaded` again — that
+      // event only ever fires once per browser session. So we initialize
+      // from connectedCallback (which reliably re-runs per navigation) and
+      // guard against double-init in case it's ever called twice for the
+      // same element instance.
+      if (this.initialized) return
+      this.initialized = true
+
       // const shouldStrip = this.dataset.stripTrailingSlash !== undefined
       // const stripTrailingSlash = (path: string) => path.replace(/(.)\/(#.*)?$/, '$1$2')
       // const formatURL = shouldStrip ? stripTrailingSlash : (path: string) => path
       const formatURL = (path: string) => path.replace(/(.)\/(#.*)?$/, '$1$2')
 
-      window.addEventListener('DOMContentLoaded', () => {
-        // if (import.meta.env.DEV) return
-        const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1))
-        onIdle(async () => {
-          // @ts-expect-error — Missing types for @pagefind/default-ui package.
-          const { PagefindUI } = await import('@pagefind/default-ui')
-          new PagefindUI({
-            element: '#site-search',
-            baseUrl: import.meta.env.BASE_URL,
-            bundlePath: import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/',
-            showImages: false,
-            showSubResults: true,
-            processResult: (result: { url: string; sub_results: Array<{ url: string }> }) => {
-              result.url = formatURL(result.url)
-              result.sub_results = result.sub_results.map((sub_result) => {
-                sub_result.url = formatURL(sub_result.url)
-                return sub_result
-              })
-            }
-          })
+      const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1))
+      onIdle(async () => {
+        // @ts-expect-error — Missing types for @pagefind/default-ui package.
+        const { PagefindUI } = await import('@pagefind/default-ui')
+        new PagefindUI({
+          element: '#site-search',
+          baseUrl: import.meta.env.BASE_URL,
+          bundlePath: import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/',
+          showImages: false,
+          showSubResults: true,
+          processResult: (result: { url: string; sub_results: Array<{ url: string }> }) => {
+            result.url = formatURL(result.url)
+            result.sub_results = result.sub_results.map((sub_result) => {
+              sub_result.url = formatURL(sub_result.url)
+              return sub_result
+            })
+          }
         })
       })
     }
   }
-  customElements.define('site-search', SiteSearch)
+  if (!customElements.get('site-search')) {
+    customElements.define('site-search', SiteSearch)
+  }
 </script>
 
 <style>

@@ -63,14 +63,14 @@ if (imagePath && !hasLogo)
   </section>
 
   <div id='content' class='animate home-sections'>
-    <section class='home-section'>
+    <section class='home-section' data-reveal>
       <h2 id='news-list' class='home-section-heading'>News</h2>
       <NewsList maxItems={5} compact showHeading={false} />
     </section>
 
     {
       featuredPublications.length > 0 && (
-        <section class='home-section'>
+        <section class='home-section' data-reveal>
           <h2 id='publications-list' class='home-section-heading'>
             Selected Publications
           </h2>

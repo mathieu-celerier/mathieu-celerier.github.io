@@ -30,7 +30,9 @@ const projects = projectsData as Project[]
     projects.length > 0 ? (
       <div class='projects-grid'>
         {projects.map((project) => (
-          <RepoCard project={project} />
+          <div data-reveal>
+            <RepoCard project={project} />
+          </div>
         ))}
       </div>
     ) : (

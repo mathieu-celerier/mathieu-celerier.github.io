@@ -109,7 +109,9 @@ const { header: headerName, content: contentName, needPercent = true } = Astro.p
       }
     }
   }
-  customElements.define('scroll-button', ScrollBtn)
+  if (!customElements.get('scroll-button')) {
+    customElements.define('scroll-button', ScrollBtn)
+  }
 </script>
 
 <style>

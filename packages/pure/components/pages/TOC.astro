@@ -122,12 +122,24 @@ const toc = generateToc(headings)
       })
 
       // Initial first and listen to scroll event
-      setInterval(this.updatePositionAndStyle, 100)
+      this.intervalId = setInterval(this.updatePositionAndStyle, 100)
       window.addEventListener('scroll', this.updatePositionAndStyle)
+    }
+
+    intervalId: ReturnType<typeof setInterval> | undefined
+
+    disconnectedCallback() {
+      // Under client-side navigation, this element is removed from the DOM
+      // rather than the page fully reloading — clean up so the interval
+      // doesn't keep running (and updating a detached element) forever.
+      if (this.intervalId) clearInterval(this.intervalId)
+      window.removeEventListener('scroll', this.updatePositionAndStyle)
     }
   }
 
-  customElements.define('toc-heading', TOC)
+  if (!customElements.get('toc-heading')) {
+    customElements.define('toc-heading', TOC)
+  }
 </script>
 
 <style>

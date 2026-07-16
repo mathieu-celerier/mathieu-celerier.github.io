@@ -83,30 +83,44 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
 </PageLayout>
 
 <script>
-  const yearSelect = document.getElementById('pub-filter-year') as HTMLSelectElement | null
-  const typeSelect = document.getElementById('pub-filter-type') as HTMLSelectElement | null
+  // Under Astro's ClientRouter, this module only executes once per browser
+  // session — navigating back to /publications after visiting another page
+  // does NOT re-run it. So initialization is wrapped in a function and run
+  // both on first load and on every `astro:page-load` (fired after every
+  // client-side navigation, including the very first page load).
+  function initPublicationFilters() {
+    const yearSelect = document.getElementById('pub-filter-year') as HTMLSelectElement | null
+    const typeSelect = document.getElementById('pub-filter-type') as HTMLSelectElement | null
 
-  function applyFilters() {
-    const year = yearSelect?.value ?? 'all'
-    const type = typeSelect?.value ?? 'all'
+    // Guard against double-binding if this ever runs twice for the same DOM.
+    if (yearSelect?.dataset.filtersBound === 'true') return
+    if (yearSelect) yearSelect.dataset.filtersBound = 'true'
 
-    document.querySelectorAll<HTMLElement>('[data-year-section]').forEach((section) => {
-      let visibleCount = 0
+    function applyFilters() {
+      const year = yearSelect?.value ?? 'all'
+      const type = typeSelect?.value ?? 'all'
 
-      section.querySelectorAll<HTMLElement>('.pub-card-wrapper').forEach((card) => {
-        const matchesYear = year === 'all' || card.dataset.year === year
-        const matchesType = type === 'all' || card.dataset.type === type
-        const visible = matchesYear && matchesType
-        card.hidden = !visible
-        if (visible) visibleCount += 1
+      document.querySelectorAll<HTMLElement>('[data-year-section]').forEach((section) => {
+        let visibleCount = 0
+
+        section.querySelectorAll<HTMLElement>('.pub-card-wrapper').forEach((card) => {
+          const matchesYear = year === 'all' || card.dataset.year === year
+          const matchesType = type === 'all' || card.dataset.type === type
+          const visible = matchesYear && matchesType
+          card.hidden = !visible
+          if (visible) visibleCount += 1
+        })
+
+        section.hidden = visibleCount === 0
       })
+    }
 
-      section.hidden = visibleCount === 0
-    })
+    yearSelect?.addEventListener('change', applyFilters)
+    typeSelect?.addEventListener('change', applyFilters)
   }
 
-  yearSelect?.addEventListener('change', applyFilters)
-  typeSelect?.addEventListener('change', applyFilters)
+  initPublicationFilters()
+  document.addEventListener('astro:page-load', initPublicationFilters)
 </script>
 
 <style>

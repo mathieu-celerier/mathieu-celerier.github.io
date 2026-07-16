@@ -112,7 +112,9 @@ import { Icon } from '../user'
     }
   }
 
-  customElements.define('header-component', HeaderComponent)
+  if (!customElements.get('header-component')) {
+    customElements.define('header-component', HeaderComponent)
+  }
 </script>
 
 <style>
