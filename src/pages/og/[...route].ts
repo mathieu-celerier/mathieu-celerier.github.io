@@ -9,7 +9,8 @@ const staticPages: Record<string, { title: string; description?: string }> = {
   publications: { title: 'Publications', description: 'Journal articles, conference papers, and other research output.' },
   projects: { title: 'Projects', description: 'Research software, controllers, and tools.' },
   about: { title: 'About', description: `About ${config.author}` },
-  search: { title: 'Search', description: 'Search the site.' }
+  search: { title: 'Search', description: 'Search the site.' },
+  talks: { title: 'Talks & Media', description: 'Conference talks and public presentations.' }
 }
 
 const newsEntries = await getCollection('news')

@@ -76,6 +76,49 @@ const skillSections = (cv.skills || [])
   .filter((section) => section.tools.length)
 
 const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
+
+// Compact horizontal timeline: pulls only the start year out of each
+// experience/education `dates` string (e.g. "June 2022 - Present"). Any
+// entry whose dates don't contain a parseable 4-digit start year is
+// skipped rather than breaking the page.
+const TIMELINE_START = 2016
+const TIMELINE_END = 2026
+
+interface TimelineMarker {
+  label: string
+  year: number
+  current: boolean
+  percent: number
+}
+
+function parseStartYear(dates: string): number | null {
+  const match = dates.match(/\b(19|20)\d{2}\b/)
+  if (!match) return null
+  const year = Number(match[0])
+  return Number.isFinite(year) ? year : null
+}
+
+function toMarkers(entries: { title?: string; degree?: string; area?: string; dates: string }[]): TimelineMarker[] {
+  return entries
+    .map((entry) => {
+      const year = parseStartYear(entry.dates)
+      if (year === null) return null
+      const label = entry.title ?? [entry.degree, entry.area].filter(Boolean).join(' — ') ?? ''
+      const clamped = Math.min(Math.max(year, TIMELINE_START), TIMELINE_END)
+      const percent = ((clamped - TIMELINE_START) / (TIMELINE_END - TIMELINE_START)) * 100
+      return {
+        label,
+        year,
+        current: entry.dates.includes('Present'),
+        percent
+      }
+    })
+    .filter((marker): marker is TimelineMarker => marker !== null)
+}
+
+const timelineMarkers = [...toMarkers(cv.experience || []), ...toMarkers(cv.education || [])].sort(
+  (a, b) => a.year - b.year
+)
 ---
 
 <PageLayout meta={{ title: 'CV', ogImage: '/og/cv.png' }} highlightColor='hsl(199 89% 55%)'>
@@ -126,6 +169,26 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
         </div>
       </div>
     </section>
+
+    {
+      timelineMarkers.length ? (
+        <section class='cv-timeline' aria-label='Career and education timeline'>
+          <div class='cv-timeline-track'>
+            <div class='cv-timeline-axis' />
+            {timelineMarkers.map((marker) => (
+              <div
+                class:list={['cv-timeline-marker', marker.current && 'cv-timeline-marker-current']}
+                style={`left: ${marker.percent}%`}
+              >
+                <span class='cv-timeline-dot' />
+                <span class='cv-timeline-year'>{marker.year}</span>
+                <span class='cv-timeline-label'>{marker.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null
+    }
 
     {
       cv.experience?.length ? (
@@ -452,6 +515,69 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
   .cv-card :global(p) {
     font-size: 0.95rem;
     line-height: 1.6;
+  }
+
+  .cv-timeline {
+    overflow-x: auto;
+    padding: 0.5rem 0.25rem 2.5rem;
+  }
+
+  .cv-timeline-track {
+    position: relative;
+    min-width: 42rem;
+    height: 2.4rem;
+    margin: 0 1rem;
+  }
+
+  .cv-timeline-axis {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0.6rem;
+    height: 2px;
+    background: hsl(var(--border) / 1);
+  }
+
+  .cv-timeline-marker {
+    position: absolute;
+    top: 0;
+    display: grid;
+    justify-items: center;
+    gap: 0.3rem;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 8rem;
+  }
+
+  .cv-timeline-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: hsl(var(--muted-foreground) / 1);
+    border: 2px solid hsl(var(--background) / 1);
+  }
+
+  .cv-timeline-marker-current .cv-timeline-dot {
+    background: hsl(var(--primary) / 1);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+  }
+
+  .cv-timeline-year {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .cv-timeline-marker-current .cv-timeline-year {
+    color: hsl(var(--primary) / 1);
+  }
+
+  .cv-timeline-label {
+    font-size: 0.68rem;
+    line-height: 1.25;
+    text-align: center;
+    color: hsl(var(--muted-foreground) / 0.85);
   }
 
   @media (min-width: 900px) {
