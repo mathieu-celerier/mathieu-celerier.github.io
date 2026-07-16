@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import ejs from 'ejs'
@@ -11,12 +12,31 @@ const TEMPLATE = path.join(ROOT, 'src/templates', 'cv.tex.ejs')
 const OUT_DIR = path.join(ROOT, 'build', 'cv')
 const OUT_TEX = path.join(OUT_DIR, 'cv.tex')
 const OUT_PDF = path.join(OUT_DIR, 'cv.pdf')
+const INPUT_HASH_FILE = path.join(OUT_DIR, '.input-hash')
 
 const PUBLIC_PDF = path.join(ROOT, 'public', 'cv.pdf')
 
 // Where Awesome-CV lives in your repo
 const AWESOME_DIR = path.join(ROOT, 'latex', 'awesome-cv')
 const AWESOME_CLS = path.join(AWESOME_DIR, 'awesome-cv.cls')
+
+// The PDF footer uses \today and XeLaTeX/xdvipdfmx embed a build timestamp, so
+// recompiling on unchanged inputs still produces a different binary. Skip the
+// (slow) latexmk run entirely when nothing that affects the output has changed,
+// so `npm run dev`/`build` don't dirty public/cv.pdf every time they run.
+function computeInputHash() {
+  const hash = crypto.createHash('sha256')
+  hash.update(fs.readFileSync(CV_YAML))
+  hash.update(fs.readFileSync(TEMPLATE))
+  for (const file of fs.readdirSync(AWESOME_DIR).sort()) {
+    const filePath = path.join(AWESOME_DIR, file)
+    if (fs.statSync(filePath).isFile()) {
+      hash.update(file)
+      hash.update(fs.readFileSync(filePath))
+    }
+  }
+  return hash.digest('hex')
+}
 
 function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true })
@@ -63,6 +83,14 @@ function main() {
   }
 
   ensureDir(OUT_DIR)
+
+  const inputHash = computeInputHash()
+  const previousHash = fs.existsSync(INPUT_HASH_FILE) ? fs.readFileSync(INPUT_HASH_FILE, 'utf8').trim() : null
+
+  if (inputHash === previousHash && fs.existsSync(PUBLIC_PDF)) {
+    console.log('CV PDF up to date, skipping regeneration')
+    return
+  }
 
   // Clean stale LaTeX artifacts so template changes do not leave incompatible aux state behind.
   for (const suffix of [
@@ -126,6 +154,7 @@ function main() {
   // Copy to public/ so Astro serves it
   ensureDir(path.dirname(PUBLIC_PDF))
   fs.copyFileSync(OUT_PDF, PUBLIC_PDF)
+  fs.writeFileSync(INPUT_HASH_FILE, inputHash, 'utf8')
   console.log(`CV PDF updated: ${path.relative(ROOT, PUBLIC_PDF)}`)
 }
 
