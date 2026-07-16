@@ -5,13 +5,13 @@ basics:
   email: 'mathieu.celerier.ing@gmail.com'
   date_of_birth: '1999/08/09'
   github: 'mathieu-celerier'
-  linkedin: 'Mathieu Celerier'
+  linkedin: 'mathieu-celerier'
   # Optional (leave blank or delete if unused)
   address: ''
   mobile: ''
   website: ''
-  scholar: ''
-  orcid: ''
+  scholar: 'https://scholar.google.com/citations?user=Mr_JxYcAAAAJ&hl=en'
+  orcid: 'https://orcid.org/0000-0001-8290-3577'
 
 summary:
   paragraph: >

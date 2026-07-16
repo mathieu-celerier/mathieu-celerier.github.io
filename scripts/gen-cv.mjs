@@ -112,6 +112,19 @@ function main() {
 
   // Load YAML
   const cvRaw = yaml.load(fs.readFileSync(CV_YAML, 'utf8'))
+
+  // The web CV links to full profile URLs, but Awesome-CV's \orcid and
+  // \googlescholar macros take bare IDs (they build the URL themselves), so
+  // derive those from the URLs stored in cv.yaml.
+  if (cvRaw.basics?.orcid) {
+    const match = /orcid\.org\/([^/?#]+)/.exec(cvRaw.basics.orcid)
+    cvRaw.basics.orcid_id = match ? match[1] : cvRaw.basics.orcid
+  }
+  if (cvRaw.basics?.scholar) {
+    const match = /[?&]user=([^&#]+)/.exec(cvRaw.basics.scholar)
+    if (match) cvRaw.basics.scholar_id = match[1]
+  }
+
   const cv = sanitizeForLatex(cvRaw)
 
   // Render TeX. Keep the emitted structure close to the original resume sources
