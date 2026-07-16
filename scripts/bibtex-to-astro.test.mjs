@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatCreator, joinAuthors } from "./bibtex-to-astro.mjs";
+import { formatCreator, joinAuthors, escapeYaml } from "./bibtex-to-astro.mjs";
 
 test("formatCreator uses name when present", () => {
   assert.equal(formatCreator({ name: "The Collective" }), "The Collective");
@@ -44,4 +44,19 @@ test("joinAuthors never emits [object Object]", () => {
 
 test("joinAuthors falls back to string handling for non-array input", () => {
   assert.equal(joinAuthors("Plain String"), "Plain String");
+});
+
+test("escapeYaml leaves plain strings unquoted", () => {
+  assert.equal(escapeYaml("A simple title"), "A simple title");
+});
+
+test("escapeYaml quotes and escapes strings with colons/quotes (e.g. long abstracts)", () => {
+  const abstract = 'This paper: introduces a "novel" approach, with details.';
+  const out = escapeYaml(abstract);
+  assert.equal(out, JSON.stringify(abstract));
+  assert.equal(JSON.parse(out), abstract);
+});
+
+test("escapeYaml collapses newlines/whitespace before quoting", () => {
+  assert.equal(escapeYaml("Line one\nLine two:   spaced"), JSON.stringify("Line one Line two: spaced"));
 });

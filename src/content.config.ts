@@ -21,7 +21,10 @@ const news = defineCollection({
     externalUrl: z.string().url().optional(),
 
     // Optional: tagging
-    tags: z.array(z.string()).default([])
+    tags: z.array(z.string()).default([]),
+
+    // Optional: thumbnail image, path under /news-images/
+    image: z.string().optional()
   })
 })
 
@@ -42,6 +45,8 @@ const publications = defineCollection({
     featured: z.boolean().optional(),
     highlights: z.array(z.string()).optional(),
     citations: z.number().int().nonnegative().optional(),
+    image: z.string().optional(),
+    abstract: z.string().optional(),
     bibkey: z.string()
   })
 })

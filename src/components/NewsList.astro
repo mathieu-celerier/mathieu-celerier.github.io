@@ -79,7 +79,8 @@ const debugEntries = isDev
         href: '',
         isExternal: false,
         hasDedicatedPage: false,
-        summaryHtml: md.render('Temporary development-only item to validate the 2024 section of the news timeline.')
+        summaryHtml: md.render('Temporary development-only item to validate the 2024 section of the news timeline.'),
+        image: undefined as string | undefined
       },
       {
         id: '__debug-2023',
@@ -91,7 +92,8 @@ const debugEntries = isDev
         href: '',
         isExternal: false,
         hasDedicatedPage: false,
-        summaryHtml: md.render('Temporary development-only item to validate the 2023 section of the news timeline.')
+        summaryHtml: md.render('Temporary development-only item to validate the 2023 section of the news timeline.'),
+        image: undefined as string | undefined
       }
     ]
   : []
@@ -118,7 +120,8 @@ const entries = [...items.map((item) => {
     href,
     isExternal: Boolean(item.data.externalUrl),
     hasDedicatedPage: hasPageFlag || hasMore || Boolean(item.data.externalUrl),
-    summaryHtml: md.render(summaryMd)
+    summaryHtml: md.render(summaryMd),
+    image: item.data.image
   }
 }), ...debugEntries].sort((a, b) => {
   const diff = a.date.getTime() - b.date.getTime()
@@ -180,16 +183,23 @@ const timelineEntries = entries.map((entry, index, array) => {
                     )}
                   </div>
 
-                  <h3 class:list={['news-card-title', entry.featured && 'news-card-title-featured']}>
-                    {entry.title}
-                  </h3>
-                  <div
-                    class:list={[
-                      'news-summary',
-                      !entry.featured && 'news-summary-compact'
-                    ]}
-                    set:html={entry.summaryHtml}
-                  />
+                  <div class='news-card-body'>
+                    <div class='news-card-text'>
+                      <h3 class:list={['news-card-title', entry.featured && 'news-card-title-featured']}>
+                        {entry.title}
+                      </h3>
+                      <div
+                        class:list={[
+                          'news-summary',
+                          !entry.featured && 'news-summary-compact'
+                        ]}
+                        set:html={entry.summaryHtml}
+                      />
+                    </div>
+                    {entry.image ? (
+                      <img src={entry.image} alt='' class='news-card-thumb' loading='lazy' />
+                    ) : null}
+                  </div>
 
                   {entry.hasDedicatedPage ? (
                     <div class='news-card-actions'>
@@ -289,6 +299,46 @@ const timelineEntries = entries.map((entry, index, array) => {
   .news-list-compact .news-summary-compact {
     font-size: 0.86rem;
     line-height: 1.45;
+  }
+
+  .news-card-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: start;
+    justify-content: space-between;
+  }
+
+  .news-card-text {
+    display: grid;
+    gap: 0.25rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .news-card-thumb {
+    flex: none;
+    width: 5.5rem;
+    height: 3.6rem;
+    object-fit: cover;
+    border-radius: calc(1 * var(--radius, 0.5rem));
+  }
+
+  .news-list-compact .news-card-thumb {
+    width: 4.2rem;
+    height: 2.8rem;
+  }
+
+  @media (max-width: 480px) {
+    .news-card-body {
+      flex-direction: column;
+    }
+
+    .news-card-thumb {
+      width: 100%;
+      height: auto;
+      max-height: 9rem;
+    }
   }
 
   .news-card-actions {

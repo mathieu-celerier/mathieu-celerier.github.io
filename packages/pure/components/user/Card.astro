@@ -5,12 +5,13 @@ import { cn } from '../../utils'
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
   heading?: string
+  headingHref?: string
   subheading?: string
   date?: string
   class?: string
 }
 
-const { as: Tag = 'div', class: className, href, heading, subheading, date } = Astro.props
+const { as: Tag = 'div', class: className, href, heading, headingHref, subheading, date } = Astro.props
 ---
 
 <Tag
@@ -23,7 +24,9 @@ const { as: Tag = 'div', class: className, href, heading, subheading, date } = A
 >
   <div class='flex flex-col gap-y-1.5'>
     <div class='flex flex-col gap-y-0.5'>
-      <h2 class='text-lg font-medium'>{heading}</h2>
+      <h2 class='text-lg font-medium'>
+        {headingHref ? <a href={headingHref} class='card-heading-link'>{heading}</a> : heading}
+      </h2>
       <p class='text-muted-foreground'>{subheading}</p>
       <p class='text-muted-foreground'>{date}</p>
     </div>
@@ -37,5 +40,15 @@ const { as: Tag = 'div', class: className, href, heading, subheading, date } = A
      to --radius adjusts corner-rounding sitewide, including here. */
   .card-radius {
     border-radius: calc(2 * var(--radius, 0.5rem));
+  }
+
+  .card-heading-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-heading-link:hover,
+  .card-heading-link:focus-visible {
+    text-decoration: underline;
   }
 </style>

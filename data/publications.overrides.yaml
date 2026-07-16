@@ -1,3 +1,11 @@
+# Per-entry overrides, keyed by BibTeX citation key. All fields optional.
+#
+# image: teaser thumbnail shown on the publication card / detail page.
+#   Convention: place the file under public/publications/<file> and reference
+#   it here as '/publications/<file>' (a plain root-relative path — the
+#   generator just writes it into frontmatter, no Astro asset import).
+# abstract: shown on the publication detail page. If omitted, falls back to
+#   the bib entry's own `abstract` field (if present); this override wins.
 muraccioliDemonstratingControlFramework2025:
   website: 'https://industry-ready-phri.github.io'
   video: 'https://youtu.be/lo9FRXFrVPw'

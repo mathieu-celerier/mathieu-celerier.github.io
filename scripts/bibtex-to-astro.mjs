@@ -90,7 +90,7 @@ function pickUrl(entry) {
   return "";
 }
 
-function escapeYaml(s) {
+export function escapeYaml(s) {
   // Safe YAML string for most cases
   const v = normalizeWhitespace(s);
   if (!v) return "";
@@ -124,6 +124,12 @@ function writeEntry(entry) {
     ? o.citation_count
     : null;
 
+  // Override wins over the bib entry's own `abstract` field.
+  const abstract = normalizeWhitespace(
+    typeof o.abstract === "string" ? o.abstract : field(entry, "abstract") || "",
+  );
+  const image = typeof o.image === "string" ? o.image : "";
+
   const safeSlug =
     slugify(`${year}-${bibkey}-${title || "pub"}`) || slugify(bibkey) || bibkey;
   const outPath = path.join(OUT_DIR, `${safeSlug}.md`);
@@ -146,6 +152,8 @@ function writeEntry(entry) {
     website ? `website: ${escapeYaml(website)}` : "",
     featured ? `featured: true` : "",
     citations !== null ? `citations: ${citations}` : "",
+    image ? `image: ${escapeYaml(image)}` : "",
+    abstract ? `abstract: ${escapeYaml(abstract)}` : "",
     highlights.length
       ? `highlights:\n${highlights.map((h) => `  - ${escapeYaml(h)}`).join("\n")}`
       : "",

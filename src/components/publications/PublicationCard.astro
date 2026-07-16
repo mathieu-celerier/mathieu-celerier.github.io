@@ -20,19 +20,26 @@ const typeLabels: Record<string, string> = {
 }
 
 const bibtexHref = `/bibtex/${entry.data.bibkey}.bib`
+const detailHref = `/publications/${entry.data.bibkey}`
 ---
 
 <div
-  class:list={['pub-card-wrapper', compact && 'pub-card-wrapper-compact']}
+  class:list={['pub-card-wrapper', compact && 'pub-card-wrapper-compact', entry.data.image && 'pub-card-wrapper-with-image']}
   data-year={entry.data.year}
   data-type={entry.data.type}
 >
   <Card
     heading={entry.data.title}
+    headingHref={detailHref}
     subheading={entry.data.authors}
     date={entry.data.venue}
     class:list={['pub-card', entry.data.featured && 'pub-card-featured']}
   >
+    {
+      entry.data.image ? (
+        <img src={entry.data.image} alt='' class='pub-thumb' loading='lazy' />
+      ) : null
+    }
     <div class='pub-meta-row'>
       <span class='pub-type-badge'>{typeLabels[entry.data.type] ?? entry.data.type}</span>
       {entry.data.featured ? <span class='pub-featured-badge'>Featured</span> : null}
@@ -171,5 +178,25 @@ const bibtexHref = `/bibtex/${entry.data.bibkey}.bib`
     flex-wrap: wrap;
     gap: 0.55rem;
     margin-top: 0.6rem;
+  }
+
+  .pub-thumb {
+    display: block;
+    width: 100%;
+    max-height: 10rem;
+    object-fit: cover;
+    border-radius: calc(1.2 * var(--radius, 0.5rem));
+    margin: 0.5rem 0;
+  }
+
+  @media (min-width: 640px) {
+    .pub-card-wrapper-with-image .pub-thumb {
+      float: right;
+      width: 9rem;
+      height: 6rem;
+      max-height: none;
+      margin: 0 0 0.5rem 1rem;
+      shape-outside: inset(0 round calc(1.2 * var(--radius, 0.5rem)));
+    }
   }
 </style>
