@@ -7,7 +7,6 @@ import PageLayout from '@/layouts/BaseLayout.astro'
 import NewsList from '@/components/NewsList.astro'
 import config from '@/site-config'
 import { loadCV } from '../lib/cv-data-loader.ts'
-import { loadTalks } from '../lib/talks-data-loader.ts'
 import projectsData from '@/data/projects.generated.json'
 
 interface Project {
@@ -44,25 +43,6 @@ const allProjects = projectsData as Project[]
 const projects = [...allProjects]
   .sort((a, b) => Number(b.featured) - Number(a.featured))
   .slice(0, 3)
-
-const talks = loadTalks()
-
-// "Years in robotics" from the earliest experience start year in cv.yaml.
-const firstYear = Math.min(
-  ...(cv.experience || [])
-    .map((entry) => Number(entry.dates.match(/\b(19|20)\d{2}\b/)?.[0]))
-    .filter((year) => Number.isFinite(year))
-)
-const yearsInRobotics = Number.isFinite(firstYear)
-  ? Math.max(new Date().getFullYear() - firstYear, 1)
-  : null
-
-const stats = [
-  yearsInRobotics ? { value: `${yearsInRobotics}+`, label: 'Years in robotics' } : null,
-  allPublications.length ? { value: `${allPublications.length}`, label: 'Publications' } : null,
-  allProjects.length ? { value: `${allProjects.length}`, label: 'Open-source projects' } : null,
-  talks.length ? { value: `${talks.length}`, label: 'Talks' } : null
-].filter((stat): stat is { value: string; label: string } => stat !== null)
 
 const identityLinks = [
   cv.basics.scholar ? { label: 'Google Scholar', href: cv.basics.scholar } : null,
@@ -135,19 +115,6 @@ if (imagePath && !hasLogo)
         ))
       }
     </div>
-
-    {
-      stats.length > 0 && (
-        <dl class='home-stats'>
-          {stats.map((stat) => (
-            <div class='home-stat'>
-              <dt class='home-stat-label'>{stat.label}</dt>
-              <dd class='home-stat-value'>{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )
-    }
   </section>
 
   <div id='content' class='animate home-bento'>
@@ -364,48 +331,16 @@ if (imagePath && !hasLogo)
     border-color: hsl(var(--primary) / 0.4);
   }
 
-  .home-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 1.4rem 0 0;
-  }
-
-  .home-stat {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 0.1rem;
-    min-width: 7.5rem;
-    padding: 0.7rem 1rem;
-    border-radius: calc(1.5 * var(--radius, 0.5rem));
-    border: 1px solid hsl(var(--border) / 0.8);
-    background: hsl(var(--background) / 0.55);
-  }
-
-  .home-stat-value {
-    margin: 0;
-    font-size: 1.45rem;
-    font-weight: 700;
-    line-height: 1.1;
-    color: hsl(var(--primary) / 1);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .home-stat-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: hsl(var(--muted-foreground) / 0.9);
-  }
-
   .home-bento {
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
     grid-template-areas:
       'news pub'
       'news projects';
-    align-items: stretch;
+    /* Each tile sizes to its own content — forcing the news tile to
+       stretch to match the pub+projects column's combined height left
+       a large empty gap stretched between its (few) entries. */
+    align-items: start;
     gap: 1.1rem;
     margin-top: 1.25rem;
   }

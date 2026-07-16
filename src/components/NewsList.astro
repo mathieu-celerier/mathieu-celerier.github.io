@@ -232,6 +232,12 @@ const timelineEntries = entries.map((entry, index, array) => {
 <style>
   .news-list {
     display: grid;
+    /* Pin rows to their natural (auto) height instead of stretching to
+       fill a taller container — e.g. when this list sits inside a bento
+       tile whose height is matched to a taller sibling column, without
+       this the (implicit, auto-sized) grid rows all the way down this
+       component absorb the extra space and spread the entries apart. */
+    align-content: start;
     gap: 1rem;
   }
 
@@ -367,6 +373,7 @@ const timelineEntries = entries.map((entry, index, array) => {
 
   .news-timeline-section {
     display: grid;
+    align-content: start;
     gap: 1rem;
     padding-top: 0.5rem;
   }
@@ -397,6 +404,7 @@ const timelineEntries = entries.map((entry, index, array) => {
     margin: 0;
     padding: 0;
     display: grid;
+    align-content: start;
     gap: 0.8rem;
   }
 

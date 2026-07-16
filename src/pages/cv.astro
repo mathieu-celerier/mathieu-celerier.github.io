@@ -128,7 +128,7 @@ interface TimelineBar {
   row: number
   leftPct: number
   widthPct: number
-  align: 'left' | 'center' | 'right'
+  maxLabelWidthPct: number
 }
 
 function toBars(
@@ -169,7 +169,9 @@ function toBars(
       row,
       leftPct,
       widthPct,
-      align: leftPct > 72 ? 'right' : leftPct < 8 ? 'left' : 'center'
+      // Leave a small margin so the label never runs past the track's
+      // right edge, regardless of how late the bar starts.
+      maxLabelWidthPct: Math.max(100 - leftPct - 2, 10)
     } satisfies TimelineBar
   })
 }
@@ -179,17 +181,35 @@ const eduBars = toBars(cv.education || [], 'edu')
 const expRows = expBars.length ? Math.max(...expBars.map((bar) => bar.row)) + 1 : 0
 const eduRows = eduBars.length ? Math.max(...eduBars.map((bar) => bar.row)) + 1 : 0
 
-// Vertical geometry in rem: exp sub-rows stack upward from the axis,
-// edu sub-rows downward; year labels sit at the bottom.
-const BAR_H = 0.7
-const ROW_STEP = 1.0
-const axisTop = 0.4 + expRows * ROW_STEP
-const eduBottom = axisTop + 0.15 + eduRows * ROW_STEP
-const trackHeight = eduBottom + 1.4
+// Vertical geometry in rem. Each sub-row holds a bar plus an always-visible
+// (truncated, native-tooltip-on-overflow) label just outside it — exp rows
+// stack upward from the axis with the label above its bar, edu rows stack
+// downward with the label below. TOP_PAD keeps the topmost label safely
+// inside the track instead of relying on overflow (which clipped before).
+const BAR_H = 0.55
+const LABEL_H = 1.05
+const ROW_GAP = 0.2
+const ROW_STEP = BAR_H + ROW_GAP + LABEL_H + 0.45
+const TOP_PAD = 0.4
+
+const expAboveHeight = expRows
+  ? (expRows - 1) * ROW_STEP + BAR_H + ROW_GAP + LABEL_H
+  : 0
+const eduBelowHeight = eduRows
+  ? (eduRows - 1) * ROW_STEP + BAR_H + ROW_GAP + LABEL_H
+  : 0
+
+const axisTop = TOP_PAD + expAboveHeight
+const trackHeight = axisTop + eduBelowHeight + 1.6
 
 function barTop(bar: TimelineBar): number {
-  if (bar.lane === 'exp') return axisTop - 0.15 - BAR_H - bar.row * ROW_STEP
-  return axisTop + 0.15 + bar.row * ROW_STEP
+  if (bar.lane === 'exp') return axisTop - bar.row * ROW_STEP - BAR_H
+  return axisTop + bar.row * ROW_STEP
+}
+
+function labelTop(bar: TimelineBar): number {
+  if (bar.lane === 'exp') return barTop(bar) - ROW_GAP - LABEL_H
+  return barTop(bar) + BAR_H + ROW_GAP
 }
 
 const timelineBars = [...expBars, ...eduBars]
@@ -253,7 +273,9 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       /* Decorative summary strip: the same data is fully readable in the
          Experience/Education sections below, so this is hidden from
          assistive tech rather than duplicating it in a hard-to-navigate
-         form. Labels appear on hover. */
+         form. Labels are always visible (truncated with a native title
+         tooltip for the full text), not hover-only, so nothing depends on
+         pointer interaction or risks being clipped off the top edge. */
       timelineBars.length ? (
         <section class='cv-timeline' aria-hidden='true'>
           <div class='cv-timeline-track' style={`height: ${trackHeight}rem`}>
@@ -264,16 +286,24 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
             ))}
             <div class='cv-timeline-axis' style={`top: ${axisTop}rem`} />
             {timelineBars.map((bar) => (
-              <span
-                class:list={[
-                  'cv-timeline-bar',
-                  `cv-timeline-bar-${bar.lane}`,
-                  bar.current && 'cv-timeline-bar-current',
-                  `cv-timeline-tip-${bar.align}`
-                ]}
-                style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
-                data-label={`${bar.label} · ${bar.dates}`}
-              />
+              <Fragment>
+                <span
+                  class:list={[
+                    'cv-timeline-bar',
+                    `cv-timeline-bar-${bar.lane}`,
+                    bar.current && 'cv-timeline-bar-current'
+                  ]}
+                  style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
+                  title={`${bar.label} · ${bar.dates}`}
+                />
+                <span
+                  class='cv-timeline-label'
+                  style={`left: ${bar.leftPct}%; top: ${labelTop(bar)}rem; max-width: ${bar.maxLabelWidthPct}%`}
+                  title={bar.label}
+                >
+                  {bar.label}
+                </span>
+              </Fragment>
             ))}
           </div>
           <p class='cv-timeline-legend'>
@@ -661,8 +691,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-timeline-bar {
     position: absolute;
-    height: 0.7rem;
-    min-width: 0.55rem;
+    height: 0.55rem;
+    min-width: 0.5rem;
     border-radius: 999px;
     cursor: default;
     z-index: 1;
@@ -688,40 +718,18 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     filter: brightness(1.15);
   }
 
-  /* Hover label */
-  .cv-timeline-bar::after {
-    content: attr(data-label);
+  /* Always-visible label next to each bar (not hover-only — nothing here
+     depends on pointer interaction, and truncation + the native `title`
+     attribute handles overly long titles instead of a custom tooltip that
+     could clip against the container edge). */
+  .cv-timeline-label {
     position: absolute;
-    bottom: calc(100% + 0.4rem);
+    font-size: 0.72rem;
+    line-height: 1.05rem;
+    color: hsl(var(--foreground) / 0.85);
     white-space: nowrap;
-    padding: 0.3rem 0.6rem;
-    border-radius: calc(1.2 * var(--radius, 0.5rem));
-    border: 1px solid hsl(var(--border) / 1);
-    background: hsl(var(--background) / 1);
-    color: hsl(var(--foreground) / 1);
-    font-size: 0.74rem;
-    font-weight: 500;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease;
-    z-index: 3;
-  }
-
-  .cv-timeline-tip-center::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .cv-timeline-tip-left::after {
-    left: 0;
-  }
-
-  .cv-timeline-tip-right::after {
-    right: 0;
-  }
-
-  .cv-timeline-bar:hover::after {
-    opacity: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .cv-timeline-legend {
