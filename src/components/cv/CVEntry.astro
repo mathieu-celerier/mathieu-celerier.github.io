@@ -1,0 +1,128 @@
+---
+interface Props {
+  title: string
+  subtitle: string
+  dates: string
+  current?: boolean
+  compact?: boolean
+}
+
+const { title, subtitle, dates, current = false, compact = false } = Astro.props
+---
+
+<article class:list={['cv-entry', current && 'cv-entry-current', compact && 'cv-entry-compact']}>
+  <div class='cv-entry-date'>{dates}</div>
+  <div class='cv-entry-body'>
+    <div class='cv-entry-top'>
+      <h3>{title}</h3>
+      {current ? <span class='cv-current-badge'>Current</span> : null}
+    </div>
+    <p class='cv-entry-subtitle'>{subtitle}</p>
+    <slot />
+  </div>
+</article>
+
+<style>
+  .cv-entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.1rem 1.3rem;
+    border-radius: calc(2 * var(--radius, 0.5rem));
+    border: 1px solid hsl(var(--border) / 1);
+    background:
+      linear-gradient(180deg, hsl(var(--background) / 0.92), hsl(var(--muted) / 0.7));
+    box-shadow: 0 16px 40px -38px rgba(15, 23, 42, 0.32);
+  }
+
+  .cv-entry-current {
+    border-color: hsl(var(--primary) / 0.35);
+    background:
+      linear-gradient(180deg, hsl(var(--background) / 0.95), hsl(var(--card) / 0.5));
+  }
+
+  .cv-entry-current::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.9rem;
+    bottom: 0.9rem;
+    width: 3px;
+    border-radius: 2px;
+    background: hsl(var(--primary) / 1);
+  }
+
+  .cv-entry-date {
+    padding-top: 0.15rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: hsl(var(--muted-foreground) / 1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cv-entry-body {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .cv-entry-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .cv-entry-top h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .cv-current-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.4rem;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary) / 1);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .cv-entry-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .cv-entry :global(ul) {
+    margin: 0.3rem 0 0;
+    padding-left: 1.15rem;
+    color: hsl(var(--muted-foreground) / 1);
+    line-height: 1.7;
+  }
+
+  .cv-entry-compact :global(ul) {
+    margin-top: 0.15rem;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 639px) {
+    .cv-entry {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+      padding: 1rem 1.1rem;
+    }
+
+    .cv-entry-date {
+      padding-top: 0;
+      order: -1;
+    }
+  }
+</style>

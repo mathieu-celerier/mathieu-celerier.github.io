@@ -2,6 +2,7 @@
 import { Card, Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ToolSection from '@/components/about/ToolSection.astro'
+import CVEntry from '@/components/cv/CVEntry.astro'
 import mcrtcLogo from '@/assets/tools/mcrtc.png'
 
 import { loadCV, type CVLink } from '../lib/cv-data-loader.ts'
@@ -77,7 +78,7 @@ const skillSections = (cv.skills || [])
 const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
 ---
 
-<PageLayout meta={{ title: 'CV' }} highlightColor='#8A8A8A'>
+<PageLayout meta={{ title: 'CV' }} highlightColor='hsl(199 89% 55%)'>
   <section class='cv-shell'>
     <section class='cv-hero'>
       <div class='cv-hero-main'>
@@ -130,25 +131,29 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
       cv.experience?.length ? (
         <section class='cv-section'>
           <div class='cv-section-header'>
+            <p class='cv-section-kicker'>Career</p>
             <h2>Experience</h2>
           </div>
           <div class='cv-stack'>
-            {cv.experience.map((entry) => (
-              <Card
-                heading={entry.title}
-                subheading={`${entry.organization} · ${entry.location}`}
-                date={entry.dates}
-                class='cv-card'
-              >
-                {entry.items?.length ? (
-                  <ul class='cv-list'>
-                    {entry.items.map((item) => (
-                      <li>{item}</li>
-                    ))}
-                  </ul>
-                ) : null}
-              </Card>
-            ))}
+            {cv.experience.map((entry) => {
+              const current = entry.dates.includes('Present')
+              return (
+                <CVEntry
+                  title={entry.title}
+                  subtitle={`${entry.organization} · ${entry.location}`}
+                  dates={entry.dates}
+                  current={current}
+                >
+                  {entry.items?.length ? (
+                    <ul>
+                      {entry.items.map((item) => (
+                        <li>{item}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </CVEntry>
+              )
+            })}
           </div>
         </section>
       ) : null
@@ -158,24 +163,25 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
       cv.education?.length ? (
         <section class='cv-section'>
           <div class='cv-section-header'>
+            <p class='cv-section-kicker'>Academic background</p>
             <h2>Education</h2>
           </div>
           <div class='cv-stack'>
             {cv.education.map((entry) => (
-              <Card
-                heading={`${entry.degree}${entry.area ? ` — ${entry.area}` : ''}`}
-                subheading={`${entry.institution} · ${entry.location}`}
-                date={entry.dates}
-                class='cv-card'
+              <CVEntry
+                title={`${entry.degree}${entry.area ? ` — ${entry.area}` : ''}`}
+                subtitle={`${entry.institution} · ${entry.location}`}
+                dates={entry.dates}
+                compact
               >
                 {entry.items?.length ? (
-                  <ul class='cv-list cv-list-compact'>
+                  <ul>
                     {entry.items.map((item) => (
                       <li>{item}</li>
                     ))}
                   </ul>
                 ) : null}
-              </Card>
+              </CVEntry>
             ))}
           </div>
         </section>
@@ -186,6 +192,7 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
       skillSections.length || nonIconSkillSections.length ? (
         <section class='cv-section'>
           <div class='cv-section-header'>
+            <p class='cv-section-kicker'>Toolbox</p>
             <h2>Skills</h2>
           </div>
           <div class='cv-tools'>
@@ -221,7 +228,7 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
   .cv-panel {
     border: 1px solid hsl(var(--border) / 1);
     background:
-      radial-gradient(circle at top right, hsl(var(--primary) / 0.12), transparent 30%),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.16), transparent 45%),
       linear-gradient(180deg, hsl(var(--background) / 0.98), hsl(var(--muted) / 0.92));
     box-shadow: 0 20px 45px -40px rgba(15, 23, 42, 0.45);
   }
@@ -249,9 +256,9 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
 
   .cv-kicker {
     margin: 0;
-    font-size: 0.74rem;
+    font-size: 0.76rem;
     font-weight: 700;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: hsl(var(--primary) / 1);
   }
@@ -335,10 +342,11 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
   }
 
   .cv-skill-tile {
+    position: relative;
     display: flex;
     align-items: center;
     min-height: 3rem;
-    padding: 0.75rem 0.9rem;
+    padding: 0.75rem 0.9rem 0.75rem 1.05rem;
     border-radius: 1rem;
     border: 1px solid hsl(var(--border) / 1);
     background:
@@ -348,6 +356,17 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
     font-weight: 600;
     line-height: 1.35;
     color: inherit;
+  }
+
+  .cv-skill-tile::before {
+    content: '';
+    position: absolute;
+    left: 0.4rem;
+    top: 0.65rem;
+    bottom: 0.65rem;
+    width: 2px;
+    border-radius: 2px;
+    background: hsl(var(--primary) / 0.5);
   }
 
   .cv-link-pill:hover {
@@ -395,12 +414,31 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
 
   .cv-section-header {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.3rem;
+  }
+
+  .cv-section-kicker {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
   }
 
   .cv-section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
     font-size: 1.7rem;
     line-height: 1.05;
+  }
+
+  .cv-section-header h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent);
   }
 
   .cv-card :global(ul) {
@@ -414,17 +452,6 @@ const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCateg
   .cv-card :global(p) {
     font-size: 0.95rem;
     line-height: 1.6;
-  }
-
-  .cv-list {
-    margin: 0;
-    padding-left: 1.15rem;
-    color: hsl(var(--muted-foreground) / 1);
-    line-height: 1.7;
-  }
-
-  .cv-list-compact {
-    margin-top: 0.2rem;
   }
 
   @media (min-width: 900px) {

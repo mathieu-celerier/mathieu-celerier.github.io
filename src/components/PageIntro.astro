@@ -1,0 +1,47 @@
+---
+interface Props {
+  kicker: string
+  title: string
+  copy?: string
+}
+
+const { kicker, title, copy } = Astro.props
+---
+
+<section class='page-intro'>
+  <p class='page-intro-kicker'>{kicker}</p>
+  <h1 class='page-intro-title'>{title}</h1>
+  {copy ? <p class='page-intro-copy'>{copy}</p> : <slot />}
+</section>
+
+<style>
+  .page-intro {
+    display: grid;
+    gap: 0.7rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .page-intro-kicker {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .page-intro-title {
+    margin: 0;
+    font-size: clamp(2.3rem, 6vw, 4.4rem);
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+
+  .page-intro-copy {
+    margin: 0;
+    max-width: 42rem;
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: hsl(var(--muted-foreground) / 1);
+  }
+</style>

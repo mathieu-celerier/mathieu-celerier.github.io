@@ -1,8 +1,9 @@
 /* Theme */
 :root {
-  /* Primary */
-  --primary: 200 29% 45%;
-  --link: 223 90% 40%;
+  /* Primary — one coordinated accent (was a pale, generic template blue plus a
+     separate, slightly mismatched --link blue) */
+  --primary: 199 89% 42%;
+  --link: 199 89% 38%;
   /* Foreground */
   --foreground: 240 10% 3.9%;
   --muted-foreground: 240 3.8% 28.1%;
@@ -15,12 +16,12 @@
   --border: 240 5% 74.9%;
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
+  --radius: 0.6rem;
 }
 .dark {
   /* Primary */
-  --primary: 195 95% 85%;
-  --link: 223 85% 75%;
+  --primary: 199 89% 64%;
+  --link: 199 89% 68%;
   /* Foreground */
   --foreground: 0 0% 98%;
   --muted-foreground: 240 5% 74.9%;
@@ -50,9 +51,4 @@ a {
 }
 .styled-link {
   color: hsl(var(--link) / var(--un-text-opacity, 1));
-}
-
-/* Adapted from Antoine */
-h1.home-title {
-  font-size: calc(1.875rem + 1.5vw);
 }

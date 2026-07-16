@@ -49,13 +49,15 @@ const softwareTools = (cv.skills?.find((skill: CVSkill) => skill.category === 'S
   }))
 ---
 
-<PageLayout title='About' {headings}>
+<PageLayout
+  title='About'
+  kicker='Profile'
+  copy='This website serves as an academic homepage, providing access to publications, projects, software artifacts, and teaching or dissemination material.'
+  highlightColor='hsl(199 89% 55%)'
+  {headings}
+>
   <h2 id='profile'>Profile</h2>
   <p>{cv.summary?.paragraph}</p>
-  <p>
-    This website serves as an academic homepage, providing access to publications, projects,
-    software artifacts, and teaching or dissemination material.
-  </p>
 
   <h2 id='research-interests'>Research Interests</h2>
   <ul>

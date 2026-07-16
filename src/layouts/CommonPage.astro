@@ -7,19 +7,26 @@ import { Comment, PageInfo } from '@/components/waline'
 
 interface Props {
   title: string
+  kicker?: string
+  copy?: string
+  highlightColor?: string
   headings?: MarkdownHeading[]
   view?: boolean
   comment?: boolean
 }
 
-const { title, headings, view, comment: enableComment, ...props } = Astro.props
+const { title, kicker, copy, headings, view, comment: enableComment, ...props } = Astro.props
 ---
 
 <PageLayout meta={{ title }} {...props}>
   {headings?.length && <TOC headings={headings} slot='sidebar' />}
 
   <Fragment slot='header'>
-    <h1 class='text-2xl font-medium sm:mb-2 sm:text-3xl'>{title}</h1>
+    {kicker && <p class='common-page-kicker'>{kicker}</p>}
+    <h1 class:list={['font-medium sm:mb-2', kicker ? 'common-page-title' : 'text-2xl sm:text-3xl']}>
+      {title}
+    </h1>
+    {copy && <p class='common-page-copy'>{copy}</p>}
     {(view || enableComment) && <PageInfo {view} comment={enableComment} class='italic' />}
   </Fragment>
 
@@ -31,3 +38,28 @@ const { title, headings, view, comment: enableComment, ...props } = Astro.props
 
   <slot name='bottom-sidebar' slot='bottom-sidebar' />
 </PageLayout>
+
+<style>
+  .common-page-kicker {
+    margin: 0 0 0.7rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .common-page-title {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  .common-page-copy {
+    margin: 0.6rem 0 0;
+    max-width: 42rem;
+    font-size: 1.02rem;
+    line-height: 1.8;
+    color: hsl(var(--muted-foreground) / 1);
+  }
+</style>

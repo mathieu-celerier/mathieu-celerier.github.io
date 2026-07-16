@@ -1,48 +1,15 @@
 ---
 import PageLayout from '@/layouts/BaseLayout.astro'
+import PageIntro from '@/components/PageIntro.astro'
 import NewsList from '@/components/NewsList.astro'
 ---
 
-<PageLayout meta={{ title: 'News' }} highlightColor='#8A8A8A'>
-  <section class='news-page-intro'>
-    <p class='news-page-kicker'>Field notes</p>
-    <h1 class='news-page-title'>News</h1>
-    <p class='news-page-copy'>
-      A running log of research milestones, publications, talks, and work in progress.
-    </p>
-  </section>
+<PageLayout meta={{ title: 'News' }} highlightColor='hsl(199 89% 55%)'>
+  <PageIntro
+    kicker='Field notes'
+    title='News'
+    copy='A running log of research milestones, publications, talks, and work in progress.'
+  />
 
   <NewsList />
 </PageLayout>
-
-<style>
-  .news-page-intro {
-    display: grid;
-    gap: 0.7rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .news-page-kicker {
-    margin: 0;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: hsl(var(--primary) / 1);
-  }
-
-  .news-page-title {
-    margin: 0;
-    font-size: clamp(2.3rem, 6vw, 4.4rem);
-    line-height: 0.95;
-    text-wrap: balance;
-  }
-
-  .news-page-copy {
-    margin: 0;
-    max-width: 42rem;
-    font-size: 1.02rem;
-    line-height: 1.8;
-    color: hsl(var(--muted-foreground) / 1);
-  }
-</style>
