@@ -77,48 +77,67 @@ const skillSections = (cv.skills || [])
 
 const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
 
-// Compact horizontal timeline: pulls only the start year out of each
-// experience/education `dates` string (e.g. "June 2022 - Present"). Any
-// entry whose dates don't contain a parseable 4-digit start year is
-// skipped rather than breaking the page.
+// Compact horizontal timeline: dots-only (labels appear on hover), split
+// into an experience lane above the axis and an education lane below it.
+// Start dates are parsed at month resolution so same-year entries spread
+// out instead of stacking; unparseable dates are skipped, never fatal.
 const TIMELINE_START = 2016
-const TIMELINE_END = 2026
+const TIMELINE_END = 2027
 
 interface TimelineMarker {
   label: string
   year: number
   current: boolean
   percent: number
+  lane: 'exp' | 'edu'
 }
 
-function parseStartYear(dates: string): number | null {
-  const match = dates.match(/\b(19|20)\d{2}\b/)
-  if (!match) return null
-  const year = Number(match[0])
-  return Number.isFinite(year) ? year : null
+const MONTHS: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
 }
 
-function toMarkers(entries: { title?: string; degree?: string; area?: string; dates: string }[]): TimelineMarker[] {
+function parseStart(dates: string): number | null {
+  const yearMatch = dates.match(/\b(19|20)\d{2}\b/)
+  if (!yearMatch) return null
+  const year = Number(yearMatch[0])
+  if (!Number.isFinite(year)) return null
+  const monthMatch = dates.toLowerCase().match(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z.]*\b/)
+  const month = monthMatch ? MONTHS[monthMatch[1]] : 0
+  return year + month / 12
+}
+
+function toMarkers(
+  entries: { title?: string; degree?: string; area?: string; dates: string }[],
+  lane: 'exp' | 'edu'
+): TimelineMarker[] {
   return entries
     .map((entry) => {
-      const year = parseStartYear(entry.dates)
-      if (year === null) return null
+      const start = parseStart(entry.dates)
+      if (start === null) return null
       const label = entry.title ?? [entry.degree, entry.area].filter(Boolean).join(' — ') ?? ''
-      const clamped = Math.min(Math.max(year, TIMELINE_START), TIMELINE_END)
+      const clamped = Math.min(Math.max(start, TIMELINE_START), TIMELINE_END)
       const percent = ((clamped - TIMELINE_START) / (TIMELINE_END - TIMELINE_START)) * 100
       return {
         label,
-        year,
+        year: Math.floor(start),
         current: entry.dates.includes('Present'),
-        percent
+        percent,
+        lane
       }
     })
     .filter((marker): marker is TimelineMarker => marker !== null)
 }
 
-const timelineMarkers = [...toMarkers(cv.experience || []), ...toMarkers(cv.education || [])].sort(
-  (a, b) => a.year - b.year
-)
+const timelineMarkers = [
+  ...toMarkers(cv.experience || [], 'exp'),
+  ...toMarkers(cv.education || [], 'edu')
+].sort((a, b) => a.percent - b.percent)
+
+const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
+  year,
+  percent: ((year - TIMELINE_START) / (TIMELINE_END - TIMELINE_START)) * 100
+}))
 ---
 
 <PageLayout meta={{ title: 'CV', ogImage: '/og/cv.png' }} highlightColor='hsl(199 89% 55%)'>
@@ -171,21 +190,35 @@ const timelineMarkers = [...toMarkers(cv.experience || []), ...toMarkers(cv.educ
     </section>
 
     {
+      /* Decorative summary strip: the same data is fully readable in the
+         Experience/Education sections below, so this is hidden from
+         assistive tech rather than duplicating it in a hard-to-navigate
+         form. Labels appear on hover. */
       timelineMarkers.length ? (
-        <section class='cv-timeline' aria-label='Career and education timeline'>
+        <section class='cv-timeline' aria-hidden='true'>
           <div class='cv-timeline-track'>
             <div class='cv-timeline-axis' />
+            {timelineTicks.map((tick) => (
+              <span class='cv-timeline-tick' style={`left: ${tick.percent}%`}>
+                {tick.year}
+              </span>
+            ))}
             {timelineMarkers.map((marker) => (
-              <div
-                class:list={['cv-timeline-marker', marker.current && 'cv-timeline-marker-current']}
+              <span
+                class:list={[
+                  'cv-timeline-marker',
+                  `cv-timeline-marker-${marker.lane}`,
+                  marker.current && 'cv-timeline-marker-current'
+                ]}
                 style={`left: ${marker.percent}%`}
-              >
-                <span class='cv-timeline-dot' />
-                <span class='cv-timeline-year'>{marker.year}</span>
-                <span class='cv-timeline-label'>{marker.label}</span>
-              </div>
+                data-label={`${marker.label} · ${marker.year}`}
+              />
             ))}
           </div>
+          <p class='cv-timeline-legend'>
+            <span class='cv-timeline-legend-dot cv-timeline-legend-exp' /> Experience
+            <span class='cv-timeline-legend-dot cv-timeline-legend-edu' /> Education
+          </p>
         </section>
       ) : null
     }
@@ -519,65 +552,170 @@ const timelineMarkers = [...toMarkers(cv.experience || []), ...toMarkers(cv.educ
 
   .cv-timeline {
     overflow-x: auto;
-    padding: 0.5rem 0.25rem 2.5rem;
+    padding: 0.25rem;
   }
 
   .cv-timeline-track {
     position: relative;
-    min-width: 42rem;
-    height: 2.4rem;
-    margin: 0 1rem;
+    min-width: 40rem;
+    height: 4.2rem;
+    margin: 0 1.25rem;
   }
 
   .cv-timeline-axis {
     position: absolute;
     left: 0;
     right: 0;
-    top: 0.6rem;
+    top: 50%;
     height: 2px;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--border) / 0.4),
+      hsl(var(--border) / 1) 12%,
+      hsl(var(--border) / 1) 88%,
+      hsl(var(--border) / 0.4)
+    );
+  }
+
+  .cv-timeline-tick {
+    position: absolute;
+    top: calc(50% + 0.55rem);
+    transform: translateX(-50%);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: hsl(var(--muted-foreground) / 0.75);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cv-timeline-tick::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -0.55rem;
+    width: 1px;
+    height: 0.35rem;
     background: hsl(var(--border) / 1);
   }
 
   .cv-timeline-marker {
     position: absolute;
-    top: 0;
-    display: grid;
-    justify-items: center;
-    gap: 0.3rem;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
     transform: translateX(-50%);
-    width: max-content;
-    max-width: 8rem;
+    cursor: default;
+    z-index: 1;
   }
 
-  .cv-timeline-dot {
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 999px;
-    background: hsl(var(--muted-foreground) / 1);
+  /* Experience lane sits above the axis, education below it. */
+  .cv-timeline-marker-exp {
+    top: calc(50% - 1.1rem);
+    background: hsl(var(--primary) / 0.85);
     border: 2px solid hsl(var(--background) / 1);
   }
 
-  .cv-timeline-marker-current .cv-timeline-dot {
+  .cv-timeline-marker-edu {
+    top: calc(50% + 0.45rem);
+    background: hsl(var(--background) / 1);
+    border: 2px solid hsl(var(--muted-foreground) / 0.8);
+  }
+
+  .cv-timeline-marker-current {
     background: hsl(var(--primary) / 1);
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.18);
   }
 
-  .cv-timeline-year {
+  /* Connector stem from each dot to the axis. */
+  .cv-timeline-marker::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 1px;
+    background: hsl(var(--border) / 0.9);
+  }
+
+  .cv-timeline-marker-exp::before {
+    top: 100%;
+    height: 0.45rem;
+  }
+
+  .cv-timeline-marker-edu::before {
+    bottom: 100%;
+    height: 0.25rem;
+  }
+
+  /* Hover label */
+  .cv-timeline-marker::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    padding: 0.3rem 0.6rem;
+    border-radius: calc(1.2 * var(--radius, 0.5rem));
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 1);
+    color: hsl(var(--foreground) / 1);
+    font-size: 0.74rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 2;
+  }
+
+  .cv-timeline-marker-exp::after {
+    bottom: calc(100% + 0.45rem);
+  }
+
+  .cv-timeline-marker-edu::after {
+    top: calc(100% + 0.45rem);
+  }
+
+  .cv-timeline-marker:hover::after {
+    opacity: 1;
+  }
+
+  /* Keep edge tooltips inside the track. */
+  .cv-timeline-marker:first-of-type::after {
+    left: 0;
+    transform: none;
+  }
+
+  .cv-timeline-marker:last-of-type::after {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+
+  .cv-timeline-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    justify-content: end;
+    margin: 0.35rem 1.25rem 0;
     font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: hsl(var(--muted-foreground) / 1);
-  }
-
-  .cv-timeline-marker-current .cv-timeline-year {
-    color: hsl(var(--primary) / 1);
-  }
-
-  .cv-timeline-label {
-    font-size: 0.68rem;
-    line-height: 1.25;
-    text-align: center;
     color: hsl(var(--muted-foreground) / 0.85);
+  }
+
+  .cv-timeline-legend-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+  }
+
+  .cv-timeline-legend-exp {
+    background: hsl(var(--primary) / 0.85);
+  }
+
+  .cv-timeline-legend-edu {
+    background: hsl(var(--background) / 1);
+    border: 2px solid hsl(var(--muted-foreground) / 0.8);
+  }
+
+  .cv-timeline-legend-dot + .cv-timeline-legend-dot,
+  .cv-timeline-legend-edu {
+    margin-left: 0.5rem;
   }
 
   @media (min-width: 900px) {

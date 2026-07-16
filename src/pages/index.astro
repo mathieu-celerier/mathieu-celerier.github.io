@@ -5,7 +5,6 @@ import { Button } from 'astro-pure/user'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
 import NewsList from '@/components/NewsList.astro'
-import PublicationCard from '@/components/publications/PublicationCard.astro'
 import config from '@/site-config'
 import { loadCV } from '../lib/cv-data-loader.ts'
 import projectsData from '@/data/projects.generated.json'
@@ -24,20 +23,32 @@ interface Project {
 
 const cv = loadCV()
 
-const featuredPublications = (await getCollection('publications'))
+const typeLabels: Record<string, string> = {
+  journal: 'Journal',
+  conference: 'Conference',
+  workshop: 'Workshop',
+  preprint: 'Preprint',
+  thesis: 'Thesis',
+  demo: 'Demo',
+  other: 'Other'
+}
+
+const featuredPublication = (await getCollection('publications'))
   .filter((entry) => entry.data.featured)
   .sort((a, b) => b.data.year - a.data.year)
-  .slice(0, 1)
+  .at(0)
 
 const projects = (projectsData as Project[])
   .sort((a, b) => Number(b.featured) - Number(a.featured))
   .slice(0, 3)
 
-const quickLinks = [
-  { label: 'CV (PDF)', href: '/cv.pdf' },
+const identityLinks = [
   cv.basics.scholar ? { label: 'Google Scholar', href: cv.basics.scholar } : null,
   cv.basics.orcid ? { label: 'ORCID', href: cv.basics.orcid } : null,
   cv.basics.github ? { label: 'GitHub', href: `https://github.com/${cv.basics.github}` } : null,
+  cv.basics.linkedin
+    ? { label: 'LinkedIn', href: `https://www.linkedin.com/in/${cv.basics.linkedin}` }
+    : null,
   { label: 'Email', href: `mailto:${cv.basics.email}` }
 ].filter((link): link is { label: string; href: string } => link !== null)
 
@@ -80,29 +91,59 @@ if (imagePath && !hasLogo)
     </p>
 
     <div class='home-actions'>
-      <Button href='/cv' variant='ahead' title='CV' />
+      <Button href='/cv' variant='ahead' class='home-cta' title='View CV' />
       <Button href='/publications' variant='ahead' title='Publications' />
       <Button href='/projects' variant='ahead' title='Projects' />
-      <Button href={`mailto:${cv.basics.email}`} variant='ahead' title='Email' />
+    </div>
+
+    <div class='home-identity-links'>
+      {
+        identityLinks.map((link) => (
+          <a
+            href={link.href}
+            class='home-identity-pill'
+            target={link.href.startsWith('http') ? '_blank' : undefined}
+            rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        ))
+      }
     </div>
   </section>
 
   <div id='content' class='animate home-bento'>
     <section class='bento-tile bento-tile-news' data-reveal>
-      <h2 class='bento-tile-heading'>News</h2>
-      <NewsList maxItems={3} compact showHeading={false} />
-      <a class='styled-link bento-tile-more' href='/news'>All news →</a>
+      <div class='bento-tile-top'>
+        <h2 class='bento-tile-heading'>News</h2>
+        <a class='styled-link bento-tile-more' href='/news'>All news →</a>
+      </div>
+      <NewsList maxItems={3} compact flat showHeading={false} />
     </section>
 
     {
-      featuredPublications.length > 0 && (
+      featuredPublication && (
         <section class='bento-tile bento-tile-pub' data-reveal>
-          <h2 class='bento-tile-heading'>Selected Publication</h2>
-          <div class='bento-pub-stack'>
-            {featuredPublications.map((entry) => (
-              <PublicationCard entry={entry} compact />
-            ))}
+          <div class='bento-tile-top'>
+            <h2 class='bento-tile-heading'>Featured Publication</h2>
           </div>
+          <article class='bento-pub'>
+            <div class='bento-pub-badges'>
+              <span class='bento-pub-badge'>
+                {typeLabels[featuredPublication.data.type] ?? featuredPublication.data.type}
+              </span>
+              <span class='bento-pub-badge'>{featuredPublication.data.year}</span>
+            </div>
+            <a class='bento-pub-title' href={`/publications/${featuredPublication.data.bibkey}`}>
+              {featuredPublication.data.title}
+            </a>
+            <p class='bento-pub-authors'>{featuredPublication.data.authors}</p>
+            {
+              featuredPublication.data.venue ? (
+                <p class='bento-pub-venue'>{featuredPublication.data.venue}</p>
+              ) : null
+            }
+          </article>
           <a class='styled-link bento-tile-more' href='/publications'>All publications →</a>
         </section>
       )
@@ -111,7 +152,9 @@ if (imagePath && !hasLogo)
     {
       projects.length > 0 && (
         <section class='bento-tile bento-tile-projects' data-reveal>
-          <h2 class='bento-tile-heading'>Projects</h2>
+          <div class='bento-tile-top'>
+            <h2 class='bento-tile-heading'>Projects</h2>
+          </div>
           <ul class='bento-projects-list'>
             {projects.map((project) => (
               <li>
@@ -126,24 +169,6 @@ if (imagePath && !hasLogo)
         </section>
       )
     }
-
-    <section class='bento-tile bento-tile-links' data-reveal>
-      <h2 class='bento-tile-heading'>Quick links</h2>
-      <ul class='bento-links-list'>
-        {quickLinks.map((link) => (
-          <li>
-            <a
-              href={link.href}
-              class='bento-link'
-              target={link.href.startsWith('http') ? '_blank' : undefined}
-              rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-            >
-              {link.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
   </div>
 </PageLayout>
 
@@ -192,66 +217,169 @@ if (imagePath && !hasLogo)
     display: flex;
     flex-wrap: wrap;
     gap: 0.6rem;
-    margin-top: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .home-cta {
+    background: hsl(var(--foreground) / 1);
+    color: hsl(var(--background) / 1);
+    border-color: transparent;
+  }
+
+  .home-cta :global(svg) {
+    color: hsl(var(--background) / 1);
+  }
+
+  .home-identity-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .home-identity-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    padding: 0 0.7rem;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 0.85);
+    color: hsl(var(--muted-foreground) / 1);
+    text-decoration: none;
+    font-size: 0.82rem;
+  }
+
+  .home-identity-pill:hover {
+    color: hsl(var(--primary) / 1);
+    border-color: hsl(var(--primary) / 0.4);
   }
 
   .home-bento {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-areas:
+      'news pub'
+      'news projects';
+    align-items: stretch;
     gap: 1.1rem;
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
   }
 
   .bento-tile {
     display: grid;
+    grid-template-rows: auto 1fr auto;
     align-content: start;
-    gap: 0.75rem;
-    padding: 1.25rem 1.35rem;
+    gap: 0.6rem;
+    padding: 1.2rem 1.35rem;
     border: 1px solid hsl(var(--border) / 1);
     border-radius: calc(2 * var(--radius, 0.5rem));
     background:
-      radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 45%),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.09), transparent 42%),
       linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(var(--muted) / 0.7));
     box-shadow: 0 18px 40px -38px rgba(15, 23, 42, 0.35);
   }
 
+  .bento-tile-news {
+    grid-area: news;
+  }
+
+  .bento-tile-pub {
+    grid-area: pub;
+  }
+
+  .bento-tile-projects {
+    grid-area: projects;
+  }
+
+  .bento-tile-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
   .bento-tile-heading {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
   }
 
   .bento-tile-more {
     justify-self: start;
-    font-size: 0.9rem;
+    align-self: end;
+    font-size: 0.86rem;
   }
 
-  .bento-tile-news {
-    grid-column: span 2;
-  }
-
-  .bento-pub-stack {
+  .bento-pub {
     display: grid;
-    gap: 0.6rem;
+    gap: 0.45rem;
+    align-content: start;
   }
 
-  .bento-projects-list,
-  .bento-links-list {
+  .bento-pub-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .bento-pub-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary) / 1);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .bento-pub-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .bento-pub-title:hover {
+    color: hsl(var(--primary) / 1);
+  }
+
+  .bento-pub-authors {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .bento-pub-venue {
+    margin: 0;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: hsl(var(--muted-foreground) / 0.85);
+  }
+
+  .bento-projects-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.5rem;
+    gap: 0.45rem;
+    align-content: start;
   }
 
   .bento-project-link {
     display: grid;
-    gap: 0.15rem;
-    padding: 0.6rem 0.7rem;
-    border-radius: calc(1 * var(--radius, 0.5rem));
+    gap: 0.1rem;
+    padding: 0.55rem 0.65rem;
+    border-radius: var(--radius, 0.5rem);
     color: inherit;
     text-decoration: none;
     background: hsl(var(--background) / 0.55);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
     border: 1px solid transparent;
   }
 
@@ -262,12 +390,13 @@ if (imagePath && !hasLogo)
 
   .bento-project-name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
   }
 
   .bento-project-desc {
     color: hsl(var(--muted-foreground) / 1);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     line-height: 1.4;
     overflow: hidden;
     display: -webkit-box;
@@ -275,31 +404,13 @@ if (imagePath && !hasLogo)
     -webkit-box-orient: vertical;
   }
 
-  .bento-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0 0.75rem;
-    border-radius: 999px;
-    border: 1px solid hsl(var(--border) / 1);
-    background: hsl(var(--background) / 0.7);
-    color: inherit;
-    text-decoration: none;
-    font-size: 0.86rem;
-  }
-
-  .bento-link:hover {
-    border-color: hsl(var(--primary) / 0.5);
-    color: hsl(var(--primary) / 1);
-  }
-
-  @media (max-width: 767px) {
+  @media (max-width: 860px) {
     .home-bento {
       grid-template-columns: 1fr;
-    }
-
-    .bento-tile-news {
-      grid-column: span 1;
+      grid-template-areas:
+        'news'
+        'pub'
+        'projects';
     }
   }
 </style>

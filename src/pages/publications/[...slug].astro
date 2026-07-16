@@ -160,6 +160,14 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     max-width: 56rem;
     margin: 0 auto;
     padding-top: 0.5rem;
+    /* Grid items default to min-width:auto, so a wide child (the BibTeX
+       <pre>'s long unwrappable lines) would inflate the whole page width
+       instead of scrolling/wrapping inside its own box. */
+    min-width: 0;
+  }
+
+  .pub-detail > * {
+    min-width: 0;
   }
 
   .pub-detail-header {
@@ -263,7 +271,11 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     padding: 1rem 1.1rem;
     border-radius: calc(1.2 * var(--radius, 0.5rem));
     background: hsl(var(--muted) / 1);
-    overflow-x: auto;
+    max-width: 100%;
+    /* Wrap long field values (abstracts can be a single 500+ character
+       line) instead of forcing a horizontal scroll region. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     font-size: 0.82rem;
     line-height: 1.5;
   }

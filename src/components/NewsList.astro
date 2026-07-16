@@ -12,6 +12,9 @@ type Props = {
   maxItems?: number
   compact?: boolean
   showHeading?: boolean
+  /** Render entries without their own card chrome (for embedding inside an
+      already-bordered container, e.g. a homepage tile). */
+  flat?: boolean
 }
 
 const {
@@ -22,7 +25,8 @@ const {
   order = 'desc',
   maxItems,
   compact = false,
-  showHeading = true
+  showHeading = true,
+  flat = false
 } = Astro.props as Props
 
 const md = new MarkdownIt({
@@ -143,7 +147,7 @@ const timelineEntries = entries.map((entry, index, array) => {
 
 {
   timelineEntries.length > 0 && (
-    <section class:list={['news-list', compact && 'news-list-compact']}>
+    <section class:list={['news-list', compact && 'news-list-compact', flat && 'news-list-flat']}>
       <section class='news-timeline-section'>
         {
           showHeading && (
@@ -505,6 +509,28 @@ const timelineEntries = entries.map((entry, index, array) => {
     min-height: 1.45rem;
     padding: 0 0.45rem;
     font-size: 0.68rem;
+  }
+
+  /* Flat variant: no per-entry card chrome, divider lines between entries
+     instead — used when the list is embedded inside an already-bordered
+     container (homepage tile). */
+  .news-list-flat .news-timeline-card {
+    padding: 0.85rem 0.15rem;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .news-list-flat .news-timeline-item:not(:last-child) .news-timeline-card {
+    border-bottom: 1px solid hsl(var(--border) / 0.55);
+  }
+
+  .news-list-flat .news-timeline {
+    gap: 0;
+  }
+
+  .news-list-flat .news-year-divider {
+    display: none;
   }
 
   @media (max-width: 767px) {
