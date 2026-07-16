@@ -1,17 +1,8 @@
 ---
 import { getCollection } from 'astro:content'
-import { Card, Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
-
-const typeLabels: Record<string, string> = {
-  journal: 'Journal',
-  conference: 'Conference',
-  workshop: 'Workshop',
-  preprint: 'Preprint',
-  thesis: 'Thesis',
-  demo: 'Demo',
-  other: 'Other'
-}
+import PageIntro from '@/components/PageIntro.astro'
+import PublicationCard from '@/components/publications/PublicationCard.astro'
 
 const entries = (await getCollection('publications')).sort((a, b) => {
   if (b.data.year !== a.data.year) return b.data.year - a.data.year
@@ -29,60 +20,61 @@ const groupedByYear = entries.reduce<Map<number, typeof entries>>((map, entry) =
 }, new Map())
 
 const years = [...groupedByYear.keys()].sort((a, b) => b - a)
+
+const typeLabels: Record<string, string> = {
+  journal: 'Journal',
+  conference: 'Conference',
+  workshop: 'Workshop',
+  preprint: 'Preprint',
+  thesis: 'Thesis',
+  demo: 'Demo',
+  other: 'Other'
+}
+
+const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
+  (a, b) => (typeLabels[a] ?? a).localeCompare(typeLabels[b] ?? b)
+)
 ---
 
-<PageLayout meta={{ title: 'Publications' }} highlightColor='#8A8A8A'>
-  <section class='pub-page-intro'>
-    <p class='pub-page-kicker'>Research output</p>
-    <h1 class='pub-page-title'>Publications</h1>
-    <p class='pub-page-copy'>Journal articles, conference papers, and other research output.</p>
-  </section>
+<PageLayout meta={{ title: 'Publications' }} highlightColor='hsl(199 89% 55%)'>
+  <PageIntro
+    kicker='Research output'
+    title='Publications'
+    copy='Journal articles, conference papers, and other research output.'
+  />
+
+  {
+    years.length ? (
+      <div class='pub-filters' role='group' aria-label='Filter publications'>
+        <label class='pub-filter'>
+          <span class='pub-filter-label'>Year</span>
+          <select id='pub-filter-year'>
+            <option value='all'>All years</option>
+            {years.map((year) => (
+              <option value={year}>{year}</option>
+            ))}
+          </select>
+        </label>
+        <label class='pub-filter'>
+          <span class='pub-filter-label'>Type</span>
+          <select id='pub-filter-type'>
+            <option value='all'>All types</option>
+            {typesPresent.map((type) => (
+              <option value={type}>{typeLabels[type] ?? type}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+    ) : null
+  }
 
   {
     years.map((year) => (
-      <section class='pub-year-section'>
+      <section class='pub-year-section' data-year-section={year}>
         <h2 class='pub-year-heading'>{year}</h2>
         <div class='pub-stack'>
           {groupedByYear.get(year)!.map((entry) => (
-            <Card
-              heading={entry.data.title}
-              subheading={entry.data.authors}
-              date={entry.data.venue}
-              class:list={['pub-card', entry.data.featured && 'pub-card-featured']}
-            >
-              <div class='pub-meta-row'>
-                <span class='pub-type-badge'>{typeLabels[entry.data.type] ?? entry.data.type}</span>
-                {entry.data.featured ? <span class='pub-featured-badge'>Featured</span> : null}
-              </div>
-
-              {
-                entry.data.highlights?.length ? (
-                  <ul class='pub-highlights'>
-                    {entry.data.highlights.map((highlight) => (
-                      <li>{highlight}</li>
-                    ))}
-                  </ul>
-                ) : null
-              }
-
-              <div class='pub-links'>
-                {entry.data.website ? (
-                  <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
-                ) : null}
-                {entry.data.url ? (
-                  <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
-                ) : null}
-                {entry.data.pdf ? (
-                  <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
-                ) : null}
-                {entry.data.code ? (
-                  <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
-                ) : null}
-                {entry.data.video ? (
-                  <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
-                ) : null}
-              </div>
-            </Card>
+            <PublicationCard entry={entry} />
           ))}
         </div>
       </section>
@@ -90,37 +82,34 @@ const years = [...groupedByYear.keys()].sort((a, b) => b - a)
   }
 </PageLayout>
 
+<script>
+  const yearSelect = document.getElementById('pub-filter-year') as HTMLSelectElement | null
+  const typeSelect = document.getElementById('pub-filter-type') as HTMLSelectElement | null
+
+  function applyFilters() {
+    const year = yearSelect?.value ?? 'all'
+    const type = typeSelect?.value ?? 'all'
+
+    document.querySelectorAll<HTMLElement>('[data-year-section]').forEach((section) => {
+      let visibleCount = 0
+
+      section.querySelectorAll<HTMLElement>('.pub-card-wrapper').forEach((card) => {
+        const matchesYear = year === 'all' || card.dataset.year === year
+        const matchesType = type === 'all' || card.dataset.type === type
+        const visible = matchesYear && matchesType
+        card.hidden = !visible
+        if (visible) visibleCount += 1
+      })
+
+      section.hidden = visibleCount === 0
+    })
+  }
+
+  yearSelect?.addEventListener('change', applyFilters)
+  typeSelect?.addEventListener('change', applyFilters)
+</script>
+
 <style>
-  .pub-page-intro {
-    display: grid;
-    gap: 0.7rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .pub-page-kicker {
-    margin: 0;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: hsl(var(--primary) / 1);
-  }
-
-  .pub-page-title {
-    margin: 0;
-    font-size: clamp(2.3rem, 6vw, 4.4rem);
-    line-height: 0.95;
-    text-wrap: balance;
-  }
-
-  .pub-page-copy {
-    margin: 0;
-    max-width: 42rem;
-    font-size: 1.02rem;
-    line-height: 1.8;
-    color: hsl(var(--muted-foreground) / 1);
-  }
-
   .pub-year-section {
     display: grid;
     gap: 1rem;
@@ -142,62 +131,31 @@ const years = [...groupedByYear.keys()].sort((a, b) => b - a)
     gap: 1.1rem;
   }
 
-  .pub-card :global(h2) {
-    font-size: 1.1rem;
-    line-height: 1.4;
-  }
-
-  .pub-card :global(p) {
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-
-  .pub-card-featured {
-    border-color: hsl(var(--primary) / 0.35);
-  }
-
-  .pub-meta-row {
+  .pub-filters {
     display: flex;
     flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .pub-filter {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
-    align-items: center;
-    margin-top: 0.35rem;
+    font-size: 0.85rem;
+    color: hsl(var(--muted-foreground) / 1);
   }
 
-  .pub-type-badge,
-  .pub-featured-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.6rem;
-    padding: 0 0.6rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
+  .pub-filter-label {
     font-weight: 600;
-    letter-spacing: 0.02em;
   }
 
-  .pub-type-badge {
-    background: hsl(var(--muted) / 1);
-    color: hsl(var(--muted-foreground) / 1);
-  }
-
-  .pub-featured-badge {
-    background: hsl(var(--primary) / 0.12);
-    color: hsl(var(--primary) / 1);
-  }
-
-  .pub-highlights {
-    margin: 0.35rem 0 0;
-    padding-left: 1.15rem;
-    color: hsl(var(--muted-foreground) / 1);
-    font-size: 0.92rem;
-    line-height: 1.65;
-  }
-
-  .pub-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.55rem;
-    margin-top: 0.6rem;
+  .pub-filter select {
+    border: 1px solid hsl(var(--border) / 1);
+    border-radius: 0.5rem;
+    background: hsl(var(--background) / 1);
+    color: hsl(var(--foreground) / 1);
+    padding: 0.3rem 0.55rem;
+    font-size: 0.85rem;
   }
 </style>

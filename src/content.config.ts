@@ -41,6 +41,7 @@ const publications = defineCollection({
     video: z.string().url().optional(),
     featured: z.boolean().optional(),
     highlights: z.array(z.string()).optional(),
+    citations: z.number().int().nonnegative().optional(),
     bibkey: z.string()
   })
 })

@@ -1,9 +1,20 @@
 ---
 import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
+import { Button } from 'astro-pure/user'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
 import NewsList from '@/components/NewsList.astro'
+import PublicationCard from '@/components/publications/PublicationCard.astro'
 import config from '@/site-config'
+import { loadCV } from '../lib/cv-data-loader.ts'
+
+const cv = loadCV()
+
+const featuredPublications = (await getCollection('publications'))
+  .filter((entry) => entry.data.featured)
+  .sort((a, b) => b.data.year - a.data.year)
+  .slice(0, 3)
 
 const imagePath = config?.logo?.src
 const images = import.meta.glob<{ default: ImageMetadata }>(
@@ -16,38 +27,136 @@ if (imagePath && !hasLogo)
   )
 ---
 
-<PageLayout meta={{ title: 'Home' }} highlightColor='#8A8A8A'>
-  <main class='flex w-full flex-col items-center'>
-    <section class='animate mb-10 flex flex-col items-center gap-y-7' id='content-header'>
-      {
-        hasLogo && (
-          <Image
-            src={images[imagePath]()}
-            alt={config?.logo?.alt || 'Profile'}
-            class='h-28 w-auto rounded-full border p-1'
-            loading='eager'
-            fetchpriority='high'
-          />
-        )
-      }
+<PageLayout meta={{ title: 'Home' }} highlightColor='hsl(199 89% 55%)'>
+  <section class='home-hero'>
+    {
+      hasLogo && (
+        <Image
+          src={images[imagePath]()}
+          alt={config?.logo?.alt || 'Profile'}
+          class='home-avatar'
+          loading='eager'
+          fetchpriority='high'
+        />
+      )
+    }
 
-      <div class='flex flex-col items-center gap-y-4'>
-        <h1 class='font-satoshi font-bold home-title'>{config.author}</h1>
-        <div class='flex flex-wrap justify-center gap-x-2 gap-y-3'>
-          <p class='text-xl'>
-            Postdoctoral researcher at <a class='styled-link' rel='stylesheet' href='https://jrl.cnrs.fr'
-              >CNRS-AIST Joint Robotics Laboratory (JRL)</a
-            >, IRL 3218, <a class='styled-link' rel='stylesheet' href='https://www.aist.go.jp/'
-              >National Institute of Advanced Industrial Science and Technology (AIST)</a
-            >
-          </p>
-        </div>
-      </div>
+    <p class='home-kicker'>{cv.basics.position}</p>
+    <h1 class='home-title'>{config.author}</h1>
+    <p class='home-role'>
+      <a class='styled-link' href='https://jrl.cnrs.fr' target='_blank' rel='noreferrer'
+        >CNRS-AIST Joint Robotics Laboratory (JRL)</a
+      >, IRL 3218, <a
+        class='styled-link'
+        href='https://www.aist.go.jp/'
+        target='_blank'
+        rel='noreferrer'>National Institute of Advanced Industrial Science and Technology (AIST)</a
+      >
+    </p>
+
+    <div class='home-actions'>
+      <Button href='/cv' variant='ahead' title='CV' />
+      <Button href='/publications' variant='ahead' title='Publications' />
+      <Button href='/projects' variant='ahead' title='Projects' />
+      <Button href={`mailto:${cv.basics.email}`} variant='ahead' title='Email' />
+    </div>
+  </section>
+
+  <div id='content' class='animate home-sections'>
+    <section class='home-section'>
+      <h2 id='news-list' class='home-section-heading'>News</h2>
+      <NewsList maxItems={5} compact showHeading={false} />
     </section>
-  </main>
 
-  <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
-    <h2 id='news-list'>News</h2>
-    <NewsList maxItems={5} compact showHeading={false} />
+    {
+      featuredPublications.length > 0 && (
+        <section class='home-section'>
+          <h2 id='publications-list' class='home-section-heading'>
+            Selected Publications
+          </h2>
+          <div class='home-pubs-stack'>
+            {featuredPublications.map((entry) => (
+              <PublicationCard entry={entry} compact />
+            ))}
+          </div>
+          <a class='styled-link home-pubs-more' href='/publications'>
+            View all publications →
+          </a>
+        </section>
+      )
+    }
   </div>
 </PageLayout>
+
+<style>
+  .home-hero {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+    padding: 2.5rem 0 2rem;
+  }
+
+  .home-avatar {
+    height: 5rem;
+    width: auto;
+    border-radius: 999px;
+    border: 1px solid hsl(var(--border) / 1);
+    padding: 0.25rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .home-kicker {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: hsl(var(--primary) / 1);
+  }
+
+  .home-title {
+    margin: 0;
+    font-size: clamp(2.6rem, 7vw, 5rem);
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+
+  .home-role {
+    margin: 0.3rem 0 0;
+    max-width: 42rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+
+  .home-sections {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .home-section {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .home-section-heading {
+    margin: 0;
+  }
+
+  .home-pubs-stack {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .home-pubs-more {
+    justify-self: start;
+  }
+</style>

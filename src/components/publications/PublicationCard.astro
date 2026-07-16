@@ -1,0 +1,175 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { Card, Button } from 'astro-pure/user'
+
+interface Props {
+  entry: CollectionEntry<'publications'>
+  compact?: boolean
+}
+
+const { entry, compact = false } = Astro.props
+
+const typeLabels: Record<string, string> = {
+  journal: 'Journal',
+  conference: 'Conference',
+  workshop: 'Workshop',
+  preprint: 'Preprint',
+  thesis: 'Thesis',
+  demo: 'Demo',
+  other: 'Other'
+}
+
+const bibtexHref = `/bibtex/${entry.data.bibkey}.bib`
+---
+
+<div
+  class:list={['pub-card-wrapper', compact && 'pub-card-wrapper-compact']}
+  data-year={entry.data.year}
+  data-type={entry.data.type}
+>
+  <Card
+    heading={entry.data.title}
+    subheading={entry.data.authors}
+    date={entry.data.venue}
+    class:list={['pub-card', entry.data.featured && 'pub-card-featured']}
+  >
+    <div class='pub-meta-row'>
+      <span class='pub-type-badge'>{typeLabels[entry.data.type] ?? entry.data.type}</span>
+      {entry.data.featured ? <span class='pub-featured-badge'>Featured</span> : null}
+      {
+        entry.data.citations ? (
+          <span class='pub-citation-badge'>{entry.data.citations} citations</span>
+        ) : null
+      }
+    </div>
+
+    {
+      !compact && entry.data.highlights?.length ? (
+        <ul class='pub-highlights'>
+          {entry.data.highlights.map((highlight) => (
+            <li>{highlight}</li>
+          ))}
+        </ul>
+      ) : null
+    }
+
+    <div class='pub-links'>
+      {entry.data.website ? (
+        <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
+      ) : null}
+      {entry.data.url ? (
+        <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
+      ) : null}
+      {entry.data.pdf ? (
+        <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
+      ) : null}
+      {entry.data.code ? (
+        <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
+      ) : null}
+      {entry.data.video ? (
+        <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
+      ) : null}
+      <Button href={bibtexHref} download variant='ahead' title='Download .bib' />
+      <Button as='button' type='button' data-copy-bibtex={bibtexHref} variant='ahead' title='Copy BibTeX' />
+    </div>
+  </Card>
+</div>
+
+<script>
+  import { showToast } from 'astro-pure/utils'
+
+  // Delegate on document so this works regardless of how many
+  // PublicationCard instances render on the page (Astro dedupes this
+  // script tag across repeated component instances).
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as HTMLElement)?.closest<HTMLElement>('[data-copy-bibtex]')
+    if (!button) return
+
+    const href = button.dataset.copyBibtex
+    if (!href) return
+
+    try {
+      const response = await fetch(href)
+      const text = await response.text()
+      await navigator.clipboard.writeText(text)
+      showToast({ message: 'BibTeX copied to clipboard' })
+    } catch {
+      showToast({ message: 'Could not copy BibTeX' })
+    }
+  })
+</script>
+
+<style>
+  .pub-card :global(h2) {
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+
+  .pub-card :global(p) {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .pub-card-wrapper-compact .pub-card :global(h2) {
+    font-size: 1rem;
+  }
+
+  .pub-card-wrapper-compact .pub-card :global(p) {
+    font-size: 0.88rem;
+  }
+
+  .pub-card-featured {
+    border-color: hsl(var(--primary) / 0.35);
+  }
+
+  .pub-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.35rem;
+  }
+
+  .pub-type-badge,
+  .pub-featured-badge,
+  .pub-citation-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.6rem;
+    padding: 0 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .pub-type-badge {
+    background: hsl(var(--muted) / 1);
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .pub-featured-badge {
+    background: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary) / 1);
+  }
+
+  .pub-citation-badge {
+    background: hsl(var(--muted) / 1);
+    color: hsl(var(--muted-foreground) / 1);
+  }
+
+  .pub-highlights {
+    margin: 0.35rem 0 0;
+    padding-left: 1.15rem;
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .pub-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.6rem;
+  }
+</style>

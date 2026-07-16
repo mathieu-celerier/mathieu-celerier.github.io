@@ -10,6 +10,7 @@ type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
   variant?: 'button' | 'pill' | 'back' | 'ahead'
   target?: string
   rel?: string
+  download?: boolean | string
   class?: string
 }
 

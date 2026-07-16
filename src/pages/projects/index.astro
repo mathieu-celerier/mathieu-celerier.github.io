@@ -1,0 +1,52 @@
+---
+import PageLayout from '@/layouts/BaseLayout.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import RepoCard from '@/components/projects/RepoCard.astro'
+import projectsData from '@/data/projects.generated.json'
+
+interface Project {
+  name: string
+  description: string
+  url: string
+  homepage: string | null
+  stars: number | null
+  language: string | null
+  topics: string[]
+  featured: boolean
+  source: 'github' | 'manual'
+}
+
+const projects = projectsData as Project[]
+---
+
+<PageLayout meta={{ title: 'Projects' }} highlightColor='hsl(199 89% 55%)'>
+  <PageIntro
+    kicker='Software'
+    title='Projects'
+    copy='Research software, controllers, and tools built as part of my work.'
+  />
+
+  {
+    projects.length > 0 ? (
+      <div class='projects-grid'>
+        {projects.map((project) => (
+          <RepoCard project={project} />
+        ))}
+      </div>
+    ) : (
+      <p class='projects-empty'>Nothing curated here yet.</p>
+    )
+  }
+</PageLayout>
+
+<style>
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.1rem;
+  }
+
+  .projects-empty {
+    color: hsl(var(--muted-foreground) / 1);
+  }
+</style>

@@ -1,0 +1,102 @@
+---
+import { Card, Button } from 'astro-pure/user'
+
+interface Project {
+  name: string
+  description: string
+  url: string
+  homepage: string | null
+  stars: number | null
+  language: string | null
+  topics: string[]
+  featured: boolean
+  source: 'github' | 'manual'
+}
+
+interface Props {
+  project: Project
+}
+
+const { project } = Astro.props
+---
+
+<Card
+  heading={project.name}
+  subheading={project.description}
+  class:list={['repo-card', project.featured && 'repo-card-featured']}
+>
+  <div class='repo-meta-row'>
+    {project.language ? <span class='repo-badge'>{project.language}</span> : null}
+    {
+      typeof project.stars === 'number' && project.stars > 0 ? (
+        <span class='repo-badge'>★ {project.stars}</span>
+      ) : null
+    }
+    {project.topics.map((topic) => (
+      <span class='repo-badge repo-badge-topic'>{topic}</span>
+    ))}
+  </div>
+
+  <div class='repo-links'>
+    {project.source === 'github' ? (
+      <Button href={project.url} target='_blank' variant='ahead' title='View on GitHub' />
+    ) : (
+      <Button href={project.url} target='_blank' variant='ahead' title='Visit' />
+    )}
+    {project.homepage ? (
+      <Button href={project.homepage} target='_blank' variant='ahead' title='Website' />
+    ) : null}
+  </div>
+</Card>
+
+<style>
+  .repo-card {
+    min-width: 0;
+  }
+
+  .repo-card :global(h2) {
+    font-size: 1.05rem;
+    overflow-wrap: break-word;
+  }
+
+  .repo-card :global(p) {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    overflow-wrap: break-word;
+  }
+
+  .repo-card-featured {
+    border-color: hsl(var(--primary) / 0.35);
+  }
+
+  .repo-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+  }
+
+  .repo-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    background: hsl(var(--muted) / 1);
+    color: hsl(var(--muted-foreground) / 1);
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .repo-badge-topic {
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary) / 1);
+  }
+
+  .repo-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+</style>

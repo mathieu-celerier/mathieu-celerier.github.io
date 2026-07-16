@@ -6,6 +6,7 @@ import YAML from "yaml";
 const BIB_PATH = "data/publications.bib";
 const OVERRIDES_PATH = "data/publications.overrides.yaml";
 const OUT_DIR = "src/content/publications";
+const BIBTEX_OUT_DIR = "public/bibtex";
 
 function loadOverrides() {
   if (!fs.existsSync(OVERRIDES_PATH)) return {};
@@ -119,6 +120,9 @@ function writeEntry(entry) {
   const highlights = Array.isArray(o.highlights)
     ? o.highlights.map(normalizeWhitespace).filter(Boolean)
     : [];
+  const citations = Number.isInteger(o.citation_count) && o.citation_count >= 0
+    ? o.citation_count
+    : null;
 
   const safeSlug =
     slugify(`${year}-${bibkey}-${title || "pub"}`) || slugify(bibkey) || bibkey;
@@ -141,6 +145,7 @@ function writeEntry(entry) {
     video ? `video: ${escapeYaml(video)}` : "",
     website ? `website: ${escapeYaml(website)}` : "",
     featured ? `featured: true` : "",
+    citations !== null ? `citations: ${citations}` : "",
     highlights.length
       ? `highlights:\n${highlights.map((h) => `  - ${escapeYaml(h)}`).join("\n")}`
       : "",
@@ -149,6 +154,13 @@ function writeEntry(entry) {
   ].filter(Boolean);
 
   fs.writeFileSync(outPath, frontmatterLines.join("\n"), "utf8");
+
+  // The raw original BibTeX source for this entry, exposed for copy/download
+  // on the publications page. `entry.input` is the verbatim source text as
+  // parsed by @retorquere/bibtex-parser, not a reconstruction from fields.
+  if (entry.input) {
+    fs.writeFileSync(path.join(BIBTEX_OUT_DIR, `${bibkey}.bib`), entry.input, "utf8");
+  }
 }
 
 function main() {
@@ -157,10 +169,14 @@ function main() {
   const entries = parsed.entries || [];
 
   ensureDir(OUT_DIR);
+  ensureDir(BIBTEX_OUT_DIR);
 
   // Clean previous generated files
   for (const f of fs.readdirSync(OUT_DIR)) {
     if (f.endsWith(".md")) fs.unlinkSync(path.join(OUT_DIR, f));
+  }
+  for (const f of fs.readdirSync(BIBTEX_OUT_DIR)) {
+    if (f.endsWith(".bib")) fs.unlinkSync(path.join(BIBTEX_OUT_DIR, f));
   }
 
   for (const e of entries) {

@@ -46,3 +46,8 @@ bunfig.toml
 # Publications are generated from data/publications.bib by `npm run gen`;
 # do not hand-edit or track the output (see scripts/bibtex-to-astro.mjs).
 /src/content/publications/*.md
+/public/bibtex/*.bib
+
+# Projects are generated from the GitHub API + data/projects.yaml by `npm run
+# gen`; do not hand-edit (see scripts/fetch-projects.mjs).
+/src/data/projects.generated.json
