@@ -128,7 +128,6 @@ interface TimelineBar {
   row: number
   leftPct: number
   widthPct: number
-  maxLabelWidthPct: number
 }
 
 function toBars(
@@ -147,7 +146,11 @@ function toBars(
     .sort((a, b) => a.start - b.start)
 
   // Greedy row assignment: each bar takes the first sub-row whose last
-  // bar ends before this one starts, so overlapping periods stack.
+  // bar ends before this one starts, so overlapping periods stack. (This
+  // only accounts for bar/time overlap — text labels are shown in a
+  // floating tooltip rather than inline, precisely because label *width*
+  // can't be known at build time and would collide with neighbors in ways
+  // this time-based packing can't account for.)
   const rowEnds: number[] = []
   return parsed.map((item) => {
     let row = rowEnds.findIndex((endsAt) => endsAt <= item.start + 1e-6)
@@ -168,10 +171,7 @@ function toBars(
       lane,
       row,
       leftPct,
-      widthPct,
-      // Leave a small margin so the label never runs past the track's
-      // right edge, regardless of how late the bar starts.
-      maxLabelWidthPct: Math.max(100 - leftPct - 2, 10)
+      widthPct
     } satisfies TimelineBar
   })
 }
@@ -181,35 +181,21 @@ const eduBars = toBars(cv.education || [], 'edu')
 const expRows = expBars.length ? Math.max(...expBars.map((bar) => bar.row)) + 1 : 0
 const eduRows = eduBars.length ? Math.max(...eduBars.map((bar) => bar.row)) + 1 : 0
 
-// Vertical geometry in rem. Each sub-row holds a bar plus an always-visible
-// (truncated, native-tooltip-on-overflow) label just outside it — exp rows
-// stack upward from the axis with the label above its bar, edu rows stack
-// downward with the label below. TOP_PAD keeps the topmost label safely
-// inside the track instead of relying on overflow (which clipped before).
-const BAR_H = 0.55
-const LABEL_H = 1.05
-const ROW_GAP = 0.2
-const ROW_STEP = BAR_H + ROW_GAP + LABEL_H + 0.45
-const TOP_PAD = 0.4
+// Vertical geometry in rem: exp sub-rows stack upward from the axis, edu
+// sub-rows downward. No space is reserved for inline labels — hover/focus
+// shows a floating tooltip instead (see the <script> below), which avoids
+// both the clipping and label-collision problems of rendering text inline.
+const BAR_H = 0.6
+const ROW_STEP = 1.05
+const TOP_PAD = 0.5
 
-const expAboveHeight = expRows
-  ? (expRows - 1) * ROW_STEP + BAR_H + ROW_GAP + LABEL_H
-  : 0
-const eduBelowHeight = eduRows
-  ? (eduRows - 1) * ROW_STEP + BAR_H + ROW_GAP + LABEL_H
-  : 0
-
-const axisTop = TOP_PAD + expAboveHeight
+const axisTop = TOP_PAD + (expRows ? (expRows - 1) * ROW_STEP + BAR_H : 0)
+const eduBelowHeight = eduRows ? (eduRows - 1) * ROW_STEP + BAR_H : 0
 const trackHeight = axisTop + eduBelowHeight + 1.6
 
 function barTop(bar: TimelineBar): number {
   if (bar.lane === 'exp') return axisTop - bar.row * ROW_STEP - BAR_H
   return axisTop + bar.row * ROW_STEP
-}
-
-function labelTop(bar: TimelineBar): number {
-  if (bar.lane === 'exp') return barTop(bar) - ROW_GAP - LABEL_H
-  return barTop(bar) + BAR_H + ROW_GAP
 }
 
 const timelineBars = [...expBars, ...eduBars]
@@ -272,10 +258,12 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     {
       /* Decorative summary strip: the same data is fully readable in the
          Experience/Education sections below, so this is hidden from
-         assistive tech rather than duplicating it in a hard-to-navigate
-         form. Labels are always visible (truncated with a native title
-         tooltip for the full text), not hover-only, so nothing depends on
-         pointer interaction or risks being clipped off the top edge. */
+         assistive tech. Labels are NOT rendered inline — text width can't
+         be known at build time, so inline labels either clipped (fixed
+         positions near the container edge) or collided with neighbors
+         (variable-width text placed by time position alone, independent
+         of how much horizontal room neighbors need). A single floating
+         tooltip (positioned by JS, viewport-clamped) sidesteps both. */
       timelineBars.length ? (
         <section class='cv-timeline' aria-hidden='true'>
           <div class='cv-timeline-track' style={`height: ${trackHeight}rem`}>
@@ -286,30 +274,22 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
             ))}
             <div class='cv-timeline-axis' style={`top: ${axisTop}rem`} />
             {timelineBars.map((bar) => (
-              <Fragment>
-                <span
-                  class:list={[
-                    'cv-timeline-bar',
-                    `cv-timeline-bar-${bar.lane}`,
-                    bar.current && 'cv-timeline-bar-current'
-                  ]}
-                  style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
-                  title={`${bar.label} · ${bar.dates}`}
-                />
-                <span
-                  class='cv-timeline-label'
-                  style={`left: ${bar.leftPct}%; top: ${labelTop(bar)}rem; max-width: ${bar.maxLabelWidthPct}%`}
-                  title={bar.label}
-                >
-                  {bar.label}
-                </span>
-              </Fragment>
+              <span
+                class:list={[
+                  'cv-timeline-bar',
+                  `cv-timeline-bar-${bar.lane}`,
+                  bar.current && 'cv-timeline-bar-current'
+                ]}
+                style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
+                data-timeline-label={`${bar.label} · ${bar.dates}`}
+              />
             ))}
           </div>
           <p class='cv-timeline-legend'>
             <span class='cv-timeline-legend-dot cv-timeline-legend-exp' /> Experience
             <span class='cv-timeline-legend-dot cv-timeline-legend-edu' /> Education
           </p>
+          <div id='cv-timeline-tooltip' class='cv-timeline-tooltip' role='presentation'></div>
         </section>
       ) : null
     }
@@ -401,6 +381,60 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     }
   </section>
 </PageLayout>
+
+<script>
+  // Floating tooltip for the CV timeline bars. Positioned via JS
+  // (position: fixed, clamped to the viewport) rather than pure CSS
+  // absolute-positioning, which is what let it clip against the
+  // scrolling track's edges and what made avoiding overlap with
+  // neighboring bars' labels intractable without knowing rendered text
+  // width. Document-delegated so it keeps working across view-transition
+  // navigations without re-registering listeners.
+  function initTimelineTooltip() {
+    // Guard on <html>, not the tooltip element itself: under view
+    // transitions the tooltip div is recreated fresh on every navigation
+    // to /cv, so a flag on it would never prevent re-adding these
+    // document-level listeners on repeat visits to this page.
+    if (document.documentElement.dataset.cvTimelineTooltipInit) return
+    document.documentElement.dataset.cvTimelineTooltipInit = 'true'
+
+    const show = (bar: HTMLElement) => {
+      const tooltip = document.getElementById('cv-timeline-tooltip')
+      const label = bar.dataset.timelineLabel
+      if (!tooltip || !label) return
+      tooltip.textContent = label
+      tooltip.classList.add('is-visible')
+
+      const barRect = bar.getBoundingClientRect()
+      const tipRect = tooltip.getBoundingClientRect()
+      const margin = 8
+
+      let left = barRect.left + barRect.width / 2 - tipRect.width / 2
+      left = Math.min(Math.max(left, margin), window.innerWidth - tipRect.width - margin)
+
+      let top = barRect.top - tipRect.height - margin
+      if (top < margin) top = barRect.bottom + margin
+
+      tooltip.style.left = `${left}px`
+      tooltip.style.top = `${top}px`
+    }
+
+    const hide = () => document.getElementById('cv-timeline-tooltip')?.classList.remove('is-visible')
+
+    document.addEventListener('pointerover', (event) => {
+      const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
+      if (bar) show(bar)
+    })
+    document.addEventListener('pointerout', (event) => {
+      const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
+      if (bar) hide()
+    })
+    document.addEventListener('scroll', hide, true)
+  }
+
+  initTimelineTooltip()
+  document.addEventListener('astro:page-load', initTimelineTooltip)
+</script>
 
 <style>
   .cv-shell {
@@ -718,18 +752,29 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     filter: brightness(1.15);
   }
 
-  /* Always-visible label next to each bar (not hover-only — nothing here
-     depends on pointer interaction, and truncation + the native `title`
-     attribute handles overly long titles instead of a custom tooltip that
-     could clip against the container edge). */
-  .cv-timeline-label {
-    position: absolute;
-    font-size: 0.72rem;
-    line-height: 1.05rem;
-    color: hsl(var(--foreground) / 0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  /* Floating tooltip, positioned by the <script> above (position:fixed,
+     viewport-clamped) rather than pure CSS — see the comment on the
+     script for why. */
+  .cv-timeline-tooltip {
+    position: fixed;
+    z-index: 50;
+    max-width: 20rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: calc(1.2 * var(--radius, 0.5rem));
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--background) / 1);
+    color: hsl(var(--foreground) / 1);
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: 0 12px 30px -16px rgba(15, 23, 42, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+  }
+
+  .cv-timeline-tooltip.is-visible {
+    opacity: 1;
   }
 
   .cv-timeline-legend {
