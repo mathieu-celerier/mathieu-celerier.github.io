@@ -1,5 +1,6 @@
 ---
 interface Props {
+  id?: string
   title: string
   subtitle: string
   dates: string
@@ -7,10 +8,10 @@ interface Props {
   compact?: boolean
 }
 
-const { title, subtitle, dates, current = false, compact = false } = Astro.props
+const { id, title, subtitle, dates, current = false, compact = false } = Astro.props
 ---
 
-<article class:list={['cv-entry', current && 'cv-entry-current', compact && 'cv-entry-compact']}>
+<article id={id} class:list={['cv-entry', current && 'cv-entry-current', compact && 'cv-entry-compact']}>
   <div class='cv-entry-date'>{dates}</div>
   <div class='cv-entry-body'>
     <div class='cv-entry-top'>
@@ -34,6 +35,15 @@ const { title, subtitle, dates, current = false, compact = false } = Astro.props
     background:
       linear-gradient(180deg, hsl(var(--background) / 0.92), hsl(var(--muted) / 0.7));
     box-shadow: 0 16px 40px -38px rgba(15, 23, 42, 0.32);
+    scroll-margin-top: 6rem;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition: outline-color 1.2s ease-out;
+  }
+
+  .cv-entry-flash {
+    outline-color: hsl(var(--primary) / 1);
+    transition: outline-color 0.1s ease-out;
   }
 
   .cv-entry-current {

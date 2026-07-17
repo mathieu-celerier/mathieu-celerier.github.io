@@ -33,6 +33,7 @@ summary:
 experience:
   - title: 'Postdoctoral researcher'
     organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
+    short_organization: 'CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
     dates: 'February 2026 - Present'
     pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
@@ -41,6 +42,7 @@ experience:
 
   - title: 'Technical staff'
     organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
+    short_organization: 'CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
     dates: 'June 2025 - December 2025'
     pdf_description: 'Technical support and research engineering within the joint robotics laboratory.'
@@ -49,6 +51,7 @@ experience:
 
   - title: 'Research assistant'
     organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
+    short_organization: 'CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
     dates: 'June 2022 - May 2025'
     items:
@@ -61,6 +64,7 @@ experience:
 
   - title: 'Robotics internship'
     organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
+    short_organization: 'LIRMM'
     location: 'Montpellier, France'
     dates: 'February 2021 - July 2021'
     items:
@@ -76,6 +80,7 @@ experience:
 
   - title: 'Robotics internship'
     organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
+    short_organization: 'LIRMM'
     location: 'Montpellier, France'
     dates: 'May 2020 - Aug. 2020'
     items:
@@ -105,6 +110,7 @@ education:
   - degree: 'Ph.D'
     area: ''
     institution: 'University of Montpellier ~ CNRS-AIST Joint Robotics Laboratory'
+    short_institution: 'UM / CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
     dates: 'September 2021 - December 2025'
     items:
@@ -117,7 +123,9 @@ education:
   - degree: 'Study semester'
     area: ''
     institution: 'University of Quebec in Chicoutimi'
+    short_institution: 'UQAC'
     location: 'Remote from France due to COVID-19'
+    short_location: 'Remote, France'
     dates: 'September 2020 - December 2020'
     items:
       - 'Courses on neural networks, quantitative methods for engineers, engineering project management, and advanced numeric communication systems.'
@@ -146,6 +154,7 @@ education:
       - '6 DoF manipulator arm project: Modelling of a manipulator arm using modified Denavit-Hartenberg parameters, dynamic control of the arm, made from scratch using Julia programming language.'
 
   - degree: "Technical Associate's Degree in Industrial Computing and Electrical Engineering"
+    short_degree: "Technical Associate's Degree"
     area: ''
     institution: 'IUT of Nimes'
     location: 'Nimes, France'

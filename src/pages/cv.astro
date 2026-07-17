@@ -122,25 +122,53 @@ function parseRange(dates: string): { start: number; end: number; current: boole
 
 interface TimelineBar {
   label: string
+  place: string
   dates: string
   current: boolean
   lane: 'exp' | 'edu'
   row: number
   leftPct: number
   widthPct: number
+  targetId: string
+}
+
+// Abbreviates full month names to three letters for the compact tooltip
+// (e.g. "February 2026 - Present" -> "Feb 2026 - Present").
+function abbreviateDates(dates: string): string {
+  return dates.replace(
+    /\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/g,
+    (month) => month.slice(0, 3)
+  )
 }
 
 function toBars(
-  entries: { title?: string; degree?: string; area?: string; dates: string }[],
+  entries: {
+    title?: string
+    degree?: string
+    organization?: string
+    institution?: string
+    location?: string
+    short_title?: string
+    short_degree?: string
+    short_organization?: string
+    short_institution?: string
+    short_location?: string
+    dates: string
+  }[],
   lane: 'exp' | 'edu'
 ): TimelineBar[] {
   const span = TIMELINE_END - TIMELINE_START
   const parsed = entries
-    .map((entry) => {
+    .map((entry, index) => {
       const range = parseRange(entry.dates)
       if (!range) return null
-      const label = entry.title ?? [entry.degree, entry.area].filter(Boolean).join(' — ') ?? ''
-      return { ...range, label, dates: entry.dates }
+      const title = entry.short_title ?? entry.title
+      const degree = entry.short_degree ?? entry.degree
+      const label = title ?? degree ?? ''
+      const place = entry.short_organization ?? entry.organization ?? entry.short_institution ?? entry.institution ?? ''
+      const location = entry.short_location ?? entry.location ?? ''
+      const targetId = `${lane}-${index}`
+      return { ...range, label, place, location, targetId, dates: abbreviateDates(entry.dates) }
     })
     .filter((item): item is NonNullable<typeof item> => item !== null)
     .sort((a, b) => a.start - b.start)
@@ -164,14 +192,17 @@ function toBars(
     const clampedEnd = Math.min(Math.max(item.end, TIMELINE_START), TIMELINE_END)
     const leftPct = ((clampedStart - TIMELINE_START) / span) * 100
     const widthPct = Math.max(((clampedEnd - clampedStart) / span) * 100, 0.8)
+    const place = [item.place, item.location].filter(Boolean).join(', ')
     return {
       label: item.label,
+      place,
       dates: item.dates,
       current: item.current,
       lane,
       row,
       leftPct,
-      widthPct
+      widthPct,
+      targetId: item.targetId
     } satisfies TimelineBar
   })
 }
@@ -183,7 +214,7 @@ const eduRows = eduBars.length ? Math.max(...eduBars.map((bar) => bar.row)) + 1 
 
 // Vertical geometry in rem: exp sub-rows stack upward from the axis, edu
 // sub-rows downward. No space is reserved for inline labels — hover/focus
-// shows a floating tooltip instead (see the <script> below), which avoids
+// shows a floating tooltip instead (see the script block below), which avoids
 // both the clipping and label-collision problems of rendering text inline.
 const BAR_H = 0.6
 const ROW_STEP = 1.05
@@ -281,7 +312,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
                   bar.current && 'cv-timeline-bar-current'
                 ]}
                 style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
-                data-timeline-label={`${bar.label} · ${bar.dates}`}
+                data-timeline-label={[bar.label, bar.place, bar.dates].filter(Boolean).join(' · ')}
+                data-timeline-target={bar.targetId}
               />
             ))}
           </div>
@@ -302,10 +334,11 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
             <h2>Experience</h2>
           </div>
           <div class='cv-stack'>
-            {cv.experience.map((entry) => {
+            {cv.experience.map((entry, index) => {
               const current = entry.dates.includes('Present')
               return (
                 <CVEntry
+                  id={`exp-${index}`}
                   title={entry.title}
                   subtitle={`${entry.organization} · ${entry.location}`}
                   dates={entry.dates}
@@ -334,8 +367,9 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
             <h2>Education</h2>
           </div>
           <div class='cv-stack'>
-            {cv.education.map((entry) => (
+            {cv.education.map((entry, index) => (
               <CVEntry
+                id={`edu-${index}`}
                 title={`${entry.degree}${entry.area ? ` — ${entry.area}` : ''}`}
                 subtitle={`${entry.institution} · ${entry.location}`}
                 dates={entry.dates}
@@ -430,6 +464,16 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       if (bar) hide()
     })
     document.addEventListener('scroll', hide, true)
+
+    document.addEventListener('click', (event) => {
+      const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
+      const targetId = bar?.dataset.timelineTarget
+      const target = targetId ? document.getElementById(targetId) : null
+      if (!target) return
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      target.classList.add('cv-entry-flash')
+      setTimeout(() => target.classList.remove('cv-entry-flash'), 1200)
+    })
   }
 
   initTimelineTooltip()
@@ -728,7 +772,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     height: 0.55rem;
     min-width: 0.5rem;
     border-radius: 999px;
-    cursor: default;
+    cursor: pointer;
     z-index: 1;
   }
 
@@ -752,7 +796,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     filter: brightness(1.15);
   }
 
-  /* Floating tooltip, positioned by the <script> above (position:fixed,
+  /* Floating tooltip, positioned by the script above (position:fixed,
      viewport-clamped) rather than pure CSS — see the comment on the
      script for why. */
   .cv-timeline-tooltip {
