@@ -2,15 +2,11 @@
 import { Card, Button } from 'astro-pure/user'
 
 interface Project {
+  slug: string
   name: string
   description: string
-  url: string
-  homepage: string | null
-  stars: number | null
-  language: string | null
-  topics: string[]
   featured: boolean
-  source: 'github' | 'manual'
+  links: { label: string; url: string }[]
 }
 
 interface Props {
@@ -21,32 +17,20 @@ const { project } = Astro.props
 ---
 
 <Card
+  id={project.slug}
   heading={project.name}
   subheading={project.description}
   class:list={['repo-card', project.featured && 'repo-card-featured']}
 >
-  <div class='repo-meta-row'>
-    {project.language ? <span class='repo-badge'>{project.language}</span> : null}
-    {
-      typeof project.stars === 'number' && project.stars > 0 ? (
-        <span class='repo-badge'>★ {project.stars}</span>
-      ) : null
-    }
-    {project.topics.map((topic) => (
-      <span class='repo-badge repo-badge-topic'>{topic}</span>
-    ))}
-  </div>
-
-  <div class='repo-links'>
-    {project.source === 'github' ? (
-      <Button href={project.url} target='_blank' variant='ahead' title='View on GitHub' />
-    ) : (
-      <Button href={project.url} target='_blank' variant='ahead' title='Visit' />
-    )}
-    {project.homepage ? (
-      <Button href={project.homepage} target='_blank' variant='ahead' title='Website' />
-    ) : null}
-  </div>
+  {
+    project.links.length > 0 && (
+      <div class='repo-links' aria-label={`${project.name} links`}>
+        {project.links.map((link) => (
+          <Button href={link.url} target='_blank' variant='ahead' title={link.label} />
+        ))}
+      </div>
+    )
+  }
 </Card>
 
 <style>
@@ -67,30 +51,6 @@ const { project } = Astro.props
 
   .repo-card-featured {
     border-color: hsl(var(--primary) / 0.35);
-  }
-
-  .repo-meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.35rem;
-  }
-
-  .repo-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.5rem;
-    padding: 0 0.55rem;
-    border-radius: 999px;
-    background: hsl(var(--muted) / 1);
-    color: hsl(var(--muted-foreground) / 1);
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  .repo-badge-topic {
-    background: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary) / 1);
   }
 
   .repo-links {

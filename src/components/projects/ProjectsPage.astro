@@ -5,25 +5,26 @@ import RepoCard from '@/components/projects/RepoCard.astro'
 import projectsData from '@/data/projects.generated.json'
 
 interface Project {
+  slug: string
   name: string
   description: string
-  url: string
-  homepage: string | null
-  stars: number | null
-  language: string | null
-  topics: string[]
   featured: boolean
-  source: 'github' | 'manual'
+  links: { label: string; url: string }[]
 }
 
 const projects = projectsData as Project[]
 ---
 
+<!--
+  This is intentionally a component rather than a file in src/pages, so it
+  does not create a public /projects route. Move it back into src/pages when
+  the project catalogue is ready to be published.
+-->
 <PageLayout meta={{ title: 'Projects', ogImage: '/og/projects.png' }} highlightColor='hsl(199 89% 55%)'>
   <PageIntro
     kicker='Software'
     title='Projects'
-    copy='Research software, controllers, and tools built as part of my work.'
+    copy='Research projects and their public software, data, and other artifacts.'
   />
 
   {

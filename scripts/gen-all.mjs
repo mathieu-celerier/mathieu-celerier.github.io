@@ -5,5 +5,5 @@ function run(cmd, args) {
 }
 
 run("node", ["scripts/bibtex-to-astro.mjs"]); // your existing publications generator
-run("node", ["scripts/fetch-projects.mjs"]); // GitHub-derived + manual projects list
+run("node", ["scripts/fetch-projects.mjs"]); // Curated project catalog
 run("node", ["scripts/gen-cv.mjs"]); // new CV generator+compiler

@@ -1,42 +1,24 @@
-# Curates the /projects page. GitHub-derived entries are looked up by repo
-# name against https://github.com/mathieu-celerier (public, non-fork repos
-# only) and rendered in the order listed here — nothing appears unless it's
-# explicitly listed, so forks/dotfiles/scratch repos never show up by accident.
+# Curates the /projects page. A project is a piece of work, not a GitHub
+# repository: it can link to any number of repositories, websites, datasets,
+# or other public artifacts. Entries are rendered in this order.
 #
-# include: repo names (as they appear in the GitHub URL) to feature, in order.
-# overrides: optional per-repo description/featured override, keyed by repo name.
-# manual: entirely non-GitHub entries (no repo lookup).
+# links: each link needs a human-readable label and an absolute URL.
 
-include:
-  - explicit_compliance_controller
-  - collaborative_peg_in_hole_controller
-  - minimum_jerk_controller
-  - mc_kinova
-  - mc_kortex
-
-overrides:
-  explicit_compliance_controller:
-    description: 'mc_rtc controller implementing explicit safety and compliance for physical interaction on torque-controlled robots.'
+projects:
+  - slug: physical-human-robot-interaction
+    name: Physical human–robot interaction controllers
+    description: >-
+      Research software for compliant physical interaction, collaborative
+      assembly, smooth motion generation, and Kinova robot integration.
     featured: true
-  humanoid_explicitly_compliance:
-    description: 'Explicit compliance control extended to humanoid platforms for physical human-robot interaction.'
-  PHRI_HL_controller:
-    description: 'High-level controller for physical human-robot interaction experiments.'
-  collaborative_peg_in_hole_controller:
-    description: 'Controller for a collaborative peg-in-hole assembly task.'
-  ral_exp_hierarchical_external_forces_controller:
-    description: 'Experimental controller for hierarchical estimation and handling of external forces.'
-  ROS_PHRI_HL_EXP:
-    description: 'ROS-based experiment setup for physical human-robot interaction studies.'
-  minimum_jerk_controller:
-    description: 'Controller generating minimum-jerk trajectories for smooth robot motion.'
-  mc_kinova:
-    description: 'mc_rtc interface for Kinova robotic arms.'
-
-manual: []
-# Example:
-# manual:
-#   - name: 'Some tool'
-#     description: 'A short description.'
-#     url: 'https://example.com'
-#     featured: false
+    links:
+      - label: Explicit compliance controller
+        url: https://github.com/mathieu-celerier/explicit_compliance_controller
+      - label: Collaborative peg-in-hole controller
+        url: https://github.com/mathieu-celerier/collaborative_peg_in_hole_controller
+      - label: Minimum-jerk controller
+        url: https://github.com/mathieu-celerier/minimum_jerk_controller
+      - label: mc_kinova
+        url: https://github.com/mathieu-celerier/mc_kinova
+      - label: mc_kortex
+        url: https://github.com/mathieu-celerier/mc_kortex

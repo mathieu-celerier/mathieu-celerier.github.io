@@ -7,19 +7,6 @@ import PageLayout from '@/layouts/BaseLayout.astro'
 import NewsList from '@/components/NewsList.astro'
 import config from '@/site-config'
 import { loadCV } from '../lib/cv-data-loader.ts'
-import projectsData from '@/data/projects.generated.json'
-
-interface Project {
-  name: string
-  description: string
-  url: string
-  homepage: string | null
-  stars: number | null
-  language: string | null
-  topics: string[]
-  featured: boolean
-  source: 'github' | 'manual'
-}
 
 const cv = loadCV()
 
@@ -38,11 +25,6 @@ const featuredPublication = allPublications
   .filter((entry) => entry.data.featured)
   .sort((a, b) => b.data.year - a.data.year)
   .at(0)
-
-const allProjects = projectsData as Project[]
-const projects = [...allProjects]
-  .sort((a, b) => Number(b.featured) - Number(a.featured))
-  .slice(0, 3)
 
 const identityLinks = [
   cv.basics.scholar ? { label: 'Google Scholar', href: cv.basics.scholar } : null,
@@ -98,7 +80,6 @@ if (imagePath && !hasLogo)
     <div class='home-actions'>
       <Button href='/cv' variant='ahead' class='home-cta' title='View CV' />
       <Button href='/publications' variant='ahead' title='Publications' />
-      <Button href='/projects' variant='ahead' title='Projects' />
     </div>
 
     <div class='home-identity-links'>
@@ -154,26 +135,6 @@ if (imagePath && !hasLogo)
       )
     }
 
-    {
-      projects.length > 0 && (
-        <section class='bento-tile bento-tile-projects' data-reveal>
-          <div class='bento-tile-top'>
-            <h2 class='bento-tile-heading'>Projects</h2>
-          </div>
-          <ul class='bento-projects-list'>
-            {projects.map((project) => (
-              <li>
-                <a href={project.url} target='_blank' rel='noreferrer' class='bento-project-link'>
-                  <span class='bento-project-name'>{project.name}</span>
-                  <span class='bento-project-desc'>{project.description}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <a class='styled-link bento-tile-more' href='/projects'>All projects →</a>
-        </section>
-      )
-    }
   </div>
 </PageLayout>
 
@@ -335,8 +296,7 @@ if (imagePath && !hasLogo)
     display: grid;
     grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
     grid-template-areas:
-      'news pub'
-      'news projects';
+      'news pub';
     /* Each tile sizes to its own content — forcing the news tile to
        stretch to match the pub+projects column's combined height left
        a large empty gap stretched between its (few) entries. */
@@ -403,10 +363,6 @@ if (imagePath && !hasLogo)
 
   .bento-tile-pub {
     grid-area: pub;
-  }
-
-  .bento-tile-projects {
-    grid-area: projects;
   }
 
   .bento-tile-top {
@@ -477,57 +433,12 @@ if (imagePath && !hasLogo)
     color: hsl(var(--muted-foreground) / 0.85);
   }
 
-  .bento-projects-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.45rem;
-    align-content: start;
-  }
-
-  .bento-project-link {
-    display: grid;
-    gap: 0.1rem;
-    padding: 0.55rem 0.65rem;
-    border-radius: var(--radius, 0.5rem);
-    color: inherit;
-    text-decoration: none;
-    background: hsl(var(--background) / 0.55);
-    transition:
-      background-color 0.2s ease,
-      border-color 0.2s ease;
-    border: 1px solid transparent;
-  }
-
-  .bento-project-link:hover {
-    border-color: hsl(var(--border) / 1);
-    background: hsl(var(--background) / 0.9);
-  }
-
-  .bento-project-name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    overflow-wrap: anywhere;
-  }
-
-  .bento-project-desc {
-    color: hsl(var(--muted-foreground) / 1);
-    font-size: 0.8rem;
-    line-height: 1.4;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
   @media (max-width: 860px) {
     .home-bento {
       grid-template-columns: 1fr;
       grid-template-areas:
         'news'
-        'pub'
-        'projects';
+        'pub';
     }
   }
 </style>
