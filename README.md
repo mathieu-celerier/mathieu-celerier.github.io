@@ -18,10 +18,8 @@ publications. Built with [Astro](https://astro.build/) on top of the
 
 Requirements:
 
-- [Node.js](https://nodejs.org/) 18+
-- For PDF generation: a TeX installation with `latexmk` and `xelatex`, plus the packages
-  required by `latex/awesome-cv/awesome-cv.cls` (TEXINPUTS is set automatically; no external
-  Awesome-CV checkout is needed).
+- A current [Node.js](https://nodejs.org/) LTS release and npm.
+- To regenerate the PDF CV: a TeX installation that provides `latexmk` and `xelatex`.
 
 ```sh
 npm install

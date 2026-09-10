@@ -1,6 +1,6 @@
 import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import AstroPureIntegration from 'astro-pure'
-import { defineConfig } from 'astro/config'
+import { defineConfig, fontProviders } from 'astro/config'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 
@@ -101,15 +101,17 @@ export default defineConfig({
     // call on every dev/build run.
     fonts: [
       {
-        provider: 'local',
         name: 'Satoshi',
         cssVariable: '--font-satoshi',
-        variants: [
-          { weight: 400, style: 'normal', src: ['./src/assets/fonts/satoshi/satoshi-400-normal.woff2'] },
-          { weight: 400, style: 'italic', src: ['./src/assets/fonts/satoshi/satoshi-400-italic.woff2'] },
-          { weight: 500, style: 'normal', src: ['./src/assets/fonts/satoshi/satoshi-500-normal.woff2'] },
-          { weight: 500, style: 'italic', src: ['./src/assets/fonts/satoshi/satoshi-500-italic.woff2'] }
-        ]
+        provider: fontProviders.local(),
+        options: {
+          variants: [
+            { weight: 400, style: 'normal', src: ['./src/assets/fonts/satoshi/satoshi-400-normal.woff2'] },
+            { weight: 400, style: 'italic', src: ['./src/assets/fonts/satoshi/satoshi-400-italic.woff2'] },
+            { weight: 500, style: 'normal', src: ['./src/assets/fonts/satoshi/satoshi-500-normal.woff2'] },
+            { weight: 500, style: 'italic', src: ['./src/assets/fonts/satoshi/satoshi-500-italic.woff2'] }
+          ]
+        }
       }
     ]
   }
