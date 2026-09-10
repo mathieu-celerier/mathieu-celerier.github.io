@@ -1,45 +1,66 @@
 /* Theme */
 :root {
-  /* Primary — one coordinated accent (was a pale, generic template blue plus a
-     separate, slightly mismatched --link blue) */
-  --primary: 199 89% 42%;
-  --link: 199 89% 38%;
-  /* Foreground */
-  --foreground: 240 10% 3.9%;
-  --muted-foreground: 240 3.8% 28.1%;
-  /* Background */
-  --background: 210 33% 99%;
-  --muted: 240 4.8% 96%;
-  --card: 0 0% 90%;
+  /* Precision research studio: warm paper, ink and cobalt. Components only
+     consume semantic tokens, so the dark theme is an intentional companion. */
+  --primary: 221 83% 43%;
+  --link: 221 83% 37%;
+  --signal: 12 78% 45%;
+  --foreground: 222 38% 13%;
+  --muted-foreground: 218 17% 36%;
+  --background: 42 38% 97%;
+  --muted: 218 27% 93%;
+  --card: 42 45% 99%;
 
   /* Basic */
-  --border: 240 5% 74.9%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.6rem;
+  --border: 217 22% 78%;
+  --input: 218 27% 90%;
+  --ring: 221 83% 43%;
+  --radius: 0.75rem;
 }
 .dark {
-  /* Primary */
-  --primary: 199 89% 64%;
-  --link: 199 89% 68%;
-  /* Foreground */
-  --foreground: 0 0% 98%;
-  --muted-foreground: 240 5% 74.9%;
-  /* Background */
-  --background: 240 20.54% 5.2%;
-  --muted: 240 5.9% 13%;
-  --card: 240 3.7% 24.9%;
+  --primary: 213 100% 72%;
+  --link: 213 100% 75%;
+  --signal: 18 92% 68%;
+  --foreground: 210 30% 94%;
+  --muted-foreground: 215 17% 70%;
+  --background: 222 34% 8%;
+  --muted: 220 25% 14%;
+  --card: 222 29% 12%;
 
   /* Basic */
-  --border: 240 3.8% 28.1%;
-  --input: 240 3.7% 17.9%;
-  --ring: 240 4.9% 83.9%;
+  --border: 216 20% 26%;
+  --input: 220 25% 17%;
+  --ring: 213 100% 72%;
 }
 :root {
   --un-default-border-color: hsl(var(--border) / 1);
 }
 html.dark {
   color-scheme: dark;
+}
+
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
+body { margin: 0; }
+:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+[hidden] { display: none !important; }
+
+header-component {
+  backdrop-filter: blur(12px);
+}
+
+header-component a[aria-label='Brand'] {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em;
+}
+
+footer .border-t {
+  border-color: hsl(var(--border) / 1);
+}
+
+::selection {
+  background: hsl(var(--primary) / 0.22);
 }
 
 /* Global */
@@ -92,9 +113,9 @@ a {
   z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px);
-  background-size: 42px 42px;
+    linear-gradient(hsl(var(--foreground) / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.055) 1px, transparent 1px);
+  background-size: 36px 36px;
   mask-image: linear-gradient(180deg, black, transparent 85%);
   -webkit-mask-image: linear-gradient(180deg, black, transparent 85%);
 }

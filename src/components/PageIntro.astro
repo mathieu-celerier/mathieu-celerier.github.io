@@ -17,8 +17,11 @@ const { kicker, title, copy } = Astro.props
 <style>
   .page-intro {
     display: grid;
-    gap: 0.7rem;
-    margin-bottom: 1.75rem;
+    grid-template-columns: minmax(8rem, 0.45fr) minmax(0, 1.55fr);
+    gap: 0.6rem 1.5rem;
+    margin: clamp(2rem, 5vw, 4rem) 0 clamp(2.5rem, 6vw, 5rem);
+    padding: 0 0 clamp(2rem, 5vw, 3.5rem);
+    border-bottom: 1px solid hsl(var(--border) / 1);
   }
 
   .page-intro-kicker {
@@ -32,16 +35,24 @@ const { kicker, title, copy } = Astro.props
 
   .page-intro-title {
     margin: 0;
+    grid-column: 2;
+    grid-row: 1;
     font-size: clamp(2.3rem, 6vw, 4.4rem);
-    line-height: 0.95;
+    line-height: 0.92;
     text-wrap: balance;
   }
 
   .page-intro-copy {
     margin: 0;
+    grid-column: 2;
     max-width: 42rem;
     font-size: 1.02rem;
     line-height: 1.8;
     color: hsl(var(--muted-foreground) / 1);
+  }
+
+  @media (max-width: 600px) {
+    .page-intro { grid-template-columns: 1fr; gap: 0.75rem; }
+    .page-intro-title, .page-intro-copy { grid-column: auto; grid-row: auto; }
   }
 </style>

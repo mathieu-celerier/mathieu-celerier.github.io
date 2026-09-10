@@ -110,7 +110,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
 <style>
   .pub-card :global(h2) {
     font-size: 1.1rem;
-    line-height: 1.4;
+    line-height: 1.32;
   }
 
   .pub-card :global(p) {
@@ -128,6 +128,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
 
   .pub-card-featured {
     border-color: hsl(var(--primary) / 0.35);
+    box-shadow: inset 3px 0 0 hsl(var(--primary) / 1);
   }
 
   .pub-meta-row {
@@ -152,7 +153,8 @@ const detailHref = `/publications/${entry.data.bibkey}`
   }
 
   .pub-type-badge {
-    background: hsl(var(--muted) / 1);
+    background: transparent;
+    border: 1px solid hsl(var(--border) / 1);
     color: hsl(var(--muted-foreground) / 1);
   }
 
@@ -162,7 +164,8 @@ const detailHref = `/publications/${entry.data.bibkey}`
   }
 
   .pub-citation-badge {
-    background: hsl(var(--muted) / 1);
+    background: transparent;
+    border: 1px solid hsl(var(--border) / 1);
     color: hsl(var(--muted-foreground) / 1);
   }
 
@@ -186,7 +189,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
     width: 100%;
     max-height: 10rem;
     object-fit: cover;
-    border-radius: calc(1.2 * var(--radius, 0.5rem));
+    border-radius: calc(0.75 * var(--radius, 0.5rem));
     margin: 0.5rem 0;
   }
 

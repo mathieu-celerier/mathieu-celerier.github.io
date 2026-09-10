@@ -24,7 +24,7 @@ function formatDate(iso: string) {
 }
 ---
 
-<PageLayout meta={{ title: 'Talks', ogImage: '/og/talks.png' }} highlightColor='hsl(199 89% 55%)'>
+<PageLayout meta={{ title: 'Talks', ogImage: '/og/talks.png' }} highlightColor='hsl(var(--primary))'>
   <PageIntro
     kicker='Speaking'
     title='Talks & Media'
@@ -72,8 +72,9 @@ function formatDate(iso: string) {
 <style>
   .talks-year-section {
     display: grid;
-    gap: 1rem;
-    margin-top: 2.25rem;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
   }
 
   .talks-year-section:first-of-type {
@@ -82,7 +83,8 @@ function formatDate(iso: string) {
 
   .talks-year-heading {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
     color: hsl(var(--primary) / 1);
   }
 
@@ -93,12 +95,12 @@ function formatDate(iso: string) {
 
   .talk-card {
     display: grid;
-    gap: 0.4rem;
-    padding: 1.1rem 1.25rem;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.5rem 1.25rem;
+    padding: 1.25rem 0;
     border: 1px solid hsl(var(--border) / 1);
-    border-radius: calc(2 * var(--radius, 0.5rem));
-    background:
-      linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(var(--muted) / 0.7));
+    border-inline: 0;
+    background: transparent;
   }
 
   .talk-date {
@@ -110,12 +112,15 @@ function formatDate(iso: string) {
 
   .talk-title {
     margin: 0;
+    grid-column: 2;
+    grid-row: 1;
     font-size: 1.1rem;
     line-height: 1.4;
   }
 
   .talk-meta {
     margin: 0;
+    grid-column: 2;
     color: hsl(var(--muted-foreground) / 1);
     font-size: 0.92rem;
   }
@@ -124,10 +129,17 @@ function formatDate(iso: string) {
     display: flex;
     flex-wrap: wrap;
     gap: 0.55rem;
+    grid-column: 2;
     margin-top: 0.4rem;
   }
 
   .talks-empty {
     color: hsl(var(--muted-foreground) / 1);
+  }
+
+  @media (max-width: 600px) {
+    .talks-year-section { grid-template-columns: 1fr; gap: 0.75rem; margin-top: 2.25rem; }
+    .talk-card { grid-template-columns: 1fr; gap: 0.45rem; }
+    .talk-title, .talk-meta, .talk-links { grid-column: auto; grid-row: auto; }
   }
 </style>

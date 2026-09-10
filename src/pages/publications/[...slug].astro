@@ -49,7 +49,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     title: entry.data.title,
     ogImage: `/og/publications/${entry.data.bibkey}.png`
   }}
-  highlightColor='hsl(199 89% 55%)'
+  highlightColor='hsl(var(--primary))'
 >
   <article class='pub-detail'>
     <header class='pub-detail-header'>
@@ -156,7 +156,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
 <style>
   .pub-detail {
     display: grid;
-    gap: 2rem;
+    gap: 3rem;
     max-width: 56rem;
     margin: 0 auto;
     padding-top: 0.5rem;
@@ -173,6 +173,8 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
   .pub-detail-header {
     display: grid;
     gap: 0.6rem;
+    padding: 2.5rem 0 3rem;
+    border-bottom: 1px solid hsl(var(--border) / 1);
   }
 
   .pub-detail-kicker {
@@ -187,7 +189,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
   .pub-detail-title {
     margin: 0;
     font-size: clamp(1.9rem, 4.4vw, 2.9rem);
-    line-height: 1.08;
+    line-height: 0.98;
     text-wrap: balance;
   }
 

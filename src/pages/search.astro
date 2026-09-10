@@ -4,7 +4,7 @@ import PageIntro from '@/components/PageIntro.astro'
 import { PFSearch } from 'astro-pure/components/pages'
 ---
 
-<PageLayout meta={{ title: 'Search', ogImage: '/og/search.png' }} highlightColor='hsl(199 89% 55%)'>
+<PageLayout meta={{ title: 'Search', ogImage: '/og/search.png' }} highlightColor='hsl(var(--primary))'>
   <PageIntro kicker='Find anything' title='Search' copy='Search across news, publications, and pages.' />
   <PFSearch />
 </PageLayout>

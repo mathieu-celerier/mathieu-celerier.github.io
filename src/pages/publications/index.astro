@@ -36,7 +36,7 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
 )
 ---
 
-<PageLayout meta={{ title: 'Publications', ogImage: '/og/publications.png' }} highlightColor='hsl(199 89% 55%)'>
+<PageLayout meta={{ title: 'Publications', ogImage: '/og/publications.png' }} highlightColor='hsl(var(--primary))'>
   <PageIntro
     kicker='Research output'
     title='Publications'
@@ -126,8 +126,10 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
 <style>
   .pub-year-section {
     display: grid;
-    gap: 1rem;
-    margin-top: 2.25rem;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding-top: 0.25rem;
   }
 
   .pub-year-section:first-of-type {
@@ -136,7 +138,8 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
 
   .pub-year-heading {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
     color: hsl(var(--primary) / 1);
   }
 
@@ -150,6 +153,9 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
     flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 0.5rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid hsl(var(--border) / 1);
+    background: hsl(var(--card) / 0.7);
   }
 
   .pub-filter {
@@ -166,10 +172,14 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
 
   .pub-filter select {
     border: 1px solid hsl(var(--border) / 1);
-    border-radius: 0.5rem;
-    background: hsl(var(--background) / 1);
+    border-radius: 0.35rem;
+    background: hsl(var(--card) / 1);
     color: hsl(var(--foreground) / 1);
     padding: 0.3rem 0.55rem;
     font-size: 0.85rem;
+  }
+
+  @media (max-width: 600px) {
+    .pub-year-section { grid-template-columns: 1fr; gap: 0.75rem; margin-top: 2.25rem; }
   }
 </style>

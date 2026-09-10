@@ -237,7 +237,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 }))
 ---
 
-<PageLayout meta={{ title: 'CV', ogImage: '/og/cv.png' }} highlightColor='hsl(199 89% 55%)'>
+<PageLayout meta={{ title: 'CV', ogImage: '/og/cv.png' }} highlightColor='hsl(var(--primary))'>
   <section class='cv-shell'>
     <section class='cv-hero'>
       <div class='cv-hero-main'>
@@ -483,7 +483,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 <style>
   .cv-shell {
     display: grid;
-    gap: 2.75rem;
+    gap: clamp(3rem, 7vw, 6rem);
     max-width: 78rem;
     margin: 0 auto;
     padding-top: 0.75rem;
@@ -492,17 +492,16 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
   .cv-hero,
   .cv-panel {
     border: 1px solid hsl(var(--border) / 1);
-    background:
-      radial-gradient(circle at top right, hsl(var(--primary) / 0.16), transparent 45%),
-      linear-gradient(180deg, hsl(var(--background) / 0.98), hsl(var(--muted) / 0.92));
-    box-shadow: 0 20px 45px -40px rgba(15, 23, 42, 0.45);
+    background: transparent;
+    box-shadow: none;
   }
 
   .cv-hero {
     display: grid;
     gap: 1.4rem;
-    padding: 2rem;
-    border-radius: 1.9rem;
+    padding: clamp(2rem, 5vw, 4rem) 0;
+    border-inline: 0;
+    border-radius: 0;
   }
 
   .cv-hero-main,
@@ -572,13 +571,13 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-download {
     width: fit-content;
-    background: hsl(var(--foreground) / 1);
-    color: hsl(var(--background) / 1);
+    background: hsl(var(--primary) / 1);
+    color: hsl(var(--card) / 1);
     border-color: transparent;
   }
 
   .cv-download :global(svg) {
-    color: hsl(var(--background) / 1);
+    color: hsl(var(--card) / 1);
   }
 
   .cv-links {
@@ -655,10 +654,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
   .cv-facts-grid {
     grid-template-columns: 1fr;
     gap: 0.9rem;
-    padding: 1rem 1.1rem;
-    border: 1px solid hsl(var(--border) / 0.7);
-    border-radius: 1rem;
-    background: hsl(var(--background) / 0.45);
+    padding: 1rem 0 0;
+    border-top: 1px solid hsl(var(--border) / 1);
   }
 
   .cv-fact {
@@ -679,7 +676,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-section-header {
     display: grid;
-    gap: 0.3rem;
+    grid-template-columns: minmax(8rem, 0.45fr) minmax(0, 1.55fr);
+    gap: 0.3rem 1.5rem;
   }
 
   .cv-section-kicker {
@@ -856,6 +854,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 0.85fr);
       align-items: start;
     }
+    .cv-hero-side { padding-left: 2rem; border-inline-start: 1px solid hsl(var(--border) / 1); }
   }
 
   @media (max-width: 639px) {
@@ -866,8 +865,9 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
     .cv-hero,
     .cv-panel {
-      padding: 1rem;
-      border-radius: 1.05rem;
+      padding: 1.5rem 0;
+      border-radius: 0;
     }
+    .cv-section-header { grid-template-columns: 1fr; gap: 0.6rem; }
   }
 </style>

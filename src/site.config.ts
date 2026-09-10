@@ -47,7 +47,7 @@ export const theme: ThemeUserConfig = {
 
   /** Configure the header of your site. */
   header: {
-    useTitle: false,
+    useTitle: true,
     searchButton: true,
     menu: [
       // { title: 'Blog', link: '/blog' },
@@ -66,7 +66,7 @@ export const theme: ThemeUserConfig = {
     // year: `© 2019 - ${new Date().getFullYear()}`,
     links: [],
     /** Enable displaying a “Astro & Pure theme powered” link in your site’s footer. */
-    credits: true,
+    credits: false,
     /** Optional details about the social media accounts for this site. */
     social: { github: 'https://github.com/mathieu-celerier/mathieu-celerier.github.io' }
   },

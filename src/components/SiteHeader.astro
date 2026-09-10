@@ -1,0 +1,44 @@
+---
+import config from '@/site-config'
+import { Icon } from 'astro-pure/user'
+const current = Astro.url.pathname
+---
+<header class='site-header'>
+  <a class='brand' href='/' aria-label='Mathieu Celerier — home'><span class='brand-mark' aria-hidden='true'>mc.</span><span>Mathieu Celerier</span></a>
+  <nav aria-label='Main navigation'>
+    {config.header.menu?.map(item => <a href={item.link} aria-current={current.startsWith(item.link) ? 'page' : undefined}>{item.title}</a>)}
+  </nav>
+  <div class='controls'>
+    <a href='/search' aria-label='Search'><Icon name='search' /></a>
+    <button type='button' data-theme-toggle aria-label='Switch color theme'><Icon name='sun' /></button>
+  </div>
+</header>
+<script>
+  import { setTheme } from '../../packages/pure/utils/theme'
+  function init() {
+    const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]')
+    if (!button || button.dataset.bound) return
+    button.dataset.bound = 'true'
+    const label = () => button.setAttribute('aria-label', `Switch to ${document.documentElement.classList.contains('dark') ? 'light' : 'dark'} mode`)
+    label()
+    button.addEventListener('click', () => { setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark', true); label() })
+  }
+  init()
+  document.addEventListener('astro:page-load', init)
+</script>
+<style>
+  .site-header { display:flex; align-items:center; gap:2rem; padding:1.5rem 0; border-bottom:1px solid hsl(var(--border)); }
+  .brand { display:flex; align-items:center; gap:.65rem; margin-right:auto; font-size:.88rem; font-weight:600; white-space:nowrap; }
+  .brand-mark { display:grid; place-items:center; width:2.3rem; height:2.3rem; border:1px solid hsl(var(--foreground)); border-radius:50%; font-family:Georgia,serif; font-size:1.2rem; }
+  nav { display:flex; gap:1.4rem; }
+  nav a { font-size:.82rem; color:hsl(var(--muted-foreground)); padding:.5rem 0; }
+  nav a[aria-current] { color:hsl(var(--primary)); text-decoration:underline; text-underline-offset:.5rem; }
+  .controls { display:flex; gap:.3rem; }
+  .controls a,.controls button { display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:50%; background:transparent; cursor:pointer; }
+  .controls :global(svg) { width:1.1rem; height:1.1rem; }
+  .controls a:hover,.controls button:hover { background:hsl(var(--muted)); }
+  @media(max-width:760px) {
+    .site-header { flex-wrap:wrap; gap:.5rem; padding:1rem 0 .5rem; }
+    nav { order:3; width:100%; justify-content:space-between; gap:.5rem; padding-top:.4rem; }
+  }
+</style>

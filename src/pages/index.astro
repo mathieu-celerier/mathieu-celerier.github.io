@@ -1,444 +1,172 @@
 ---
-import { Image } from 'astro:assets'
 import { getCollection } from 'astro:content'
-import { Button } from 'astro-pure/user'
-
 import PageLayout from '@/layouts/BaseLayout.astro'
-import NewsList from '@/components/NewsList.astro'
-import config from '@/site-config'
-import { loadCV } from '../lib/cv-data-loader.ts'
-
+import { loadCV } from '../lib/cv-data-loader'
 const cv = loadCV()
-
-const typeLabels: Record<string, string> = {
-  journal: 'Journal',
-  conference: 'Conference',
-  workshop: 'Workshop',
-  preprint: 'Preprint',
-  thesis: 'Thesis',
-  demo: 'Demo',
-  other: 'Other'
-}
-
-const allPublications = await getCollection('publications')
-const featuredPublication = allPublications
-  .filter((entry) => entry.data.featured)
-  .sort((a, b) => b.data.year - a.data.year)
-  .at(0)
-
-const identityLinks = [
-  cv.basics.scholar ? { label: 'Google Scholar', href: cv.basics.scholar } : null,
-  cv.basics.orcid ? { label: 'ORCID', href: cv.basics.orcid } : null,
-  cv.basics.github ? { label: 'GitHub', href: `https://github.com/${cv.basics.github}` } : null,
-  cv.basics.linkedin
-    ? { label: 'LinkedIn', href: `https://www.linkedin.com/in/${cv.basics.linkedin}` }
-    : null,
-  { label: 'Email', href: `mailto:${cv.basics.email}` }
-].filter((link): link is { label: string; href: string } => link !== null)
-
-const imagePath = config?.logo?.src
-const images = import.meta.glob<{ default: ImageMetadata }>(
-  '/src/assets/*.{jpeg,jpg,png,gif,avif,webp}'
-)
-const hasLogo = typeof imagePath === 'string' && imagePath.length > 0 && !!images[imagePath]
-if (imagePath && !hasLogo)
-  throw new Error(
-    `"${imagePath}" does not exist in glob: "src/assets/*.{jpeg,jpg,png,gif,avif,webp}"`
-  )
+const publications = (await getCollection('publications')).sort((a,b) => Number(!!b.data.featured)-Number(!!a.data.featured) || b.data.year-a.data.year).slice(0,3)
+const leadPaper = (await getCollection('publications')).find(entry => entry.data.bibkey === 'celerier2025explicit')
+const news = (await getCollection('news')).sort((a,b)=>b.data.date.getTime()-a.data.date.getTime()).slice(0,3)
+const profiles = [
+  {label:'Google Scholar', href:cv.basics.scholar},
+  {label:'GitHub', href:cv.basics.github ? 'https://github.com/'+cv.basics.github : undefined},
+  {label:'ORCID', href:cv.basics.orcid},
+  {label:'LinkedIn', href:cv.basics.linkedin ? 'https://www.linkedin.com/in/'+cv.basics.linkedin : undefined}
+].filter(p=>p.href)
 ---
-
-<PageLayout meta={{ title: 'Home', ogImage: '/og/home.png' }} highlightColor='hsl(199 89% 55%)'>
-  <section class='home-hero hero-grid-bg'>
-    {
-      hasLogo && (
-        <Image
-          src={images[imagePath]()}
-          alt={config?.logo?.alt || 'Profile'}
-          class='home-avatar'
-          loading='eager'
-          fetchpriority='high'
-        />
-      )
-    }
-
-    <p class='home-kicker'>
-      <span class='home-status-dot' aria-hidden='true'></span>
-      {cv.basics.position}
-    </p>
-    <h1 class='home-title'>{config.author}</h1>
-    <p class='home-role'>
-      <a class='styled-link' href='https://jrl.cnrs.fr' target='_blank' rel='noreferrer'
-        >CNRS-AIST Joint Robotics Laboratory (JRL)</a
-      >, IRL 3218, <a
-        class='styled-link'
-        href='https://www.aist.go.jp/'
-        target='_blank'
-        rel='noreferrer'>National Institute of Advanced Industrial Science and Technology (AIST)</a
-      >
-    </p>
-
-    <div class='home-actions'>
-      <Button href='/cv' variant='ahead' class='home-cta' title='View CV' />
-      <Button href='/publications' variant='ahead' title='Publications' />
-    </div>
-
-    <div class='home-identity-links'>
-      {
-        identityLinks.map((link) => (
-          <a
-            href={link.href}
-            class='home-identity-pill'
-            target={link.href.startsWith('http') ? '_blank' : undefined}
-            rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </div>
-  </section>
-
-  <div id='content' class='animate home-bento'>
-    <section class='bento-tile bento-tile-news' data-reveal>
-      <div class='bento-tile-top'>
-        <h2 class='bento-tile-heading'>News</h2>
-        <a class='styled-link bento-tile-more' href='/news'>All news →</a>
+<PageLayout meta={{title:'Home',ogImage:'/og/home.png'}}>
+  <main>
+    <section class='hero' aria-labelledby='intro'>
+      <div class='intro'>
+        <p class='eyebrow'>Robotics · Human–robot interaction</p>
+        <h1 id='intro'>Robots that work<br />with <em>people.</em></h1>
+        <p class='introduction'>I’m Mathieu Celerier, a postdoctoral researcher studying physical human–robot interaction.</p>
+        <p class='affiliation'>At <a href='https://jrl.cnrs.fr' target='_blank' rel='noreferrer'>CNRS-AIST JRL</a> in Tsukuba, Japan, I explore how control and human perception shape the way we work with robots.</p>
+        <div class='actions'><a class='primary-action' href='/publications'>Explore my research <span aria-hidden='true'>↗</span></a><a class='text-action' href='/cv'>View CV →</a></div>
       </div>
-      <NewsList maxItems={3} compact flat showHeading={false} />
-    </section>
-
-    {
-      featuredPublication && (
-        <section class='bento-tile bento-tile-pub' data-reveal>
-          <div class='bento-tile-top'>
-            <h2 class='bento-tile-heading'>Featured Publication</h2>
+      <figure class='interaction-figure' data-study='contact'>
+        <div class='figure-top'><span>Physical interaction</span><span>01 / Study</span></div>
+        <svg viewBox='0 0 420 360' role='img' aria-labelledby='diagram-title'>
+          <title id='diagram-title'>Abstract robotic arm reaching toward a shared point of interaction</title>
+          <defs><pattern id='dots' width='20' height='20' patternUnits='userSpaceOnUse'><circle cx='1' cy='1' r='.8' fill='currentColor' opacity='.18'/></pattern></defs>
+          <rect width='420' height='360' fill='url(#dots)'/>
+          <g class='construction' fill='none' stroke='currentColor' stroke-width='1'>
+            <circle cx='230' cy='147' r='87' stroke-dasharray='3 6'/><circle cx='230' cy='147' r='119' opacity='.35'/>
+            <path d='M230 15V300M88 147H370' opacity='.25'/><path d='M60 292H365M60 298H365' opacity='.5'/>
+          </g>
+          <g class='robot' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'>
+            <path d='M102 275L124 201L173 238L227 157' stroke-width='22'/>
+            <path class='robot-inset' d='M102 275L124 201L173 238L227 157' stroke-width='15'/>
+            <path d='M78 290V277H126V290' stroke-width='3'/>
+            <circle cx='124' cy='201' r='14' stroke-width='3'/><circle cx='173' cy='238' r='14' stroke-width='3'/>
+            <path d='M220 163L236 145M233 142L242 139L251 148L248 157' stroke-width='3'/>
+          </g>
+          <g class='interaction' fill='none' stroke='currentColor'>
+            <path d='M349 91C303 85 302 142 258 146' stroke-width='2'/>
+            <path d='M350 105C310 99 308 157 268 158' stroke-width='1' opacity='.5'/>
+            <circle cx='249' cy='146' r='7' fill='currentColor' stroke='none'/><circle cx='249' cy='146' r='18' opacity='.4'/>
+          </g>
+          <g fill='currentColor' font-family='monospace' font-size='9'><text x='276' y='185'>SHARED CONTACT</text><text x='62' y='325'>CONTROL ↔ PERCEPTION</text></g>
+        </svg>
+        <figcaption>
+          <div class='study-controls' role='group' aria-label='Explore the research illustration'>
+            <button type='button' data-study-mode='contact' aria-pressed='true'>01 Contact</button>
+            <button type='button' data-study-mode='control' aria-pressed='false'>02 Control</button>
+            <button type='button' data-study-mode='perception' aria-pressed='false'>03 Perception</button>
           </div>
-          <article class='bento-pub'>
-            <div class='bento-pub-badges'>
-              <span class='bento-pub-badge'>
-                {typeLabels[featuredPublication.data.type] ?? featuredPublication.data.type}
-              </span>
-              <span class='bento-pub-badge'>{featuredPublication.data.year}</span>
-            </div>
-            <a class='bento-pub-title' href={`/publications/${featuredPublication.data.bibkey}`}>
-              {featuredPublication.data.title}
-            </a>
-            <p class='bento-pub-authors'>{featuredPublication.data.authors}</p>
-            {
-              featuredPublication.data.venue ? (
-                <p class='bento-pub-venue'>{featuredPublication.data.venue}</p>
-              ) : null
-            }
-          </article>
-          <a class='styled-link bento-tile-more' href='/publications'>All publications →</a>
-        </section>
-      )
-    }
-
-  </div>
+          <p class='study-caption' aria-live='polite'>The point where human intention meets robot motion.</p>
+        </figcaption>
+      </figure>
+    </section>
+    <div class='profile-strip'><span>Find me elsewhere</span><div>{profiles.map(p=><a href={p.href} target='_blank' rel='noreferrer'>{p.label} ↗</a>)}</div></div>
+    <section class='selected' aria-labelledby='selected-title'>
+      <div class='section-heading'><div><p class='eyebrow'>Selected work</p><h2 id='selected-title'>From questions to research.</h2></div><a class='text-action' href='/publications'>All publications ↗</a></div>
+      {leadPaper && <article class='research-feature'>
+        <div class='feature-label'><span class='eyebrow'>Research in focus</span><span class='feature-year'>{leadPaper.data.year}</span></div>
+        <div class='feature-content'><p class='eyebrow'>Physical human–robot interaction</p><h3><a href={'/publications/'+leadPaper.data.bibkey}>{leadPaper.data.title}</a></h3><p class='authors'>{leadPaper.data.authors}</p><a class='text-action' href={'/publications/'+leadPaper.data.bibkey}>Read the research <span aria-hidden='true'>↗</span></a></div>
+      </article>}
+      <div class='paper-list'>{publications.filter(entry=>entry.id !== leadPaper?.id).map((entry,i)=><article class='paper'>
+        <span class='paper-index'>0{i+1}</span><div><p class='paper-meta'>{entry.data.venue || entry.data.type} <span> / {entry.data.year}</span></p><h3><a href={'/publications/'+entry.data.bibkey}>{entry.data.title}</a></h3><p class='authors'>{entry.data.authors}</p></div><a class='paper-arrow' href={'/publications/'+entry.data.bibkey} aria-label={'Read '+entry.data.title}>↗</a>
+      </article>)}</div>
+    </section>
+    <section class='updates' aria-labelledby='updates-title'><div><p class='eyebrow'>Along the way</p><h2 id='updates-title'>Recent news.</h2><a class='text-action' href='/news'>All updates ↗</a></div><ol>{news.map(entry=><li><time datetime={entry.data.date.toISOString()}>{entry.data.date.toLocaleDateString('en-GB',{month:'short',day:'numeric',year:'numeric'})}</time><a href={entry.data.externalUrl || (entry.data.hasPage || entry.body?.includes('{/* more */}') ? '/news/'+entry.id : '/news')}>{entry.data.title} ↗</a></li>)}</ol></section>
+    <section class='contact'><div><p class='eyebrow'>An open conversation</p><p>Interested in physical human–robot interaction?</p></div><a href={'mailto:'+cv.basics.email}>Let’s <em>talk.</em> ↗</a></section>
+  </main>
 </PageLayout>
-
 <script>
-  // Mouse-following spotlight on bento tiles. Document-level delegation:
-  // registers once and keeps working across view-transition navigations.
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-  document.addEventListener('mousemove', (event) => {
-    if (reduceMotion.matches) return
-    const tile = (event.target as HTMLElement | null)?.closest<HTMLElement>('.bento-tile')
-    if (!tile) return
-    const rect = tile.getBoundingClientRect()
-    tile.style.setProperty('--mx', `${event.clientX - rect.left}px`)
-    tile.style.setProperty('--my', `${event.clientY - rect.top}px`)
+  const descriptions = {
+    contact: 'The point where human intention meets robot motion.',
+    control: 'How a robot responds to contact: compliance, stability, and safety.',
+    perception: 'How people experience and interpret a robot’s physical response.'
+  }
+  document.addEventListener('click', event => {
+    const button = (event.target as Element)?.closest<HTMLButtonElement>('[data-study-mode]')
+    const figure = button?.closest<HTMLElement>('.interaction-figure')
+    const mode = button?.dataset.studyMode as keyof typeof descriptions
+    if (!figure || !(mode in descriptions)) return
+    figure.dataset.study = mode
+    figure.querySelectorAll('button').forEach(item=>item.setAttribute('aria-pressed', String(item===button)))
+    const caption = figure.querySelector('.study-caption')
+    if (caption) caption.textContent = descriptions[mode]
   })
 </script>
-
 <style>
-  .home-hero {
-    position: relative;
-    display: grid;
-    justify-items: start;
-    gap: 0.6rem;
-    padding: 2.5rem 0 2rem;
+  .study-controls { display:flex; justify-content:space-between; gap:.3rem; }
+  .study-controls button { color:hsl(var(--muted-foreground)); font:inherit; padding:.6rem .2rem; cursor:pointer; border-bottom:2px solid transparent; }
+  .study-controls button[aria-pressed='true'] { color:hsl(var(--primary)); border-color:hsl(var(--primary)); }
+  .study-caption { line-height:1.6; min-height:3.2em; margin:.75rem 0 0; font-size:.75rem; }
+  .interaction-figure[data-study='control'] .robot { color:hsl(var(--primary)); }
+  .interaction-figure[data-study='perception'] .construction { color:hsl(var(--primary)); }
+  .interaction-figure[data-study='perception'] .interaction { color:hsl(var(--signal)); }
+  .research-feature { display:grid; grid-template-columns:10rem 1fr; gap:2rem; padding:2rem; margin-bottom:1.5rem; background:hsl(var(--muted)/.55); border:1px solid hsl(var(--border)); border-radius:5px; }
+  .feature-label { display:flex; flex-direction:column; justify-content:space-between; gap:2rem; border-right:1px solid hsl(var(--border)); }
+  .feature-year { font:italic 2.6rem Georgia,serif; color:hsl(var(--primary)); }
+  .feature-content h3 { font-size:clamp(1.4rem,2.7vw,1.85rem); line-height:1.25; margin:.8rem 0; letter-spacing:-.025em; }
+  .feature-content .text-action { margin-top:1rem; }
+  .paper { transition:background .2s; }
+  .paper:hover,.paper:focus-within { background:hsl(var(--muted)/.5); }
+  .paper-arrow { transition:transform .2s; }
+  .paper:hover .paper-arrow { transform:translate(2px,-2px); }
+  .contact { display:flex; justify-content:space-between; align-items:center; gap:2rem; }
+  .contact em { font-family:Georgia,serif; color:hsl(var(--primary)); }
+  @media(max-width:600px) {
+    .research-feature { grid-template-columns:1fr; padding:1.3rem; gap:1.2rem; }
+    .feature-label { flex-direction:row; align-items:center; border-right:0; border-bottom:1px solid hsl(var(--border)); padding-bottom:1rem; }
+    .feature-year { font-size:1.7rem; }
+    .contact { flex-direction:column; align-items:start; gap:.5rem; }
   }
-
-  /* Soft accent glow behind the hero (the grid texture lives on
-     .hero-grid-bg::before; this is its companion layer). */
-  .home-hero::after {
-    content: '';
-    position: absolute;
-    top: -8rem;
-    right: -6rem;
-    width: 30rem;
-    height: 30rem;
-    border-radius: 999px;
-    background: radial-gradient(circle, hsl(var(--primary) / 0.16), transparent 62%);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .home-status-dot {
-    display: inline-block;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: hsl(var(--primary) / 1);
-    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5);
-    animation: home-pulse 2.4s ease-out infinite;
-  }
-
-  @keyframes home-pulse {
-    0% {
-      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.45);
-    }
-    70% {
-      box-shadow: 0 0 0 0.55rem hsl(var(--primary) / 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .home-status-dot {
-      animation: none;
-    }
-  }
-
-  .home-avatar {
-    height: 5rem;
-    width: auto;
-    border-radius: 999px;
-    border: 1px solid hsl(var(--border) / 1);
-    padding: 0.25rem;
-    margin-bottom: 0.4rem;
-  }
-
-  .home-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    margin: 0;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: hsl(var(--primary) / 1);
-  }
-
-  .home-title {
-    margin: 0;
-    font-size: clamp(2.6rem, 7vw, 5rem);
-    line-height: 0.98;
-    text-wrap: balance;
-    /* Subtle accent sweep on the name */
-    background: linear-gradient(
-      95deg,
-      hsl(var(--foreground) / 1) 45%,
-      hsl(var(--primary) / 0.95)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    padding-bottom: 0.08em;
-  }
-
-  .home-role {
-    margin: 0.3rem 0 0;
-    max-width: 42rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: hsl(var(--muted-foreground) / 1);
-  }
-
-  .home-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 1rem;
-  }
-
-  .home-cta {
-    background: hsl(var(--foreground) / 1);
-    color: hsl(var(--background) / 1);
-    border-color: transparent;
-  }
-
-  .home-cta :global(svg) {
-    color: hsl(var(--background) / 1);
-  }
-
-  .home-identity-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .home-identity-pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.8rem;
-    padding: 0 0.7rem;
-    border-radius: 999px;
-    border: 1px solid hsl(var(--border) / 1);
-    background: hsl(var(--background) / 0.85);
-    color: hsl(var(--muted-foreground) / 1);
-    text-decoration: none;
-    font-size: 0.82rem;
-  }
-
-  .home-identity-pill:hover {
-    color: hsl(var(--primary) / 1);
-    border-color: hsl(var(--primary) / 0.4);
-  }
-
-  .home-bento {
-    display: grid;
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    grid-template-areas:
-      'news pub';
-    /* Each tile sizes to its own content — forcing the news tile to
-       stretch to match the pub+projects column's combined height left
-       a large empty gap stretched between its (few) entries. */
-    align-items: start;
-    gap: 1.1rem;
-    margin-top: 1.25rem;
-  }
-
-  .bento-tile {
-    position: relative;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    align-content: start;
-    gap: 0.6rem;
-    padding: 1.2rem 1.35rem;
-    border: 1px solid hsl(var(--border) / 1);
-    border-radius: calc(2 * var(--radius, 0.5rem));
-    background:
-      radial-gradient(circle at top right, hsl(var(--primary) / 0.09), transparent 42%),
-      linear-gradient(180deg, hsl(var(--background) / 0.96), hsl(var(--muted) / 0.7));
-    box-shadow: 0 18px 40px -38px rgba(15, 23, 42, 0.35);
-    overflow: hidden;
-    transition:
-      transform 0.25s ease,
-      border-color 0.25s ease,
-      box-shadow 0.25s ease;
-  }
-
-  /* Mouse-following spotlight, driven by --mx/--my set from the script
-     below. Sits under the content, above the tile background. */
-  .bento-tile::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(
-      18rem circle at var(--mx, 50%) var(--my, 50%),
-      hsl(var(--primary) / 0.08),
-      transparent 65%
-    );
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .bento-tile:hover::after {
-    opacity: 1;
-  }
-
-  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    .bento-tile:hover {
-      transform: translateY(-3px);
-      border-color: hsl(var(--primary) / 0.4);
-      box-shadow: 0 24px 48px -36px rgba(15, 23, 42, 0.5);
-    }
-  }
-
-  .bento-tile-pub {
-    border-color: hsl(var(--primary) / 0.3);
-  }
-
-  .bento-tile-news {
-    grid-area: news;
-  }
-
-  .bento-tile-pub {
-    grid-area: pub;
-  }
-
-  .bento-tile-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .bento-tile-heading {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  .bento-tile-more {
-    justify-self: start;
-    align-self: end;
-    font-size: 0.86rem;
-  }
-
-  .bento-pub {
-    display: grid;
-    gap: 0.45rem;
-    align-content: start;
-  }
-
-  .bento-pub-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .bento-pub-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.5rem;
-    padding: 0 0.55rem;
-    border-radius: 999px;
-    background: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary) / 1);
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  .bento-pub-title {
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.45;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .bento-pub-title:hover {
-    color: hsl(var(--primary) / 1);
-  }
-
-  .bento-pub-authors {
-    margin: 0;
-    font-size: 0.84rem;
-    line-height: 1.5;
-    color: hsl(var(--muted-foreground) / 1);
-  }
-
-  .bento-pub-venue {
-    margin: 0;
-    font-size: 0.82rem;
-    font-style: italic;
-    color: hsl(var(--muted-foreground) / 0.85);
-  }
-
-  @media (max-width: 860px) {
-    .home-bento {
-      grid-template-columns: 1fr;
-      grid-template-areas:
-        'news'
-        'pub';
-    }
+  @media(prefers-reduced-motion:reduce) { .paper,.paper-arrow { transition:none; } .paper:hover .paper-arrow { transform:none; } }
+  .eyebrow { margin:0; font-size:.68rem; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:hsl(var(--muted-foreground)); }
+  .hero { display:grid; grid-template-columns:1.2fr 1fr; gap:3rem; align-items:center; padding:5.5rem 0 4rem; }
+  h1 { font-size:clamp(3rem,5.2vw,4.7rem); font-weight:500; line-height:1.05; letter-spacing:-.055em; margin:1.6rem 0; }
+  h1 em { font-family:Georgia,'Times New Roman',serif; font-weight:400; color:hsl(var(--primary)); }
+  .introduction { font-size:1.07rem; line-height:1.6; max-width:29rem; margin:0 0 .8rem; }
+  .affiliation { font-size:.9rem; line-height:1.75; color:hsl(var(--muted-foreground)); max-width:29rem; margin:0; }
+  .affiliation a { text-decoration:underline; text-underline-offset:3px; }
+  .actions { display:flex; align-items:center; flex-wrap:wrap; gap:1.5rem; margin-top:1.8rem; }
+  .primary-action { display:flex; align-items:center; gap:1.5rem; padding:.85rem 1.1rem; background:hsl(var(--foreground)); color:hsl(var(--background)); border-radius:4px; font-size:.8rem; }
+  .primary-action:hover { opacity:.85; color:hsl(var(--background)); }
+  .text-action { font-size:.8rem; display:inline-block; padding:.5rem 0; }
+  .interaction-figure { margin:0; padding:1rem 1rem .9rem; border:1px solid hsl(var(--border)); border-radius:6px; background:hsl(var(--muted)/.35); }
+  .figure-top { display:flex; justify-content:space-between; gap:1rem; font-family:monospace; font-size:.59rem; color:hsl(var(--muted-foreground)); text-transform:uppercase; letter-spacing:.05em; }
+  .interaction-figure svg { width:100%; height:auto; margin:1rem 0 .2rem; }
+  .construction { color:hsl(var(--muted-foreground)); }
+  .robot { color:hsl(var(--foreground)); }
+  .robot-inset { stroke:hsl(var(--background)); }
+  .interaction { color:hsl(var(--primary)); }
+  figcaption { font-size:.65rem; color:hsl(var(--muted-foreground)); border-top:1px solid hsl(var(--border)); padding-top:.9rem; }
+  .profile-strip { display:flex; align-items:center; gap:2rem; border-block:1px solid hsl(var(--border)); padding:1.1rem 0; font-size:.72rem; }
+  .profile-strip>span { color:hsl(var(--muted-foreground)); }
+  .profile-strip>div { display:flex; flex-wrap:wrap; gap:1.8rem; }
+  .selected { padding:4.5rem 0; }
+  .section-heading { display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-bottom:2rem; }
+  h2 { font-size:clamp(1.6rem,3vw,2.1rem); font-weight:500; letter-spacing:-.035em; line-height:1.2; margin:.7rem 0 0; }
+  .paper { display:grid; grid-template-columns:2rem 1fr 2rem; gap:1rem; border-top:1px solid hsl(var(--border)); padding:1.5rem 0; }
+  .paper-index { font-family:monospace; font-size:.7rem; color:hsl(var(--muted-foreground)); padding-top:.1rem; }
+  .paper-meta { font-size:.64rem; text-transform:uppercase; letter-spacing:.06em; color:hsl(var(--primary)); margin:0 0 .6rem; }
+  .paper-meta span { color:hsl(var(--muted-foreground)); }
+  h3 { font-size:1.15rem; font-weight:500; line-height:1.4; max-width:46rem; margin:0; }
+  .authors { font-size:.76rem; color:hsl(var(--muted-foreground)); line-height:1.6; margin:.5rem 0 0; }
+  .paper-arrow { align-self:center; font-size:1.4rem; text-align:right; }
+  .updates { display:grid; grid-template-columns:1fr 2fr; gap:3rem; padding:2.5rem 0 4rem; border-top:1px solid hsl(var(--border)); }
+  .updates .text-action { margin-top:1rem; }
+  .updates ol { padding:0; margin:0; list-style:none; }
+  .updates li { display:grid; grid-template-columns:7rem 1fr; gap:1rem; padding:1rem 0; border-bottom:1px solid hsl(var(--border)); }
+  .updates li:first-child { padding-top:0; }
+  time { font-size:.68rem; color:hsl(var(--muted-foreground)); padding-top:.2rem; }
+  .updates li a { font-size:.88rem; line-height:1.5; }
+  .contact { border-top:1px solid hsl(var(--border)); padding:2.5rem 0 .5rem; }
+  .contact p { color:hsl(var(--muted-foreground)); font-size:.85rem; }
+  .contact>a { font-size:2.5rem; letter-spacing:-.04em; }
+  @media(max-width:760px) {
+    .hero { grid-template-columns:1fr; padding:2.8rem 0 2rem; gap:2.5rem; }
+    h1 { font-size:clamp(3rem,9vw,4.5rem); }
+    .interaction-figure { max-width:28rem; width:100%; box-sizing:border-box; }
+    .profile-strip { align-items:start; flex-direction:column; gap:.75rem; }
+    .profile-strip>div { gap:1rem; }
+    .selected { padding:3rem 0; }
+    .section-heading { align-items:start; flex-direction:column; }
+    .paper { grid-template-columns:1.3rem 1fr 1rem; gap:.5rem; }
+    .updates { grid-template-columns:1fr; gap:1.5rem; }
+    .updates li { grid-template-columns:1fr; gap:.35rem; }
   }
 </style>

@@ -446,9 +446,9 @@ const timelineEntries = entries.map((entry, index, array) => {
     display: grid;
     gap: 0.65rem;
     padding: 0.95rem 1.1rem;
-    border-radius: calc(2 * var(--radius, 0.5rem));
-    background:
-      linear-gradient(180deg, hsl(var(--background) / 0.92), hsl(var(--muted) / 0.7));
+    border: 1px solid hsl(var(--border) / 1);
+    border-radius: var(--radius);
+    background: hsl(var(--card) / 0.72);
     box-shadow: 0 16px 40px -38px rgba(15, 23, 42, 0.32);
   }
 
