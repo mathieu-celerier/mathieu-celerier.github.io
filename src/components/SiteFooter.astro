@@ -1,0 +1,56 @@
+---
+import { loadCV } from '@/lib/cv-data-loader'
+
+const { basics } = loadCV()
+---
+
+<footer class='site-footer'>
+  <div>
+    <a href='/' class='footer-name'>Mathieu Celerier<span aria-hidden='true'>.</span></a><p>
+      Robotics research · Tsukuba, Japan
+    </p>
+  </div>
+  <nav aria-label='Footer navigation'>
+    <a href={`mailto:${basics.email}`}>Email ↗</a><a href='/cv.pdf'>CV PDF ↗</a><a href='/rss.xml'
+      >RSS ↗</a>
+  </nav>
+  <small>© {new Date().getFullYear()} Mathieu Celerier</small>
+</footer>
+<style>
+  .site-footer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    margin-top: 5rem;
+    padding: 2rem 0;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .footer-name {
+    font-size: 1.3rem;
+    letter-spacing: -0.04em;
+  }
+  .footer-name span {
+    color: hsl(var(--primary));
+  }
+  p,
+  small {
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: start;
+    font-size: 0.8125rem;
+  }
+  small {
+    grid-column: 1/-1;
+  }
+  @media (max-width: 600px) {
+    .site-footer {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+</style>

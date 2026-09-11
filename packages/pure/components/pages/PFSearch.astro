@@ -28,7 +28,7 @@ import '@pagefind/default-ui/css/ui.css'
       // from connectedCallback (which reliably re-runs per navigation) and
       // guard against double-init in case it's ever called twice for the
       // same element instance.
-      if (this.initialized) return
+      if (this.initialized || !this.querySelector('#site-search')) return
       this.initialized = true
 
       // const shouldStrip = this.dataset.stripTrailingSlash !== undefined
@@ -64,14 +64,14 @@ import '@pagefind/default-ui/css/ui.css'
 
 <style>
   #site-search {
-    --pagefind-ui-scale: 0.8;
+    --pagefind-ui-scale: 1;
     --pagefind-ui-primary: hsl(var(--primary) / var(--un-bg-opacity, 1));
     --pagefind-ui-text: hsl(var(--foreground) / var(--un-text-opacity, 1));
     --pagefind-ui-background: hsl(var(--muted) / var(--un-bg-opacity, 1));
     --pagefind-ui-border: hsl(var(--border) / var(--un-border-opacity, 1));
     --pagefind-ui-tag: hsl(var(--muted-foreground) / var(--un-text-opacity, 1));
-    --pagefind-ui-border-width: 2px;
-    --pagefind-ui-border-radius: calc(var(--radius) + 2px);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 4px;
     --pagefind-ui-image-border-radius: calc(var(--radius) + 2px);
     --pagefind-ui-image-box-ratio: 3 / 2;
     --pagefind-ui-font: sans-serif;

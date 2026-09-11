@@ -1,0 +1,186 @@
+---
+/** Conceptual research diagram: geometry illustrates ideas, not experimental results. */
+---
+
+<figure class='interaction-figure' data-study='contact'>
+  <div class='figure-top'><span>Physical interaction</span><span>01 / Study</span></div>
+  <svg viewBox='0 0 420 360' role='img' aria-labelledby='diagram-title'>
+    <title id='diagram-title'>
+      Abstract robotic arm reaching toward a shared point of interaction
+    </title>
+    <defs
+      ><pattern id='dots' width='20' height='20' patternUnits='userSpaceOnUse'
+        ><circle cx='1' cy='1' r='.8' fill='currentColor' opacity='.18'></circle></pattern
+      ></defs
+    >
+    <rect width='420' height='360' fill='url(#dots)'></rect>
+    <g class='construction' fill='none' stroke='currentColor' stroke-width='1'>
+      <circle cx='230' cy='147' r='87' stroke-dasharray='3 6'></circle><circle
+        cx='230'
+        cy='147'
+        r='119'
+        opacity='.35'></circle>
+      <path d='M230 15V300M88 147H370' opacity='.25'></path><path
+        d='M60 292H365M60 298H365'
+        opacity='.5'></path>
+    </g>
+    <g
+      class='robot'
+      fill='none'
+      stroke='currentColor'
+      stroke-linecap='round'
+      stroke-linejoin='round'
+    >
+      <path d='M102 275L124 201L173 238L227 157' stroke-width='22'></path>
+      <path class='robot-inset' d='M102 275L124 201L173 238L227 157' stroke-width='15'></path>
+      <path d='M78 290V277H126V290' stroke-width='3'></path>
+      <circle cx='124' cy='201' r='14' stroke-width='3'></circle><circle
+        cx='173'
+        cy='238'
+        r='14'
+        stroke-width='3'></circle>
+      <path d='M220 163L236 145M233 142L242 139L251 148L248 157' stroke-width='3'></path>
+    </g>
+    <g class='interaction' fill='none' stroke='currentColor'>
+      <path d='M349 91C303 85 302 142 258 146' stroke-width='2'></path>
+      <path d='M350 105C310 99 308 157 268 158' stroke-width='1' opacity='.5'></path>
+      <circle cx='249' cy='146' r='7' fill='currentColor' stroke='none'></circle><circle
+        cx='249'
+        cy='146'
+        r='18'
+        opacity='.4'></circle>
+    </g>
+    <g fill='currentColor' font-family='monospace' font-size='9'
+      ><text x='276' y='185'>SHARED CONTACT</text><text x='62' y='325'>CONTROL ↔ PERCEPTION</text
+      ></g
+    >
+    <g class='control-view' fill='none' stroke='currentColor' stroke-width='2'>
+      <path d='M260 170L270 177L260 184L270 191L260 198L270 205L260 212'></path>
+      <path d='M180 270H315V225' stroke-dasharray='4 4'></path>
+      <path d='M310 231L315 225L320 231'></path>
+      <text x='275' y='207' fill='currentColor' stroke='none' font-size='11'>COMPLIANCE</text>
+    </g>
+    <g class='perception-view' fill='none' stroke='currentColor' stroke-width='2'>
+      <path d='M285 70Q315 42 345 70Q315 98 285 70Z'></path><circle cx='315' cy='70' r='9'></circle>
+      <path d='M306 99L260 135' stroke-dasharray='4 4'></path>
+      <text x='277' y='115' fill='currentColor' stroke='none' font-size='11'>PERCEPTION</text>
+    </g>
+  </svg>
+  <figcaption>
+    <div class='study-controls' role='group' aria-label='Explore the research illustration'>
+      <button type='button' data-study-mode='contact' aria-pressed='true'>01 Contact</button>
+      <button type='button' data-study-mode='control' aria-pressed='false'>02 Control</button>
+      <button type='button' data-study-mode='perception' aria-pressed='false'>03 Perception</button>
+    </div>
+    <p class='study-caption' aria-live='polite'>
+      The point where human intention meets robot motion.
+    </p>
+  </figcaption>
+</figure>
+<script>
+  const descriptions = {
+    contact: 'The point where human intention meets robot motion.',
+    control: 'How a robot responds to contact: compliance, stability, and safety.',
+    perception: 'How people experience and interpret a robot’s physical response.'
+  }
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element)?.closest<HTMLButtonElement>('[data-study-mode]')
+    const figure = button?.closest<HTMLElement>('.interaction-figure')
+    const mode = button?.dataset.studyMode as keyof typeof descriptions
+    if (!figure || !(mode in descriptions)) return
+    figure.dataset.study = mode
+    figure
+      .querySelectorAll('button')
+      .forEach((item) => item.setAttribute('aria-pressed', String(item === button)))
+    const caption = figure.querySelector('.study-caption')
+    if (caption) caption.textContent = descriptions[mode]
+  })
+</script>
+<style>
+  .interaction-figure {
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 4px;
+    background: hsl(var(--muted) / 0.3);
+  }
+  .figure-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: hsl(var(--muted-foreground));
+    font: 0.8125rem/1.4 monospace;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    margin: 1rem 0;
+  }
+  .construction {
+    color: hsl(var(--muted-foreground));
+  }
+  .robot {
+    color: hsl(var(--foreground));
+  }
+  .robot-inset {
+    stroke: hsl(var(--background));
+  }
+  .interaction,
+  .control-view {
+    color: hsl(var(--primary));
+  }
+  .perception-view {
+    color: hsl(var(--signal));
+  }
+  .control-view,
+  .perception-view {
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  [data-study='control'] .control-view,
+  [data-study='perception'] .perception-view {
+    opacity: 1;
+  }
+  [data-study='control'] .robot {
+    color: hsl(var(--primary));
+  }
+  [data-study='perception'] .construction {
+    opacity: 0.35;
+  }
+  figcaption {
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 0.6rem;
+  }
+  .study-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+  button {
+    font: inherit;
+    font-size: 0.8125rem;
+    min-height: 44px;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    color: hsl(var(--muted-foreground));
+  }
+  button[aria-pressed='true'] {
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
+  }
+  .study-caption {
+    font-size: 0.875rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+    min-height: 4.8em;
+    margin: 0.6rem 0 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .control-view,
+    .perception-view {
+      transition: none;
+    }
+  }
+</style>

@@ -1,8 +1,9 @@
 ---
+import { loadTalks } from '@/lib/talks-data-loader'
+
+import { Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import PageIntro from '@/components/PageIntro.astro'
-import { Button } from 'astro-pure/user'
-import { loadTalks } from '@/lib/talks-data-loader'
 
 const talks = loadTalks()
   .filter((talk) => !Number.isNaN(Date.parse(talk.date)))
@@ -24,7 +25,10 @@ function formatDate(iso: string) {
 }
 ---
 
-<PageLayout meta={{ title: 'Talks', ogImage: '/og/talks.png' }} highlightColor='hsl(var(--primary))'>
+<PageLayout
+  meta={{ title: 'Talks', ogImage: '/og/talks.png' }}
+  highlightColor='hsl(var(--primary))'
+>
   <PageIntro
     kicker='Speaking'
     title='Talks & Media'
@@ -46,16 +50,31 @@ function formatDate(iso: string) {
                 </p>
                 <div class='talk-links'>
                   {talk.links?.slides ? (
-                    <Button href={talk.links.slides} target='_blank' variant='ahead' title='Slides' />
+                    <Button
+                      href={talk.links.slides}
+                      target='_blank'
+                      variant='ahead'
+                      title='Slides'
+                    />
                   ) : null}
                   {talk.links?.video ? (
                     <Button href={talk.links.video} target='_blank' variant='ahead' title='Video' />
                   ) : null}
                   {talk.links?.poster ? (
-                    <Button href={talk.links.poster} target='_blank' variant='ahead' title='Poster' />
+                    <Button
+                      href={talk.links.poster}
+                      target='_blank'
+                      variant='ahead'
+                      title='Poster'
+                    />
                   ) : null}
                   {talk.links?.website ? (
-                    <Button href={talk.links.website} target='_blank' variant='ahead' title='Website' />
+                    <Button
+                      href={talk.links.website}
+                      target='_blank'
+                      variant='ahead'
+                      title='Website'
+                    />
                   ) : null}
                 </div>
               </article>
@@ -114,7 +133,9 @@ function formatDate(iso: string) {
     margin: 0;
     grid-column: 2;
     grid-row: 1;
-    font-size: 1.1rem;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
     line-height: 1.4;
   }
 
@@ -122,7 +143,7 @@ function formatDate(iso: string) {
     margin: 0;
     grid-column: 2;
     color: hsl(var(--muted-foreground) / 1);
-    font-size: 0.92rem;
+    font-size: 1rem;
   }
 
   .talk-links {
@@ -138,8 +159,20 @@ function formatDate(iso: string) {
   }
 
   @media (max-width: 600px) {
-    .talks-year-section { grid-template-columns: 1fr; gap: 0.75rem; margin-top: 2.25rem; }
-    .talk-card { grid-template-columns: 1fr; gap: 0.45rem; }
-    .talk-title, .talk-meta, .talk-links { grid-column: auto; grid-row: auto; }
+    .talks-year-section {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-top: 2.25rem;
+    }
+    .talk-card {
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+    }
+    .talk-title,
+    .talk-meta,
+    .talk-links {
+      grid-column: auto;
+      grid-row: auto;
+    }
   }
 </style>

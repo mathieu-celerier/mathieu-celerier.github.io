@@ -39,20 +39,52 @@ html.dark {
   color-scheme: dark;
 }
 
-html { color-scheme: light; }
-html.dark { color-scheme: dark; }
-body { margin: 0; }
-:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
-[hidden] { display: none !important; }
-
-header-component {
-  backdrop-filter: blur(12px);
+html {
+  color-scheme: light;
 }
-
-header-component a[aria-label='Brand'] {
-  font-size: 1rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.03em;
+html.dark {
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+}
+body {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.editorial-button {
+  min-height: 44px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 4px;
+  background: transparent;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+  font-size: 0.875rem;
+}
+.editorial-button:hover {
+  background: hsl(var(--muted));
+}
+.editorial-button svg {
+  stroke: currentColor !important;
+}
+input,
+select,
+button {
+  font: inherit;
+}
+select {
+  min-height: 44px;
+}
+img,
+video {
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 4px;
+}
+[hidden] {
+  display: none !important;
 }
 
 footer .border-t {

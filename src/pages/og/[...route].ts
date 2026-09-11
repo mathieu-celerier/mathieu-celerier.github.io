@@ -1,12 +1,16 @@
-import { OGImageRoute } from 'astro-og-canvas'
 import { getCollection } from 'astro:content'
+import { OGImageRoute } from 'astro-og-canvas'
+
 import config from '@/site-config'
 
 const staticPages: Record<string, { title: string; description?: string }> = {
   home: { title: config.title, description: config.description },
   news: { title: 'News', description: 'Research milestones, talks, papers, and project updates.' },
   cv: { title: 'CV', description: 'Curriculum vitae' },
-  publications: { title: 'Publications', description: 'Journal articles, conference papers, and other research output.' },
+  publications: {
+    title: 'Publications',
+    description: 'Journal articles, conference papers, and other research output.'
+  },
   projects: { title: 'Projects', description: 'Research software, controllers, and tools.' },
   about: { title: 'About', description: `About ${config.author}` },
   search: { title: 'Search', description: 'Search the site.' },
@@ -44,11 +48,11 @@ export const { getStaticPaths, GET } = await OGImageRoute({
   getImageOptions: (_path, page: { title: string; description?: string }) => ({
     title: page.title,
     description: page.description,
-    bgGradient: [[10, 10, 18]],
-    border: { color: [56, 189, 248], width: 4, side: 'block-end' },
+    bgGradient: [[250, 248, 244]],
+    border: { color: [19, 69, 201], width: 4, side: 'block-end' },
     font: {
-      title: { color: [250, 250, 250], size: 64, weight: 'Bold' },
-      description: { color: [180, 190, 205], size: 32 }
+      title: { color: [21, 30, 46], size: 64, weight: 'Bold' },
+      description: { color: [76, 91, 107], size: 30 }
     },
     fonts,
     padding: 80

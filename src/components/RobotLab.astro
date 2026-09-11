@@ -1,0 +1,595 @@
+---
+import { loadCV } from '@/lib/cv-data-loader'
+
+const { basics } = loadCV()
+---
+
+<robot-lab class='lab'>
+  <div class='lab-heading'>
+    <span><i></i> HUMAN–ROBOT INTERACTION</span><span>TSUKUBA, JP / CNRS–AIST JRL</span>
+  </div>
+  <div class='lab-copy'>
+    <p class='lab-name'>Mathieu Celerier · {basics.position}</p>
+    <h1>Robots.<br />With <em>people.</em></h1>
+    <p class='lab-intro'>
+      Exploring the space where human intention<br class='desktop-break' /> meets robot motion.
+    </p>
+    <div class='lab-actions'>
+      <a href='/publications'>Explore the research <span>↗</span></a><a href='/cv'
+        >My background →</a
+      >
+    </div>
+  </div>
+  <div class='lab-scene'>
+    <svg viewBox='0 0 900 650' role='img' aria-labelledby='lab-scene-title'>
+      <title id='lab-scene-title'>
+        Interactive two-link robot arm reaching toward a movable target
+      </title>
+      <defs>
+        <linearGradient id='lab-metal' x1='0' x2='1' y1='0' y2='1'
+          ><stop class='metal-light'></stop><stop offset='.5' class='metal-mid'></stop><stop
+            offset='1'
+            class='metal-dark'></stop></linearGradient
+        >
+        <linearGradient id='lab-blue' x1='0' x2='1' y1='0' y2='1'
+          ><stop stop-color='#91c6ff'></stop><stop offset='.5' stop-color='#397cf1'></stop><stop
+            offset='1'
+            stop-color='#183e9e'></stop></linearGradient
+        >
+        <radialGradient id='lab-floor'
+          ><stop stop-color='currentColor' stop-opacity='.18'></stop><stop
+            offset='1'
+            stop-color='currentColor'
+            stop-opacity='0'></stop></radialGradient
+        >
+        <pattern id='lab-grid' width='48' height='48' patternUnits='userSpaceOnUse'
+          ><path d='M48 0H0V48' fill='none' stroke='currentColor' stroke-opacity='.11'
+          ></path></pattern
+        >
+        <filter id='lab-shadow' x='-50%' y='-50%' width='200%' height='200%'
+          ><feGaussianBlur stdDeviation='12'></feGaussianBlur></filter
+        >
+      </defs>
+      <g class='floor'>
+        <ellipse cx='490' cy='520' rx='370' ry='135' fill='url(#lab-floor)'></ellipse>
+        <path d='M70 420H850L900 640H0Z' fill='url(#lab-grid)'></path>
+        <g fill='none' stroke='currentColor'
+          ><ellipse cx='470' cy='520' rx='280' ry='83' opacity='.22'></ellipse><ellipse
+            cx='470'
+            cy='520'
+            rx='205'
+            ry='60'
+            opacity='.3'></ellipse><ellipse cx='470' cy='520' rx='115' ry='34' opacity='.35'
+          ></ellipse><path d='M100 520H840M470 420V635' stroke-dasharray='4 8' opacity='.3'
+          ></path></g
+        >
+      </g>
+      <ellipse
+        cx='485'
+        cy='519'
+        rx='92'
+        ry='21'
+        fill='#061025'
+        opacity='.3'
+        filter='url(#lab-shadow)'></ellipse>
+      <path
+        d='M425 492Q470 467 515 492V514Q470 541 425 514Z'
+        fill='url(#lab-metal)'
+        stroke='var(--lab-edge)'
+        stroke-width='2'></path>
+      <ellipse cx='470' cy='492' rx='45' ry='15' fill='url(#lab-blue)'></ellipse>
+      <path
+        d='M449 490V458Q470 444 491 458V490'
+        fill='url(#lab-metal)'
+        stroke='var(--lab-edge)'
+        stroke-width='2'></path>
+      <g fill='none' stroke-linecap='round' stroke-linejoin='round'>
+        <path
+          data-arm-outline
+          d='M470 460L427 255L640 245'
+          stroke='var(--lab-edge)'
+          stroke-width='53'></path>
+        <path data-arm d='M470 460L427 255L640 245' stroke='url(#lab-metal)' stroke-width='48'
+        ></path>
+        <path
+          data-arm-highlight
+          d='M470 460L427 255L640 245'
+          stroke='var(--lab-highlight)'
+          stroke-width='4'
+          opacity='.75'></path>
+      </g>
+      <g data-elbow transform='translate(427 255)'
+        ><circle r='35' fill='url(#lab-blue)' stroke='var(--lab-edge)' stroke-width='2'
+        ></circle><circle r='22' fill='url(#lab-metal)'></circle><circle
+          r='8'
+          fill='var(--lab-edge)'></circle><path
+          d='M-26 0H-19M19 0H26M0-26V-19M0 19V26'
+          stroke='#dbeaff'
+          stroke-width='2'></path></g
+      >
+      <g transform='translate(470 460)'
+        ><circle r='32' fill='url(#lab-blue)'></circle><circle r='19' fill='url(#lab-metal)'
+        ></circle><circle r='7' fill='var(--lab-edge)'></circle></g
+      >
+      <g data-gripper transform='translate(640 245)'
+        ><circle r='18' fill='url(#lab-blue)'></circle><path
+          d='M15-12L40-12L46-5M15 12L40 12L46 5'
+          fill='none'
+          stroke='var(--lab-grip)'
+          stroke-width='8'
+          stroke-linecap='round'></path></g
+      >
+      <g data-target transform='translate(640 245)' class='target'>
+        <circle
+          r='43'
+          fill='transparent'
+          stroke='currentColor'
+          stroke-width='1'
+          stroke-dasharray='3 7'></circle><circle
+          r='28'
+          fill='currentColor'
+          fill-opacity='.08'
+          stroke='currentColor'></circle><circle r='5' fill='currentColor'></circle><path
+          d='M-55 0H-38M38 0H55M0-55V-38M0 38V55'
+          stroke='currentColor'></path>
+      </g>
+      <g class='scene-note' fill='currentColor' font-family='monospace' font-size='12'
+        ><text x='540' y='590'>01 / PLANAR REACHING STUDY</text><text x='540' y='611'
+          >CONCEPTUAL MODEL · 2 DOF</text
+        ><text data-telemetry x='540' y='632'>TCP 640 / 245 · REACHABLE</text></g
+      >
+    </svg>
+    <div class='scene-label'>
+      <span class='target-symbol'>⊕</span>
+      <span>Shared space.<br /><strong>Move the target. Find the connection.</strong></span>
+    </div>
+  </div>
+  <div class='lab-bottom'>
+    <p><span>THE QUESTION</span> How can physical interaction feel natural?</p>
+    <div class='lab-controls' hidden>
+      <label
+        >Target X <output data-output='x'>640</output><input
+          data-axis='x'
+          aria-label='Target horizontal position'
+          type='range'
+          min='300'
+          max='760'
+          value='640'
+          step='1'
+        /></label
+      >
+      <label
+        >Target Y <output data-output='y'>245</output><input
+          data-axis='y'
+          aria-label='Target vertical position'
+          type='range'
+          min='120'
+          max='400'
+          value='245'
+          step='1'
+        /></label
+      >
+      <button type='button' data-reset>Reset ↺</button>
+    </div>
+    <noscript><p>A conceptual study of a robot’s reaching workspace.</p></noscript>
+  </div>
+</robot-lab>
+<script>
+  class RobotLab extends HTMLElement {
+    cleanup?: () => void
+    connectedCallback() {
+      const svg = this.querySelector('svg')!
+      const xInput = this.querySelector<HTMLInputElement>('[data-axis="x"]')!
+      const yInput = this.querySelector<HTMLInputElement>('[data-axis="y"]')!
+      const xOutput = this.querySelector<HTMLOutputElement>('[data-output="x"]')!
+      const yOutput = this.querySelector<HTMLOutputElement>('[data-output="y"]')!
+      const telemetry = this.querySelector<SVGTextElement>('[data-telemetry]')!
+      const target = this.querySelector<SVGGElement>('[data-target]')!
+      const elbow = this.querySelector<SVGGElement>('[data-elbow]')!
+      const gripper = this.querySelector<SVGGElement>('[data-gripper]')!
+      const paths = this.querySelectorAll('[data-arm],[data-arm-outline],[data-arm-highlight]')
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)')
+      let desired = { x: 640, y: 245 },
+        current = { ...desired },
+        frame = 0,
+        dragging = false
+      const solve = () => {
+        const dx = current.x - 470,
+          dy = current.y - 460
+        const distance = Math.hypot(dx, dy)
+        const d = Math.min(418, Math.max(12, distance))
+        const direction = Math.atan2(dy, dx)
+        const angle =
+          direction -
+          Math.acos(Math.max(-1, Math.min(1, (210 * 210 + d * d - 210 * 210) / (2 * 210 * d))))
+        const ex = 470 + 210 * Math.cos(angle),
+          ey = 460 + 210 * Math.sin(angle)
+        const tx = 470 + d * Math.cos(direction),
+          ty = 460 + d * Math.sin(direction)
+        const path = `M470 460L${ex} ${ey}L${tx} ${ty}`
+        paths.forEach((p) => p.setAttribute('d', path))
+        elbow.setAttribute('transform', `translate(${ex} ${ey})`)
+        gripper.setAttribute(
+          'transform',
+          `translate(${tx} ${ty}) rotate(${(Math.atan2(ty - ey, tx - ex) * 180) / Math.PI})`
+        )
+        target.setAttribute('transform', `translate(${desired.x} ${desired.y})`)
+        telemetry.textContent = `TCP ${Math.round(desired.x)} / ${Math.round(desired.y)} · ${distance <= 418 ? 'REACHABLE' : 'LIMITED'}`
+      }
+      const tick = () => {
+        current.x += (desired.x - current.x) * 0.14
+        current.y += (desired.y - current.y) * 0.14
+        solve()
+        if (Math.hypot(desired.x - current.x, desired.y - current.y) > 0.2)
+          frame = requestAnimationFrame(tick)
+        else {
+          current = { ...desired }
+          solve()
+          frame = 0
+        }
+      }
+      const update = (x: number, y: number) => {
+        desired = { x: Math.min(760, Math.max(300, x)), y: Math.min(400, Math.max(120, y)) }
+        xInput.value = String(Math.round(desired.x))
+        yInput.value = String(Math.round(desired.y))
+        xOutput.value = String(Math.round(desired.x))
+        yOutput.value = String(Math.round(desired.y))
+        if (reduced.matches) {
+          cancelAnimationFrame(frame)
+          frame = 0
+          current = { ...desired }
+          solve()
+        } else if (!frame) frame = requestAnimationFrame(tick)
+      }
+      const controller = new AbortController(),
+        options = { signal: controller.signal }
+      this.querySelector('.lab-controls')!.removeAttribute('hidden')
+      xInput.addEventListener(
+        'input',
+        () => update(Number(xInput.value), Number(yInput.value)),
+        options
+      )
+      yInput.addEventListener(
+        'input',
+        () => update(Number(xInput.value), Number(yInput.value)),
+        options
+      )
+      this.querySelector('[data-reset]')!.addEventListener('click', () => update(640, 245), options)
+      const move = (event: PointerEvent) => {
+        if (event.pointerType !== 'mouse' && !dragging) return
+        const matrix = svg.getScreenCTM()
+        if (!matrix) return
+        const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse())
+        update(point.x, point.y)
+      }
+      svg.addEventListener('pointermove', move, options)
+      target.addEventListener(
+        'pointerdown',
+        (event) => {
+          dragging = true
+          target.setPointerCapture(event.pointerId)
+          move(event)
+        },
+        options
+      )
+      target.addEventListener('pointerup', () => (dragging = false), options)
+      target.addEventListener('pointercancel', () => (dragging = false), options)
+      const onMotion = () => {
+        if (reduced.matches) {
+          cancelAnimationFrame(frame)
+          frame = 0
+          current = { ...desired }
+          solve()
+        }
+      }
+      reduced.addEventListener('change', onMotion, options)
+      solve()
+      this.cleanup = () => {
+        controller.abort()
+        cancelAnimationFrame(frame)
+      }
+    }
+    disconnectedCallback() {
+      this.cleanup?.()
+    }
+  }
+  if (!customElements.get('robot-lab')) customElements.define('robot-lab', RobotLab)
+</script>
+<style>
+  .lab {
+    --lab-edge: #3a4a63;
+    --lab-highlight: #fff;
+    --lab-grip: #283b5e;
+    display: block;
+    position: relative;
+    isolation: isolate;
+    min-height: 760px;
+    background: #eaeef1;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 1.5rem 0 0;
+    color: #142443;
+  }
+  :global(html.dark) .lab {
+    --lab-edge: #182b50;
+    --lab-highlight: #e3edff;
+    --lab-grip: #a5c4f7;
+    background: #0b1527;
+    color: #e5ecf9;
+  }
+  .lab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse at 77% 42%, #4d86e32b, transparent 55%),
+      linear-gradient(120deg, #fff7e855, transparent 50%);
+  }
+  :global(html.dark) .lab::before {
+    background:
+      radial-gradient(ellipse at 78% 43%, #2556bf45, transparent 55%),
+      linear-gradient(130deg, #101d31, transparent);
+  }
+  .metal-light {
+    stop-color: #f7faff;
+  }
+  .metal-mid {
+    stop-color: #bac9df;
+  }
+  .metal-dark {
+    stop-color: #586f98;
+  }
+  .lab-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    font: 0.7rem/1.4 monospace;
+    letter-spacing: 0.05em;
+  }
+  .lab-heading span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3b7ded;
+    box-shadow: 0 0 15px #377dff;
+  }
+  .lab-copy {
+    position: relative;
+    z-index: 2;
+    padding: 6rem 0 0 3rem;
+    width: 55%;
+    pointer-events: none;
+  }
+  .lab-name {
+    font-size: 0.85rem;
+    margin: 0 0 1.5rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(4rem, 6.7vw, 7rem);
+    line-height: 0.98;
+    letter-spacing: -0.06em;
+    font-weight: 500;
+  }
+  h1 em {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    color: #215fcc;
+  }
+  :global(html.dark) h1 em {
+    color: #82b5ff;
+  }
+  .lab-intro {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 1.8rem 0;
+    max-width: 24rem;
+  }
+  .lab-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    pointer-events: auto;
+    font-size: 0.85rem;
+  }
+  .lab-actions a:first-child {
+    background: #205ad4;
+    color: #fff;
+    border: 1px solid #205ad4;
+    padding: 0.9rem 1.1rem;
+    border-radius: 5px;
+    display: flex;
+    gap: 2rem;
+  }
+  .lab-actions a:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
+  .lab-scene {
+    position: absolute;
+    width: 76%;
+    right: -10%;
+    top: 3.5rem;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+  .floor {
+    color: #3b6bc0;
+  }
+  .target {
+    color: #2464d6;
+    cursor: grab;
+    touch-action: none;
+  }
+  .target:active {
+    cursor: grabbing;
+  }
+  :global(html.dark) .floor {
+    color: #548eeb;
+  }
+  :global(html.dark) .target {
+    color: #91beff;
+  }
+  .scene-note {
+    opacity: 0.65;
+  }
+  .scene-label {
+    position: absolute;
+    top: 8%;
+    right: 20%;
+    display: flex;
+    gap: 0.7rem;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+  .scene-label strong {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+  .target-symbol {
+    font-size: 2rem;
+    line-height: 1;
+    color: #377fec;
+  }
+  .lab-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    border-top: 1px solid #8499b144;
+    padding: 1.2rem 2rem;
+    background: #ffffff33;
+  }
+  :global(html.dark) .lab-bottom {
+    background: #08111f66;
+  }
+  .lab-bottom p {
+    font-size: 0.85rem;
+    margin: 0;
+  }
+  .lab-bottom p > span {
+    display: block;
+    font: 0.65rem/1.6 monospace;
+    letter-spacing: 0.1em;
+    opacity: 0.65;
+  }
+  .lab-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .lab-controls label {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.3rem;
+    font: 0.65rem/1.2 monospace;
+  }
+  .lab-controls output {
+    color: #205ad4;
+    font-variant-numeric: tabular-nums;
+  }
+  :global(html.dark) .lab-controls output {
+    color: #82b5ff;
+  }
+  input {
+    grid-column: 1 / -1;
+    width: 85px;
+    accent-color: #3979de;
+    min-height: 24px;
+  }
+  button {
+    font-size: 0.8rem;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  @media (min-width: 1100px) {
+    .lab {
+      width: calc(100vw - 64px);
+      max-width: 1500px;
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+  @media (max-width: 800px) {
+    .lab {
+      min-height: 960px;
+    }
+    .lab-copy {
+      width: 100%;
+      padding: 2rem 1.5rem 0;
+      box-sizing: border-box;
+    }
+    .lab-heading {
+      padding: 1.2rem 1.5rem;
+    }
+    .lab-heading span:last-child {
+      display: none;
+    }
+    h1 {
+      font-size: clamp(3.5rem, 10vw, 5rem);
+    }
+    .lab-scene {
+      width: 120%;
+      right: -12%;
+      top: 420px;
+    }
+    .scene-label {
+      top: 0;
+    }
+    .lab-bottom {
+      flex-direction: column;
+      align-items: start;
+      gap: 1rem;
+      padding: 1.2rem 1.5rem;
+    }
+    .lab-controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+  @media (max-width: 420px) {
+    .lab {
+      min-height: 900px;
+    }
+    .lab-copy {
+      padding-top: 1.2rem;
+    }
+    .lab-name {
+      font-size: 0.8rem;
+      max-width: 17rem;
+    }
+    .lab-actions {
+      gap: 0.8rem;
+    }
+    .lab-intro {
+      font-size: 1rem;
+    }
+    .desktop-break {
+      display: none;
+    }
+    .lab-scene {
+      top: 420px;
+      width: 135%;
+      right: -17%;
+    }
+    .scene-label {
+      right: 23%;
+    }
+  }
+</style>

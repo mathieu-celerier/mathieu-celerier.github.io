@@ -1,21 +1,15 @@
 ---
-import PageLayout from '@/layouts/CommonPage.astro'
-import Substats from '@/components/about/Substats.astro'
+import PageLayout from '@/layouts/BaseLayout.astro'
 import ToolSection from '@/components/about/ToolSection.astro'
+import EditorialSection from '@/components/EditorialSection.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import ResearchDiagram from '@/components/ResearchDiagram.astro'
 import mcrtcLogo from '@/assets/tools/mcrtc.png'
 
 import { loadCV, type CVSkill } from '../../lib/cv-data-loader.ts'
 
 const cv = loadCV()
 const githubHandle = cv.basics.github
-
-// Keep headings minimal + academic
-const headings = [
-  { depth: 2, slug: 'profile', text: 'Profile' },
-  { depth: 2, slug: 'research-interests', text: 'Research Interests' },
-  { depth: 2, slug: 'tools', text: 'Tools & Technical Stack' },
-  { depth: 2, slug: 'online-presence', text: 'Online Presence' }
-]
 
 // Same icon set as the CV page, so both pages point at the same official assets.
 const skillIconMap = {
@@ -39,7 +33,9 @@ const skillDescriptionMap: Record<string, string> = {
   mc_rtc: 'Whole-body control framework'
 }
 
-const softwareTools = (cv.skills?.find((skill: CVSkill) => skill.category === 'Software')?.items ?? [])
+const softwareTools = (
+  cv.skills?.find((skill: CVSkill) => skill.category === 'Software')?.items ?? []
+)
   .filter((item: string): item is keyof typeof skillIconMap => item in skillIconMap)
   .map((item: keyof typeof skillIconMap) => ({
     name: item,
@@ -49,65 +45,79 @@ const softwareTools = (cv.skills?.find((skill: CVSkill) => skill.category === 'S
   }))
 ---
 
-<PageLayout
-  title='About'
-  kicker='Profile'
-  copy='This website serves as an academic homepage, providing access to publications, projects, software artifacts, and teaching or dissemination material.'
-  highlightColor='hsl(var(--primary))'
-  ogImage='/og/about.png'
-  {headings}
->
-  <h2 id='profile'>Profile</h2>
-  <p>{cv.summary?.paragraph}</p>
-
-  <h2 id='research-interests'>Research Interests</h2>
-  <ul>
-    <li>Physical human–robot interaction and shared control</li>
-    <li>Torque-controlled manipulators and inverse-dynamics QP control</li>
-    <li>Human motion models and their limitations for control and generation</li>
-    <li>Explicit compliance, safety, and stability guarantees</li>
-    <li>User experience evaluation in interactive robotic systems</li>
-  </ul>
-
-  <h2 id='tools'>Tools & Technical Stack</h2>
-  <p>
-    Tools and environments representative of those used in my research and software development.
-  </p>
-
-  <ToolSection class='mb-5' title='Programming & Robotics' tools={softwareTools} />
-
-  <ToolSection
-    class='mb-5'
-    title='Development Environment'
-    tools={[
-      {
-        name: 'Linux (Ubuntu)',
-        description: 'Primary development and experiment platform',
-        href: 'https://ubuntu.com/',
-        icon: import('@/assets/tools/ubuntu.svg?raw')
-      },
-      {
-        name: 'Neovim',
-        description: 'Editing, code review, and writing',
-        href: 'https://neovim.io/',
-        icon: import('@/assets/tools/neovim.svg?raw')
-      }
-    ]}
+<PageLayout meta={{ title: 'About', ogImage: '/og/about.png' }}>
+  <PageIntro
+    kicker='About'
+    title='People, robots, and the space between.'
+    copy='My work explores physical human–robot interaction, from control to human experience.'
   />
+  <EditorialSection label='01 / Profile' title='Research & background' id='profile'>
+    <p>{cv.summary?.paragraph}</p>
+  </EditorialSection>
+  <EditorialSection label='02 / Questions' title='Research interests' id='research-interests'>
+    <ul>
+      <li>Physical human–robot interaction and shared control</li>
+      <li>Torque-controlled manipulators and inverse-dynamics QP control</li>
+      <li>Human motion models and their limitations for control and generation</li>
+      <li>Explicit compliance, safety, and stability guarantees</li>
+      <li>User experience evaluation in interactive robotic systems</li>
+    </ul>
 
-  <h2 id='online-presence'>Online Presence</h2>
-  <p>Public profiles and repositories related to my academic and technical work:</p>
+    <div class='about-diagram'><ResearchDiagram /></div>
+  </EditorialSection>
+  <EditorialSection label='03 / Practice' title='Tools & technical stack' id='tools'>
+    <p>
+      Tools and environments representative of those used in my research and software development.
+    </p>
 
-  {/* IMPORTANT: self-close Substats. Otherwise Astro may treat following tokens as props. */}
-  <Substats
-    stats={[
-      {
-        platform: 'GitHub',
-        icon: 'github',
-        link: `https://github.com/${githubHandle}`,
-        text: 'repositories',
-        api: `github/${githubHandle}`
-      }
-    ]}
-  />
+    <ToolSection class='mb-5' title='Programming & Robotics' tools={softwareTools} />
+
+    <ToolSection
+      class='mb-5'
+      title='Development Environment'
+      tools={[
+        {
+          name: 'Linux (Ubuntu)',
+          description: 'Primary development and experiment platform',
+          href: 'https://ubuntu.com/',
+          icon: import('@/assets/tools/ubuntu.svg?raw')
+        },
+        {
+          name: 'Neovim',
+          description: 'Editing, code review, and writing',
+          href: 'https://neovim.io/',
+          icon: import('@/assets/tools/neovim.svg?raw')
+        }
+      ]}
+    />
+  </EditorialSection>
+  <EditorialSection label='04 / Connect' title='Online presence' id='online-presence'>
+    <p>Public profiles and repositories related to my academic and technical work:</p>
+
+    <a
+      class='styled-link'
+      href={`https://github.com/${githubHandle}`}
+      target='_blank'
+      rel='noreferrer'>GitHub repositories ↗</a
+    >
+  </EditorialSection>
 </PageLayout>
+<style>
+  p,
+  li {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: hsl(var(--muted-foreground));
+  }
+  ul {
+    padding-left: 1.2rem;
+    list-style: disc;
+  }
+  li {
+    margin-bottom: 0.6rem;
+  }
+  .about-diagram {
+    max-width: 32rem;
+    margin-top: 2rem;
+  }
+</style>

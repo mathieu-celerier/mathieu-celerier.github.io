@@ -25,7 +25,7 @@ function isImageMetadata(obj: unknown): obj is ImageMetadata {
 ---
 
 <div
-  class={cn('not-prose flex flex-col rounded-xl border py-3 px-3 gap-y-3 sm:gap-y-4', className)}
+  class={cn('tool-section not-prose flex flex-col py-3 gap-y-3 sm:gap-y-4', className)}
   {...props}
 >
   <div class='m-0 px-2 text-lg font-medium'>{title}</div>
@@ -33,7 +33,7 @@ function isImageMetadata(obj: unknown): obj is ImageMetadata {
     {
       tools.map((tool) => (
         <a
-          class='group relative text-sm leading-normal no-underline'
+          class='group relative text-base leading-normal no-underline'
           href={tool.href}
           id={tool.name}
           target='_blank'
@@ -89,3 +89,11 @@ function isImageMetadata(obj: unknown): obj is ImageMetadata {
     }
   </div>
 </div>
+<style>
+  .tool-section {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .tool-section a {
+    color: hsl(var(--muted-foreground));
+  }
+</style>

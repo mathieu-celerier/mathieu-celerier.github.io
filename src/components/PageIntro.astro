@@ -8,7 +8,7 @@ interface Props {
 const { kicker, title, copy } = Astro.props
 ---
 
-<section class='page-intro hero-grid-bg'>
+<section class='page-intro'>
   <p class='page-intro-kicker'>{kicker}</p>
   <h1 class='page-intro-title'>{title}</h1>
   {copy ? <p class='page-intro-copy'>{copy}</p> : <slot />}
@@ -26,7 +26,7 @@ const { kicker, title, copy } = Astro.props
 
   .page-intro-kicker {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -38,7 +38,11 @@ const { kicker, title, copy } = Astro.props
     grid-column: 2;
     grid-row: 1;
     font-size: clamp(2.3rem, 6vw, 4.4rem);
-    line-height: 0.92;
+    line-height: 1.06;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.04em;
     text-wrap: balance;
   }
 
@@ -52,7 +56,14 @@ const { kicker, title, copy } = Astro.props
   }
 
   @media (max-width: 600px) {
-    .page-intro { grid-template-columns: 1fr; gap: 0.75rem; }
-    .page-intro-title, .page-intro-copy { grid-column: auto; grid-row: auto; }
+    .page-intro {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .page-intro-title,
+    .page-intro-copy {
+      grid-column: auto;
+      grid-row: auto;
+    }
   }
 </style>

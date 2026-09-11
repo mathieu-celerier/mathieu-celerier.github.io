@@ -16,9 +16,8 @@
 }
 @media (prefers-reduced-motion) {
   .animate {
-    opacity: 0;
-    animation: 100ms fade-in-up;
-    animation-fill-mode: forwards;
+    opacity: 1;
+    animation: none;
   }
 }
 #content-header {

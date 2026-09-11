@@ -1,5 +1,5 @@
 ---
-import { Card, Button } from 'astro-pure/user'
+import { Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ToolSection from '@/components/about/ToolSection.astro'
 import CVEntry from '@/components/cv/CVEntry.astro'
@@ -7,9 +7,7 @@ import mcrtcLogo from '@/assets/tools/mcrtc.png'
 
 import { loadCV, type CVLink } from '../lib/cv-data-loader.ts'
 
-type ContactItem =
-  | { label: string; value: string; href: string }
-  | { label: string; value: string }
+type ContactItem = { label: string; value: string; href: string } | { label: string; value: string }
 
 const cv = loadCV()
 
@@ -75,7 +73,9 @@ const skillSections = (cv.skills || [])
   .filter((section) => iconSkillCategories.has(section.title))
   .filter((section) => section.tools.length)
 
-const nonIconSkillSections = (cv.skills || []).filter((skill) => !iconSkillCategories.has(skill.category))
+const nonIconSkillSections = (cv.skills || []).filter(
+  (skill) => !iconSkillCategories.has(skill.category)
+)
 
 // Compact horizontal Gantt timeline: each entry is a duration bar
 // (experience lane above the axis, education below). Overlapping periods
@@ -85,8 +85,18 @@ const TIMELINE_START = 2016
 const TIMELINE_END = 2027
 
 const MONTHS: Record<string, number> = {
-  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
-  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dec: 11
 }
 
 function parseMoment(segment: string): number | null {
@@ -165,7 +175,12 @@ function toBars(
       const title = entry.short_title ?? entry.title
       const degree = entry.short_degree ?? entry.degree
       const label = title ?? degree ?? ''
-      const place = entry.short_organization ?? entry.organization ?? entry.short_institution ?? entry.institution ?? ''
+      const place =
+        entry.short_organization ??
+        entry.organization ??
+        entry.short_institution ??
+        entry.institution ??
+        ''
       const location = entry.short_location ?? entry.location ?? ''
       const targetId = `${lane}-${index}`
       return { ...range, label, place, location, targetId, dates: abbreviateDates(entry.dates) }
@@ -245,11 +260,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
         <h1 class='cv-title'>{fullName}</h1>
         <p class='cv-position'>{cv.basics.position}</p>
         <p class='cv-affiliation'>CNRS-AIST Joint Robotics Laboratory, Tsukuba, Japan</p>
-        {
-          cv.summary?.paragraph ? (
-            <p class='cv-summary'>{cv.summary.paragraph}</p>
-          ) : null
-        }
+        {cv.summary?.paragraph ? <p class='cv-summary'>{cv.summary.paragraph}</p> : null}
       </div>
 
       <div class='cv-hero-side'>
@@ -268,20 +279,20 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
           }
         </div>
         <div class='cv-facts cv-facts-grid'>
-          {contactItems.map((item) => (
-            <div class='cv-fact'>
-              <span class='cv-fact-label'>{item.label}</span>
-              {
-                'href' in item ? (
+          {
+            contactItems.map((item) => (
+              <div class='cv-fact'>
+                <span class='cv-fact-label'>{item.label}</span>
+                {'href' in item ? (
                   <a href={item.href} class='styled-link'>
                     {item.value}
                   </a>
                 ) : (
                   <span>{item.value}</span>
-                )
-              }
-            </div>
-          ))}
+                )}
+              </div>
+            ))
+          }
         </div>
       </div>
     </section>
@@ -321,7 +332,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
             <span class='cv-timeline-legend-dot cv-timeline-legend-exp' /> Experience
             <span class='cv-timeline-legend-dot cv-timeline-legend-edu' /> Education
           </p>
-          <div id='cv-timeline-tooltip' class='cv-timeline-tooltip' role='presentation'></div>
+          <div id='cv-timeline-tooltip' class='cv-timeline-tooltip' role='presentation' />
         </section>
       ) : null
     }
@@ -398,13 +409,14 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
           </div>
           <div class='cv-tools'>
             {nonIconSkillSections.map((skill) => (
-              <Card heading={skill.category} class='cv-card'>
+              <section class='cv-card'>
+                <h3>{skill.category}</h3>
                 <div class='cv-skill-grid'>
                   {(skill.items || []).map((item) => (
                     <span class='cv-skill-tile'>{item}</span>
                   ))}
                 </div>
-              </Card>
+              </section>
             ))}
             {skillSections.map((section) => (
               <ToolSection title={section.title} tools={section.tools} />
@@ -453,7 +465,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       tooltip.style.top = `${top}px`
     }
 
-    const hide = () => document.getElementById('cv-timeline-tooltip')?.classList.remove('is-visible')
+    const hide = () =>
+      document.getElementById('cv-timeline-tooltip')?.classList.remove('is-visible')
 
     document.addEventListener('pointerover', (event) => {
       const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
@@ -470,7 +483,10 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       const targetId = bar?.dataset.timelineTarget
       const target = targetId ? document.getElementById(targetId) : null
       if (!target) return
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      target.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start'
+      })
       target.classList.add('cv-entry-flash')
       setTimeout(() => target.classList.remove('cv-entry-flash'), 1200)
     })
@@ -520,7 +536,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-kicker {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -539,7 +555,10 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-title {
     font-size: clamp(2.6rem, 6.4vw, 4.8rem);
-    line-height: 0.92;
+    line-height: 1.05;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
     max-width: 10ch;
   }
 
@@ -571,8 +590,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-download {
     width: fit-content;
-    background: hsl(var(--primary) / 1);
-    color: hsl(var(--card) / 1);
+    background: hsl(var(--foreground) / 1);
+    color: hsl(var(--background) / 1);
     border-color: transparent;
   }
 
@@ -611,11 +630,9 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     align-items: center;
     min-height: 3rem;
     padding: 0.75rem 0.9rem 0.75rem 1.05rem;
-    border-radius: 1rem;
+    border-radius: 4px;
     border: 1px solid hsl(var(--border) / 1);
-    background:
-      linear-gradient(180deg, hsl(var(--background) / 0.98), hsl(var(--muted) / 0.88));
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.04);
+    background: transparent;
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.35;
@@ -664,7 +681,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
   }
 
   .cv-fact-label {
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -682,7 +699,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
   .cv-section-kicker {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -693,7 +710,9 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     display: flex;
     align-items: center;
     gap: 0.9rem;
-    font-size: 1.7rem;
+    font:
+      italic 2rem/1.1 Georgia,
+      serif;
     line-height: 1.05;
   }
 
@@ -758,10 +777,10 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     left: 50%;
     transform: translateX(-50%);
     margin-top: 0.25rem;
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    color: hsl(var(--muted-foreground) / 0.75);
+    color: hsl(var(--muted-foreground) / 1);
     font-variant-numeric: tabular-nums;
   }
 
@@ -806,7 +825,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     border: 1px solid hsl(var(--border) / 1);
     background: hsl(var(--background) / 1);
     color: hsl(var(--foreground) / 1);
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     line-height: 1.4;
     box-shadow: 0 12px 30px -16px rgba(15, 23, 42, 0.5);
@@ -825,8 +844,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     gap: 0.45rem;
     justify-content: end;
     margin: 0.35rem 1.25rem 0;
-    font-size: 0.72rem;
-    color: hsl(var(--muted-foreground) / 0.85);
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground) / 1);
   }
 
   .cv-timeline-legend-dot {
@@ -854,7 +873,10 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 0.85fr);
       align-items: start;
     }
-    .cv-hero-side { padding-left: 2rem; border-inline-start: 1px solid hsl(var(--border) / 1); }
+    .cv-hero-side {
+      padding-left: 2rem;
+      border-inline-start: 1px solid hsl(var(--border) / 1);
+    }
   }
 
   @media (max-width: 639px) {
@@ -868,6 +890,9 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       padding: 1.5rem 0;
       border-radius: 0;
     }
-    .cv-section-header { grid-template-columns: 1fr; gap: 0.6rem; }
+    .cv-section-header {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
   }
 </style>

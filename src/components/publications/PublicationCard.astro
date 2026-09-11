@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content'
-import { Card, Button } from 'astro-pure/user'
+
+import { Button } from 'astro-pure/user'
 
 interface Props {
   entry: CollectionEntry<'publications'>
@@ -24,18 +25,19 @@ const detailHref = `/publications/${entry.data.bibkey}`
 ---
 
 <div
-  class:list={['pub-card-wrapper', compact && 'pub-card-wrapper-compact', entry.data.image && 'pub-card-wrapper-with-image']}
+  class:list={[
+    'pub-card-wrapper',
+    compact && 'pub-card-wrapper-compact',
+    entry.data.image && 'pub-card-wrapper-with-image'
+  ]}
   data-year={entry.data.year}
   data-type={entry.data.type}
   data-reveal
 >
-  <Card
-    heading={entry.data.title}
-    headingHref={detailHref}
-    subheading={entry.data.authors}
-    date={entry.data.venue}
-    class:list={['pub-card', entry.data.featured && 'pub-card-featured']}
-  >
+  <article class:list={['pub-card', entry.data.featured && 'pub-card-featured']}>
+    <p class='pub-venue'>{entry.data.venue}</p>
+    <h2><a href={detailHref}>{entry.data.title}</a></h2>
+    <p class='pub-authors'>{entry.data.authors}</p>
     {
       entry.data.image ? (
         <img src={entry.data.image} alt='' class='pub-thumb' loading='lazy' />
@@ -62,59 +64,78 @@ const detailHref = `/publications/${entry.data.bibkey}`
     }
 
     <div class='pub-links'>
-      {entry.data.website ? (
-        <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
-      ) : null}
-      {entry.data.url ? (
-        <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
-      ) : null}
-      {entry.data.pdf ? (
-        <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
-      ) : null}
-      {entry.data.code ? (
-        <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
-      ) : null}
-      {entry.data.video ? (
-        <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
-      ) : null}
+      {
+        entry.data.website ? (
+          <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
+        ) : null
+      }
+      {
+        entry.data.url ? (
+          <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
+        ) : null
+      }
+      {
+        entry.data.pdf ? (
+          <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
+        ) : null
+      }
+      {
+        entry.data.code ? (
+          <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
+        ) : null
+      }
+      {
+        entry.data.video ? (
+          <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
+        ) : null
+      }
       <Button href={bibtexHref} download variant='ahead' title='Download .bib' />
-      <Button as='button' type='button' data-copy-bibtex={bibtexHref} variant='ahead' title='Copy BibTeX' />
+      <Button
+        as='button'
+        type='button'
+        data-copy-bibtex={bibtexHref}
+        variant='ahead'
+        title='Copy BibTeX'
+      />
     </div>
-  </Card>
+  </article>
 </div>
 
 <script>
-  import { showToast } from 'astro-pure/utils'
-
-  // Delegate on document so this works regardless of how many
-  // PublicationCard instances render on the page (Astro dedupes this
-  // script tag across repeated component instances).
-  document.addEventListener('click', async (event) => {
-    const button = (event.target as HTMLElement)?.closest<HTMLElement>('[data-copy-bibtex]')
-    if (!button) return
-
-    const href = button.dataset.copyBibtex
-    if (!href) return
-
-    try {
-      const response = await fetch(href)
-      const text = await response.text()
-      await navigator.clipboard.writeText(text)
-      showToast({ message: 'BibTeX copied to clipboard' })
-    } catch {
-      showToast({ message: 'Could not copy BibTeX' })
-    }
-  })
+  import '@/lib/copy-bibtex'
 </script>
 
 <style>
-  .pub-card :global(h2) {
-    font-size: 1.1rem;
-    line-height: 1.32;
+  .pub-card {
+    padding: 1.75rem 0;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .pub-card h2 {
+    margin: 0.6rem 0;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+  }
+  .pub-card h2 a {
+    color: inherit;
+  }
+  .pub-card h2 a:hover {
+    color: hsl(var(--primary));
+  }
+  .pub-venue {
+    color: hsl(var(--primary));
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+  .pub-authors {
+    color: hsl(var(--muted-foreground));
+    margin: 0 0 0.75rem;
+    line-height: 1.6;
   }
 
   .pub-card :global(p) {
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.6;
   }
 
@@ -128,7 +149,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
 
   .pub-card-featured {
     border-color: hsl(var(--primary) / 0.35);
-    box-shadow: inset 3px 0 0 hsl(var(--primary) / 1);
+    border-top-width: 2px;
   }
 
   .pub-meta-row {
@@ -147,7 +168,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
     min-height: 1.6rem;
     padding: 0 0.6rem;
     border-radius: 999px;
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
   }

@@ -16,7 +16,16 @@ interface Props {
   ogImage?: string
 }
 
-const { title, kicker, copy, headings, view, comment: enableComment, ogImage, ...props } = Astro.props
+const {
+  title,
+  kicker,
+  copy,
+  headings,
+  view,
+  comment: enableComment,
+  ogImage,
+  ...props
+} = Astro.props
 ---
 
 <PageLayout meta={{ title, ogImage }} {...props}>
@@ -43,7 +52,7 @@ const { title, kicker, copy, headings, view, comment: enableComment, ogImage, ..
 <style>
   .common-page-kicker {
     margin: 0 0 0.7rem;
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -52,7 +61,10 @@ const { title, kicker, copy, headings, view, comment: enableComment, ogImage, ..
 
   .common-page-title {
     font-size: clamp(2rem, 5vw, 3.4rem);
-    line-height: 0.92;
+    line-height: 1.08;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
     text-wrap: balance;
   }
 

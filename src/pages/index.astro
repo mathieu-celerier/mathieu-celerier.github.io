@@ -1,172 +1,486 @@
 ---
 import { getCollection } from 'astro:content'
+import { homeSelection } from '@/lib/home-selection'
+
 import PageLayout from '@/layouts/BaseLayout.astro'
+import RobotLab from '@/components/RobotLab.astro'
+
 import { loadCV } from '../lib/cv-data-loader'
+
 const cv = loadCV()
-const publications = (await getCollection('publications')).sort((a,b) => Number(!!b.data.featured)-Number(!!a.data.featured) || b.data.year-a.data.year).slice(0,3)
-const leadPaper = (await getCollection('publications')).find(entry => entry.data.bibkey === 'celerier2025explicit')
-const news = (await getCollection('news')).sort((a,b)=>b.data.date.getTime()-a.data.date.getTime()).slice(0,3)
+const allPublications = await getCollection('publications')
+const leadPaper = allPublications.find((entry) => entry.data.bibkey === homeSelection.lead)
+const publications = homeSelection.supporting.flatMap((key) => {
+  const entry = allPublications.find((item) => item.data.bibkey === key)
+  return entry && entry.id !== leadPaper?.id ? [entry] : []
+})
+const news = (await getCollection('news'))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3)
 const profiles = [
-  {label:'Google Scholar', href:cv.basics.scholar},
-  {label:'GitHub', href:cv.basics.github ? 'https://github.com/'+cv.basics.github : undefined},
-  {label:'ORCID', href:cv.basics.orcid},
-  {label:'LinkedIn', href:cv.basics.linkedin ? 'https://www.linkedin.com/in/'+cv.basics.linkedin : undefined}
-].filter(p=>p.href)
+  { label: 'Google Scholar', href: cv.basics.scholar },
+  {
+    label: 'GitHub',
+    href: cv.basics.github ? 'https://github.com/' + cv.basics.github : undefined
+  },
+  { label: 'ORCID', href: cv.basics.orcid },
+  {
+    label: 'LinkedIn',
+    href: cv.basics.linkedin ? 'https://www.linkedin.com/in/' + cv.basics.linkedin : undefined
+  }
+].filter((p) => p.href)
 ---
-<PageLayout meta={{title:'Home',ogImage:'/og/home.png'}}>
+
+<PageLayout meta={{ title: 'Home', ogImage: '/og/home.png' }}>
   <main>
-    <section class='hero' aria-labelledby='intro'>
-      <div class='intro'>
-        <p class='eyebrow'>Robotics · Human–robot interaction</p>
-        <h1 id='intro'>Robots that work<br />with <em>people.</em></h1>
-        <p class='introduction'>I’m Mathieu Celerier, a postdoctoral researcher studying physical human–robot interaction.</p>
-        <p class='affiliation'>At <a href='https://jrl.cnrs.fr' target='_blank' rel='noreferrer'>CNRS-AIST JRL</a> in Tsukuba, Japan, I explore how control and human perception shape the way we work with robots.</p>
-        <div class='actions'><a class='primary-action' href='/publications'>Explore my research <span aria-hidden='true'>↗</span></a><a class='text-action' href='/cv'>View CV →</a></div>
+    <RobotLab />
+    <div class='profile-strip'>
+      <span>Find me elsewhere</span><div>
+        {
+          profiles.map((p) => (
+            <a href={p.href} target='_blank' rel='noreferrer'>
+              {p.label} ↗
+            </a>
+          ))
+        }
       </div>
-      <figure class='interaction-figure' data-study='contact'>
-        <div class='figure-top'><span>Physical interaction</span><span>01 / Study</span></div>
-        <svg viewBox='0 0 420 360' role='img' aria-labelledby='diagram-title'>
-          <title id='diagram-title'>Abstract robotic arm reaching toward a shared point of interaction</title>
-          <defs><pattern id='dots' width='20' height='20' patternUnits='userSpaceOnUse'><circle cx='1' cy='1' r='.8' fill='currentColor' opacity='.18'/></pattern></defs>
-          <rect width='420' height='360' fill='url(#dots)'/>
-          <g class='construction' fill='none' stroke='currentColor' stroke-width='1'>
-            <circle cx='230' cy='147' r='87' stroke-dasharray='3 6'/><circle cx='230' cy='147' r='119' opacity='.35'/>
-            <path d='M230 15V300M88 147H370' opacity='.25'/><path d='M60 292H365M60 298H365' opacity='.5'/>
-          </g>
-          <g class='robot' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'>
-            <path d='M102 275L124 201L173 238L227 157' stroke-width='22'/>
-            <path class='robot-inset' d='M102 275L124 201L173 238L227 157' stroke-width='15'/>
-            <path d='M78 290V277H126V290' stroke-width='3'/>
-            <circle cx='124' cy='201' r='14' stroke-width='3'/><circle cx='173' cy='238' r='14' stroke-width='3'/>
-            <path d='M220 163L236 145M233 142L242 139L251 148L248 157' stroke-width='3'/>
-          </g>
-          <g class='interaction' fill='none' stroke='currentColor'>
-            <path d='M349 91C303 85 302 142 258 146' stroke-width='2'/>
-            <path d='M350 105C310 99 308 157 268 158' stroke-width='1' opacity='.5'/>
-            <circle cx='249' cy='146' r='7' fill='currentColor' stroke='none'/><circle cx='249' cy='146' r='18' opacity='.4'/>
-          </g>
-          <g fill='currentColor' font-family='monospace' font-size='9'><text x='276' y='185'>SHARED CONTACT</text><text x='62' y='325'>CONTROL ↔ PERCEPTION</text></g>
-        </svg>
-        <figcaption>
-          <div class='study-controls' role='group' aria-label='Explore the research illustration'>
-            <button type='button' data-study-mode='contact' aria-pressed='true'>01 Contact</button>
-            <button type='button' data-study-mode='control' aria-pressed='false'>02 Control</button>
-            <button type='button' data-study-mode='perception' aria-pressed='false'>03 Perception</button>
-          </div>
-          <p class='study-caption' aria-live='polite'>The point where human intention meets robot motion.</p>
-        </figcaption>
-      </figure>
-    </section>
-    <div class='profile-strip'><span>Find me elsewhere</span><div>{profiles.map(p=><a href={p.href} target='_blank' rel='noreferrer'>{p.label} ↗</a>)}</div></div>
+    </div>
+    <div class='research-statement'>
+      <p class='eyebrow'>Beyond the demonstration</p><p>
+        A robot can follow a target.<br />Working with a person asks <em>more.</em>
+      </p><span
+        >My research explores physical interaction through control, compliance, and human
+        experience.</span>
+    </div>
     <section class='selected' aria-labelledby='selected-title'>
-      <div class='section-heading'><div><p class='eyebrow'>Selected work</p><h2 id='selected-title'>From questions to research.</h2></div><a class='text-action' href='/publications'>All publications ↗</a></div>
-      {leadPaper && <article class='research-feature'>
-        <div class='feature-label'><span class='eyebrow'>Research in focus</span><span class='feature-year'>{leadPaper.data.year}</span></div>
-        <div class='feature-content'><p class='eyebrow'>Physical human–robot interaction</p><h3><a href={'/publications/'+leadPaper.data.bibkey}>{leadPaper.data.title}</a></h3><p class='authors'>{leadPaper.data.authors}</p><a class='text-action' href={'/publications/'+leadPaper.data.bibkey}>Read the research <span aria-hidden='true'>↗</span></a></div>
-      </article>}
-      <div class='paper-list'>{publications.filter(entry=>entry.id !== leadPaper?.id).map((entry,i)=><article class='paper'>
-        <span class='paper-index'>0{i+1}</span><div><p class='paper-meta'>{entry.data.venue || entry.data.type} <span> / {entry.data.year}</span></p><h3><a href={'/publications/'+entry.data.bibkey}>{entry.data.title}</a></h3><p class='authors'>{entry.data.authors}</p></div><a class='paper-arrow' href={'/publications/'+entry.data.bibkey} aria-label={'Read '+entry.data.title}>↗</a>
-      </article>)}</div>
+      <div class='section-heading'>
+        <div>
+          <p class='eyebrow'>Selected work</p><h2 id='selected-title'>Inside the research.</h2>
+        </div><a class='text-action' href='/publications'>All publications ↗</a>
+      </div>
+      {
+        leadPaper && (
+          <article class='research-feature'>
+            <div class='feature-label'>
+              <>
+                <span class='eyebrow'>Research in focus</span>
+                <span class='feature-year'>{leadPaper.data.year}</span>
+              </>
+            </div>
+            <div class='feature-content'>
+              <>
+                <p class='eyebrow'>Physical human–robot interaction</p>
+                <h3>
+                  <a href={'/publications/' + leadPaper.data.bibkey}>{leadPaper.data.title}</a>
+                </h3>
+                <p class='authors'>{leadPaper.data.authors}</p>
+                <a class='text-action' href={'/publications/' + leadPaper.data.bibkey}>
+                  Read the research <span aria-hidden='true'>↗</span>
+                </a>
+              </>
+            </div>
+          </article>
+        )
+      }
+      <div class='paper-list'>
+        {
+          publications
+            .filter((entry) => entry.id !== leadPaper?.id)
+            .map((entry, i) => (
+              <article class='paper'>
+                <>
+                  <span class='paper-index'>0{i + 1}</span>
+                  <div>
+                    <>
+                      <p class='paper-meta'>
+                        {entry.data.venue || entry.data.type} <span> / {entry.data.year}</span>
+                      </p>
+                      <h3>
+                        <a href={'/publications/' + entry.data.bibkey}>{entry.data.title}</a>
+                      </h3>
+                      <p class='authors'>{entry.data.authors}</p>
+                    </>
+                  </div>
+                  <a
+                    class='paper-arrow'
+                    href={'/publications/' + entry.data.bibkey}
+                    aria-label={'Read ' + entry.data.title}
+                  >
+                    ↗
+                  </a>
+                </>
+              </article>
+            ))
+        }
+      </div>
     </section>
-    <section class='updates' aria-labelledby='updates-title'><div><p class='eyebrow'>Along the way</p><h2 id='updates-title'>Recent news.</h2><a class='text-action' href='/news'>All updates ↗</a></div><ol>{news.map(entry=><li><time datetime={entry.data.date.toISOString()}>{entry.data.date.toLocaleDateString('en-GB',{month:'short',day:'numeric',year:'numeric'})}</time><a href={entry.data.externalUrl || (entry.data.hasPage || entry.body?.includes('{/* more */}') ? '/news/'+entry.id : '/news')}>{entry.data.title} ↗</a></li>)}</ol></section>
-    <section class='contact'><div><p class='eyebrow'>An open conversation</p><p>Interested in physical human–robot interaction?</p></div><a href={'mailto:'+cv.basics.email}>Let’s <em>talk.</em> ↗</a></section>
+    <section class='updates' aria-labelledby='updates-title'>
+      <div>
+        <p class='eyebrow'>Along the way</p><h2 id='updates-title'>Recent news.</h2><a
+          class='text-action'
+          href='/news'>All updates ↗</a
+        >
+      </div><ol>
+        {
+          news.map((entry) => (
+            <li>
+              <>
+                <time datetime={entry.data.date.toISOString()}>
+                  {entry.data.date.toLocaleDateString('en-GB', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </time>
+                <a
+                  href={
+                    entry.data.externalUrl ||
+                    (entry.data.hasPage || entry.body?.includes('{/* more */}')
+                      ? '/news/' + entry.id
+                      : '/news')
+                  }
+                >
+                  {entry.data.title} ↗
+                </a>
+              </>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+    <section class='contact'>
+      <div>
+        <p class='eyebrow'>An open conversation</p><p>
+          Interested in physical human–robot interaction?
+        </p>
+      </div><a href={'mailto:' + cv.basics.email}>Let’s <em>talk.</em> ↗</a>
+    </section>
   </main>
 </PageLayout>
-<script>
-  const descriptions = {
-    contact: 'The point where human intention meets robot motion.',
-    control: 'How a robot responds to contact: compliance, stability, and safety.',
-    perception: 'How people experience and interpret a robot’s physical response.'
-  }
-  document.addEventListener('click', event => {
-    const button = (event.target as Element)?.closest<HTMLButtonElement>('[data-study-mode]')
-    const figure = button?.closest<HTMLElement>('.interaction-figure')
-    const mode = button?.dataset.studyMode as keyof typeof descriptions
-    if (!figure || !(mode in descriptions)) return
-    figure.dataset.study = mode
-    figure.querySelectorAll('button').forEach(item=>item.setAttribute('aria-pressed', String(item===button)))
-    const caption = figure.querySelector('.study-caption')
-    if (caption) caption.textContent = descriptions[mode]
-  })
-</script>
+
 <style>
-  .study-controls { display:flex; justify-content:space-between; gap:.3rem; }
-  .study-controls button { color:hsl(var(--muted-foreground)); font:inherit; padding:.6rem .2rem; cursor:pointer; border-bottom:2px solid transparent; }
-  .study-controls button[aria-pressed='true'] { color:hsl(var(--primary)); border-color:hsl(var(--primary)); }
-  .study-caption { line-height:1.6; min-height:3.2em; margin:.75rem 0 0; font-size:.75rem; }
-  .interaction-figure[data-study='control'] .robot { color:hsl(var(--primary)); }
-  .interaction-figure[data-study='perception'] .construction { color:hsl(var(--primary)); }
-  .interaction-figure[data-study='perception'] .interaction { color:hsl(var(--signal)); }
-  .research-feature { display:grid; grid-template-columns:10rem 1fr; gap:2rem; padding:2rem; margin-bottom:1.5rem; background:hsl(var(--muted)/.55); border:1px solid hsl(var(--border)); border-radius:5px; }
-  .feature-label { display:flex; flex-direction:column; justify-content:space-between; gap:2rem; border-right:1px solid hsl(var(--border)); }
-  .feature-year { font:italic 2.6rem Georgia,serif; color:hsl(var(--primary)); }
-  .feature-content h3 { font-size:clamp(1.4rem,2.7vw,1.85rem); line-height:1.25; margin:.8rem 0; letter-spacing:-.025em; }
-  .feature-content .text-action { margin-top:1rem; }
-  .paper { transition:background .2s; }
-  .paper:hover,.paper:focus-within { background:hsl(var(--muted)/.5); }
-  .paper-arrow { transition:transform .2s; }
-  .paper:hover .paper-arrow { transform:translate(2px,-2px); }
-  .contact { display:flex; justify-content:space-between; align-items:center; gap:2rem; }
-  .contact em { font-family:Georgia,serif; color:hsl(var(--primary)); }
-  @media(max-width:600px) {
-    .research-feature { grid-template-columns:1fr; padding:1.3rem; gap:1.2rem; }
-    .feature-label { flex-direction:row; align-items:center; border-right:0; border-bottom:1px solid hsl(var(--border)); padding-bottom:1rem; }
-    .feature-year { font-size:1.7rem; }
-    .contact { flex-direction:column; align-items:start; gap:.5rem; }
+  .research-statement {
+    padding: 5rem 0;
+    max-width: 55rem;
   }
-  @media(prefers-reduced-motion:reduce) { .paper,.paper-arrow { transition:none; } .paper:hover .paper-arrow { transform:none; } }
-  .eyebrow { margin:0; font-size:.68rem; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:hsl(var(--muted-foreground)); }
-  .hero { display:grid; grid-template-columns:1.2fr 1fr; gap:3rem; align-items:center; padding:5.5rem 0 4rem; }
-  h1 { font-size:clamp(3rem,5.2vw,4.7rem); font-weight:500; line-height:1.05; letter-spacing:-.055em; margin:1.6rem 0; }
-  h1 em { font-family:Georgia,'Times New Roman',serif; font-weight:400; color:hsl(var(--primary)); }
-  .introduction { font-size:1.07rem; line-height:1.6; max-width:29rem; margin:0 0 .8rem; }
-  .affiliation { font-size:.9rem; line-height:1.75; color:hsl(var(--muted-foreground)); max-width:29rem; margin:0; }
-  .affiliation a { text-decoration:underline; text-underline-offset:3px; }
-  .actions { display:flex; align-items:center; flex-wrap:wrap; gap:1.5rem; margin-top:1.8rem; }
-  .primary-action { display:flex; align-items:center; gap:1.5rem; padding:.85rem 1.1rem; background:hsl(var(--foreground)); color:hsl(var(--background)); border-radius:4px; font-size:.8rem; }
-  .primary-action:hover { opacity:.85; color:hsl(var(--background)); }
-  .text-action { font-size:.8rem; display:inline-block; padding:.5rem 0; }
-  .interaction-figure { margin:0; padding:1rem 1rem .9rem; border:1px solid hsl(var(--border)); border-radius:6px; background:hsl(var(--muted)/.35); }
-  .figure-top { display:flex; justify-content:space-between; gap:1rem; font-family:monospace; font-size:.59rem; color:hsl(var(--muted-foreground)); text-transform:uppercase; letter-spacing:.05em; }
-  .interaction-figure svg { width:100%; height:auto; margin:1rem 0 .2rem; }
-  .construction { color:hsl(var(--muted-foreground)); }
-  .robot { color:hsl(var(--foreground)); }
-  .robot-inset { stroke:hsl(var(--background)); }
-  .interaction { color:hsl(var(--primary)); }
-  figcaption { font-size:.65rem; color:hsl(var(--muted-foreground)); border-top:1px solid hsl(var(--border)); padding-top:.9rem; }
-  .profile-strip { display:flex; align-items:center; gap:2rem; border-block:1px solid hsl(var(--border)); padding:1.1rem 0; font-size:.72rem; }
-  .profile-strip>span { color:hsl(var(--muted-foreground)); }
-  .profile-strip>div { display:flex; flex-wrap:wrap; gap:1.8rem; }
-  .selected { padding:4.5rem 0; }
-  .section-heading { display:flex; justify-content:space-between; align-items:end; gap:1rem; margin-bottom:2rem; }
-  h2 { font-size:clamp(1.6rem,3vw,2.1rem); font-weight:500; letter-spacing:-.035em; line-height:1.2; margin:.7rem 0 0; }
-  .paper { display:grid; grid-template-columns:2rem 1fr 2rem; gap:1rem; border-top:1px solid hsl(var(--border)); padding:1.5rem 0; }
-  .paper-index { font-family:monospace; font-size:.7rem; color:hsl(var(--muted-foreground)); padding-top:.1rem; }
-  .paper-meta { font-size:.64rem; text-transform:uppercase; letter-spacing:.06em; color:hsl(var(--primary)); margin:0 0 .6rem; }
-  .paper-meta span { color:hsl(var(--muted-foreground)); }
-  h3 { font-size:1.15rem; font-weight:500; line-height:1.4; max-width:46rem; margin:0; }
-  .authors { font-size:.76rem; color:hsl(var(--muted-foreground)); line-height:1.6; margin:.5rem 0 0; }
-  .paper-arrow { align-self:center; font-size:1.4rem; text-align:right; }
-  .updates { display:grid; grid-template-columns:1fr 2fr; gap:3rem; padding:2.5rem 0 4rem; border-top:1px solid hsl(var(--border)); }
-  .updates .text-action { margin-top:1rem; }
-  .updates ol { padding:0; margin:0; list-style:none; }
-  .updates li { display:grid; grid-template-columns:7rem 1fr; gap:1rem; padding:1rem 0; border-bottom:1px solid hsl(var(--border)); }
-  .updates li:first-child { padding-top:0; }
-  time { font-size:.68rem; color:hsl(var(--muted-foreground)); padding-top:.2rem; }
-  .updates li a { font-size:.88rem; line-height:1.5; }
-  .contact { border-top:1px solid hsl(var(--border)); padding:2.5rem 0 .5rem; }
-  .contact p { color:hsl(var(--muted-foreground)); font-size:.85rem; }
-  .contact>a { font-size:2.5rem; letter-spacing:-.04em; }
-  @media(max-width:760px) {
-    .hero { grid-template-columns:1fr; padding:2.8rem 0 2rem; gap:2.5rem; }
-    h1 { font-size:clamp(3rem,9vw,4.5rem); }
-    .interaction-figure { max-width:28rem; width:100%; box-sizing:border-box; }
-    .profile-strip { align-items:start; flex-direction:column; gap:.75rem; }
-    .profile-strip>div { gap:1rem; }
-    .selected { padding:3rem 0; }
-    .section-heading { align-items:start; flex-direction:column; }
-    .paper { grid-template-columns:1.3rem 1fr 1rem; gap:.5rem; }
-    .updates { grid-template-columns:1fr; gap:1.5rem; }
-    .updates li { grid-template-columns:1fr; gap:.35rem; }
+  .research-statement > p:nth-child(2) {
+    font-size: clamp(1.9rem, 4vw, 3.2rem);
+    line-height: 1.18;
+    letter-spacing: -0.04em;
+    margin: 1.25rem 0;
+  }
+  .research-statement em {
+    font-family: Georgia, serif;
+    color: hsl(var(--primary));
+  }
+  .research-statement > span {
+    color: hsl(var(--muted-foreground));
+    font-size: 1rem;
+  }
+
+  .research-feature {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 2rem;
+    padding: 3rem;
+    margin-bottom: 1.5rem;
+    background: #173e89;
+    color: #f0f5ff;
+    border-radius: 12px;
+  }
+  .research-feature::before {
+    content: '';
+    position: absolute;
+    width: 35rem;
+    height: 35rem;
+    right: -18rem;
+    top: -14rem;
+    border: 1px solid #ffffff22;
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 50px #ffffff05,
+      0 0 0 100px #ffffff04;
+    z-index: -1;
+  }
+  .research-feature .eyebrow,
+  .research-feature .authors {
+    color: #c5d8fa;
+  }
+  .research-feature .feature-year {
+    color: #aecfff;
+  }
+  .research-feature a:hover {
+    color: white;
+    text-decoration: underline;
+  }
+  .paper-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  .paper-list .paper {
+    grid-template-columns: 1fr 2rem;
+    padding: 1.75rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 12px;
+    background: hsl(var(--muted) / 0.35);
+  }
+  .paper-index {
+    grid-column: 1/-1;
+    font:
+      italic 2rem Georgia,
+      serif !important;
+  }
+  .paper-list .paper h3 {
+    font-size: 1.35rem;
+  }
+  @media (max-width: 700px) {
+    .paper-list {
+      grid-template-columns: 1fr;
+    }
+    .research-feature {
+      padding: 1.5rem;
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .feature-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2rem;
+    border-right: 1px solid hsl(var(--border));
+  }
+  .feature-year {
+    font:
+      italic 2.6rem Georgia,
+      serif;
+    color: hsl(var(--primary));
+  }
+  .feature-content h3 {
+    font-size: clamp(1.4rem, 2.7vw, 1.85rem);
+    line-height: 1.25;
+    margin: 0.8rem 0;
+    letter-spacing: -0.025em;
+  }
+  .feature-content .text-action {
+    margin-top: 1rem;
+  }
+  .paper {
+    transition: background 0.2s;
+  }
+  .paper:hover,
+  .paper:focus-within {
+    background: hsl(var(--muted) / 0.5);
+  }
+  .paper-arrow {
+    transition: transform 0.2s;
+  }
+  .paper:hover .paper-arrow {
+    transform: translate(2px, -2px);
+  }
+  .contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+  }
+  .contact em {
+    font-family: Georgia, serif;
+    color: hsl(var(--primary));
+  }
+  @media (max-width: 600px) {
+    .research-feature {
+      grid-template-columns: 1fr;
+      padding: 1.3rem;
+      gap: 1.2rem;
+    }
+    .feature-label {
+      flex-direction: row;
+      align-items: center;
+      border-right: 0;
+      border-bottom: 1px solid hsl(var(--border));
+      padding-bottom: 1rem;
+    }
+    .feature-year {
+      font-size: 1.7rem;
+    }
+    .contact {
+      flex-direction: column;
+      align-items: start;
+      gap: 0.5rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .paper,
+    .paper-arrow {
+      transition: none;
+    }
+    .paper:hover .paper-arrow {
+      transform: none;
+    }
+  }
+  .eyebrow {
+    margin: 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .text-action {
+    font-size: 0.8125rem;
+    display: inline-block;
+    padding: 0.5rem 0;
+  }
+
+  .profile-strip {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    border-block: 1px solid hsl(var(--border));
+    padding: 1.1rem 0;
+    font-size: 0.8125rem;
+  }
+  .profile-strip > span {
+    color: hsl(var(--muted-foreground));
+  }
+  .profile-strip > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.8rem;
+  }
+  .selected {
+    padding: 0 0 4.5rem;
+  }
+  .section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+    margin: 0.7rem 0 0;
+  }
+  .paper {
+    display: grid;
+    grid-template-columns: 2rem 1fr 2rem;
+    gap: 1rem;
+    border-top: 1px solid hsl(var(--border));
+    padding: 1.5rem 0;
+  }
+  .paper-index {
+    font-family: monospace;
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    padding-top: 0.1rem;
+  }
+  .paper-meta {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(var(--primary));
+    margin: 0 0 0.6rem;
+  }
+  .paper-meta span {
+    color: hsl(var(--muted-foreground));
+  }
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 500;
+    line-height: 1.4;
+    max-width: 46rem;
+    margin: 0;
+  }
+  .authors {
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+    margin: 0.5rem 0 0;
+  }
+  .paper-arrow {
+    align-self: center;
+    font-size: 1.4rem;
+    text-align: right;
+  }
+  .updates {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+    padding: 2.5rem 0 4rem;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .updates .text-action {
+    margin-top: 1rem;
+  }
+  .updates ol {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .updates li {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .updates li:first-child {
+    padding-top: 0;
+  }
+  time {
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    padding-top: 0.2rem;
+  }
+  .updates li a {
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .contact {
+    border-top: 1px solid hsl(var(--border));
+    padding: 2.5rem 0 0.5rem;
+  }
+  .contact p {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.85rem;
+  }
+  .contact > a {
+    font-size: 2.5rem;
+    letter-spacing: -0.04em;
+  }
+  @media (max-width: 760px) {
+    .research-statement {
+      padding: 3.5rem 0;
+    }
+    .profile-strip {
+      align-items: start;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .profile-strip > div {
+      gap: 1rem;
+    }
+    .section-heading {
+      align-items: start;
+      flex-direction: column;
+    }
+    .updates {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .updates li {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
   }
 </style>

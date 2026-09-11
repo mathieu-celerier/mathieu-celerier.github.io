@@ -11,7 +11,10 @@ interface Props {
 const { id, title, subtitle, dates, current = false, compact = false } = Astro.props
 ---
 
-<article id={id} class:list={['cv-entry', current && 'cv-entry-current', compact && 'cv-entry-compact']}>
+<article
+  id={id}
+  class:list={['cv-entry', current && 'cv-entry-current', compact && 'cv-entry-compact']}
+>
   <div class='cv-entry-date'>{dates}</div>
   <div class='cv-entry-body'>
     <div class='cv-entry-top'>
@@ -30,7 +33,7 @@ const { id, title, subtitle, dates, current = false, compact = false } = Astro.p
     grid-template-columns: 8rem minmax(0, 1fr);
     gap: 1.25rem;
     padding: 1.35rem 0;
-    border-radius: calc(2 * var(--radius, 0.5rem));
+    border-radius: 0;
     border: 0;
     border-bottom: 1px solid hsl(var(--border) / 1);
     background: transparent;
@@ -97,7 +100,7 @@ const { id, title, subtitle, dates, current = false, compact = false } = Astro.p
     border-radius: 999px;
     background: hsl(var(--primary) / 0.12);
     color: hsl(var(--primary) / 1);
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -105,7 +108,7 @@ const { id, title, subtitle, dates, current = false, compact = false } = Astro.p
 
   .cv-entry-subtitle {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: hsl(var(--muted-foreground) / 1);
   }
 

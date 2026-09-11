@@ -32,8 +32,8 @@ const safeRel = target === '_blank' ? (rel ?? 'noopener noreferrer') : rel
 
 <Tag
   class={cn(
-    'group inline-flex items-center gap-x-1 rounded-lg bg-muted border px-2 py-1 text-sm text-muted-foreground transition-all hover:bg-card no-underline',
-    !href && 'cursor-default',
+    'editorial-button group inline-flex items-center gap-x-1 border px-2 py-1 text-sm no-underline',
+    !href && 'cursor-pointer',
     variant === 'pill' && 'rounded-xl',
     className
   )}

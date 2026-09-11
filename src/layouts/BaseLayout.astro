@@ -1,9 +1,11 @@
 ---
 import { ClientRouter } from 'astro:transitions'
-import { Footer, ThemeProvider } from 'astro-pure/components/basic'
-import Header from '@/components/SiteHeader.astro'
+
+import { ThemeProvider } from 'astro-pure/components/basic'
 import type { SiteMeta } from 'astro-pure/types'
 import BaseHead from '@/components/BaseHead.astro'
+import Footer from '@/components/SiteFooter.astro'
+import Header from '@/components/SiteHeader.astro'
 import config from '@/site-config'
 
 // Import the global.css file here so that it is included on
@@ -35,7 +37,7 @@ const {
       class='w-full max-w-[70rem] px-4 sm:px-7 lg:px-10 min-h-[100dvh] flex flex-col justify-between'
     >
       <Header />
-      <div class='flex-1 w-full'>
+      <div class='flex-1 w-full' data-pagefind-body>
         <slot />
       </div>
       <Footer />
@@ -66,7 +68,9 @@ const {
       // state entirely — content just stays visible, no animation.
       function initScrollReveal() {
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        const targets = document.querySelectorAll<HTMLElement>('[data-reveal]:not(.reveal-observed)')
+        const targets = document.querySelectorAll<HTMLElement>(
+          '[data-reveal]:not(.reveal-observed)'
+        )
 
         if (prefersReducedMotion || targets.length === 0) return
 

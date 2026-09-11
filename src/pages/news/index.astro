@@ -1,7 +1,7 @@
 ---
 import PageLayout from '@/layouts/BaseLayout.astro'
-import PageIntro from '@/components/PageIntro.astro'
 import NewsList from '@/components/NewsList.astro'
+import PageIntro from '@/components/PageIntro.astro'
 ---
 
 <PageLayout meta={{ title: 'News', ogImage: '/og/news.png' }} highlightColor='hsl(var(--primary))'>
@@ -11,5 +11,5 @@ import NewsList from '@/components/NewsList.astro'
     copy='A running log of research milestones, publications, talks, and work in progress.'
   />
 
-  <NewsList />
+  <NewsList showHeading={false} />
 </PageLayout>

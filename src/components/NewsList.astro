@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import MarkdownIt from 'markdown-it'
+
 import { Button } from 'astro-pure/user'
 
 type Props = {
@@ -69,68 +70,39 @@ const formatDate = (date: Date) => {
 }
 
 const basePath = '/news'
-const isDev = import.meta.env.DEV
-
-const debugEntries = isDev
-  ? [
-      {
-        id: '__debug-2024',
-        title: 'Debug timeline item for 2024',
-        date: new Date('2024-10-14'),
-        formattedDate: formatDate(new Date('2024-10-14')),
-        isoDate: new Date('2024-10-14').toISOString(),
-        tags: ['debug'],
-        href: '',
-        isExternal: false,
-        hasDedicatedPage: false,
-        summaryHtml: md.render('Temporary development-only item to validate the 2024 section of the news timeline.'),
-        image: undefined as string | undefined
-      },
-      {
-        id: '__debug-2023',
-        title: 'Debug timeline item for 2023',
-        date: new Date('2023-05-22'),
-        formattedDate: formatDate(new Date('2023-05-22')),
-        isoDate: new Date('2023-05-22').toISOString(),
-        tags: ['debug'],
-        href: '',
-        isExternal: false,
-        hasDedicatedPage: false,
-        summaryHtml: md.render('Temporary development-only item to validate the 2023 section of the news timeline.'),
-        image: undefined as string | undefined
-      }
-    ]
-  : []
-
 const items = (await getCollection(collection)).sort((a, b) => {
   const diff = a.data.date.getTime() - b.data.date.getTime()
   return order === 'asc' ? diff : -diff
 })
 
-const entries = [...items.map((item) => {
-  const body = item.body ?? ''
-  const hasMore = body.includes(moreMarker)
-  const hasPageFlag = item.data.hasPage === true
-  const href = item.data.externalUrl || `${basePath}/${item.id}`
-  const summaryMd = (body.split(moreMarker)[0] ?? '').trim()
+const entries = [
+  ...items.map((item) => {
+    const body = item.body ?? ''
+    const hasMore = body.includes(moreMarker)
+    const hasPageFlag = item.data.hasPage === true
+    const href = item.data.externalUrl || `${basePath}/${item.id}`
+    const summaryMd = (body.split(moreMarker)[0] ?? '').trim()
 
-  return {
-    id: item.id,
-    title: item.data.title,
-    date: item.data.date,
-    formattedDate: formatDate(item.data.date),
-    isoDate: item.data.date.toISOString(),
-    tags: item.data.tags ?? [],
-    href,
-    isExternal: Boolean(item.data.externalUrl),
-    hasDedicatedPage: hasPageFlag || hasMore || Boolean(item.data.externalUrl),
-    summaryHtml: md.render(summaryMd),
-    image: item.data.image
-  }
-}), ...debugEntries].sort((a, b) => {
-  const diff = a.date.getTime() - b.date.getTime()
-  return order === 'asc' ? diff : -diff
-}).slice(0, maxItems ?? Number.POSITIVE_INFINITY)
+    return {
+      id: item.id,
+      title: item.data.title,
+      date: item.data.date,
+      formattedDate: formatDate(item.data.date),
+      isoDate: item.data.date.toISOString(),
+      tags: item.data.tags ?? [],
+      href,
+      isExternal: Boolean(item.data.externalUrl),
+      hasDedicatedPage: hasPageFlag || hasMore || Boolean(item.data.externalUrl),
+      summaryHtml: md.render(summaryMd),
+      image: item.data.image
+    }
+  })
+]
+  .sort((a, b) => {
+    const diff = a.date.getTime() - b.date.getTime()
+    return order === 'asc' ? diff : -diff
+  })
+  .slice(0, maxItems ?? Number.POSITIVE_INFINITY)
 
 const timelineEntries = entries.map((entry, index, array) => {
   const year = entry.date.getFullYear()
@@ -149,14 +121,12 @@ const timelineEntries = entries.map((entry, index, array) => {
   timelineEntries.length > 0 && (
     <section class:list={['news-list', compact && 'news-list-compact', flat && 'news-list-flat']}>
       <section class='news-timeline-section'>
-        {
-          showHeading && (
-            <div class='news-timeline-heading'>
-              <h2>Timeline</h2>
-              <p>Recent milestones, talks, papers, and project updates in chronological order.</p>
-            </div>
-          )
-        }
+        {showHeading && (
+          <div class='news-timeline-heading'>
+            <h2>Timeline</h2>
+            <p>Recent milestones, talks, papers, and project updates in chronological order.</p>
+          </div>
+        )}
 
         <ol class='news-timeline'>
           {timelineEntries.map((entry) => (
@@ -168,7 +138,10 @@ const timelineEntries = entries.map((entry, index, array) => {
               ) : null}
               <li class='news-timeline-item'>
                 <article
-                  class:list={['news-timeline-card', entry.featured && 'news-timeline-card-featured']}
+                  class:list={[
+                    'news-timeline-card',
+                    entry.featured && 'news-timeline-card-featured'
+                  ]}
                   data-reveal
                 >
                   <div class='news-timeline-top'>
@@ -177,7 +150,6 @@ const timelineEntries = entries.map((entry, index, array) => {
                     </time>
                     {entry.featured ? (
                       <Fragment>
-                        <span class='news-top-sep' aria-hidden='true'>·</span>
                         <p class='news-kicker'>Latest update</p>
                       </Fragment>
                     ) : null}
@@ -192,14 +164,16 @@ const timelineEntries = entries.map((entry, index, array) => {
 
                   <div class='news-card-body'>
                     <div class='news-card-text'>
-                      <h3 class:list={['news-card-title', entry.featured && 'news-card-title-featured']}>
+                      <h3
+                        class:list={[
+                          'news-card-title',
+                          entry.featured && 'news-card-title-featured'
+                        ]}
+                      >
                         {entry.title}
                       </h3>
                       <div
-                        class:list={[
-                          'news-summary',
-                          !entry.featured && 'news-summary-compact'
-                        ]}
+                        class:list={['news-summary', !entry.featured && 'news-summary-compact']}
                         set:html={entry.summaryHtml}
                       />
                     </div>
@@ -247,7 +221,7 @@ const timelineEntries = entries.map((entry, index, array) => {
 
   .news-kicker {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -263,7 +237,7 @@ const timelineEntries = entries.map((entry, index, array) => {
   }
 
   .news-list-compact .news-timeline-date {
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
   }
 
   .news-top-sep {
@@ -298,13 +272,13 @@ const timelineEntries = entries.map((entry, index, array) => {
 
   .news-summary {
     color: hsl(var(--muted-foreground) / 1);
-    font-size: 0.94rem;
+    font-size: 1rem;
     line-height: 1.55;
     max-width: 68ch;
   }
 
   .news-summary-compact {
-    font-size: 0.9rem;
+    font-size: 1rem;
     line-height: 1.5;
   }
 
@@ -419,7 +393,7 @@ const timelineEntries = entries.map((entry, index, array) => {
     margin: 0.8rem 0 0.35rem;
     scroll-margin-top: 5rem;
     color: hsl(var(--primary) / 1);
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -427,7 +401,7 @@ const timelineEntries = entries.map((entry, index, array) => {
 
   .news-list-compact .news-year-divider {
     margin: 0.35rem 0 0;
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
   }
 
   .news-year-divider::after {
@@ -442,14 +416,36 @@ const timelineEntries = entries.map((entry, index, array) => {
   }
 
   .news-timeline-card {
-    position: relative;
     display: grid;
-    gap: 0.65rem;
-    padding: 0.95rem 1.1rem;
-    border: 1px solid hsl(var(--border) / 1);
-    border-radius: var(--radius);
-    background: hsl(var(--card) / 0.72);
-    box-shadow: 0 16px 40px -38px rgba(15, 23, 42, 0.32);
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 1rem 2rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid hsl(var(--border));
+    background: transparent;
+  }
+  .news-timeline-top {
+    grid-column: 1;
+    align-content: start;
+    flex-direction: column;
+    align-items: start !important;
+  }
+  .news-card-body,
+  .news-card-actions {
+    grid-column: 2;
+  }
+  .news-card-body {
+    grid-row: 1;
+  }
+  @media (max-width: 700px) {
+    .news-timeline-card {
+      grid-template-columns: 1fr;
+    }
+    .news-card-body,
+    .news-card-actions,
+    .news-timeline-top {
+      grid-column: 1;
+      grid-row: auto;
+    }
   }
 
   .news-list-compact .news-timeline-card {
@@ -459,26 +455,11 @@ const timelineEntries = entries.map((entry, index, array) => {
   }
 
   .news-timeline-card-featured {
-    padding: 1.1rem 1.2rem;
-    border-radius: calc(2.2 * var(--radius, 0.5rem));
-    border: 1px solid hsl(var(--primary) / 0.3);
-    background:
-      linear-gradient(180deg, hsl(var(--background) / 0.95), hsl(var(--card) / 0.65));
-    box-shadow: 0 22px 50px -40px rgba(15, 23, 42, 0.45);
+    border-top: 2px solid hsl(var(--primary));
   }
 
   /* An inset bar (rather than border-left) so the accent stays a straight
      line instead of following the card's rounded corners. */
-  .news-timeline-card-featured::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.85rem;
-    bottom: 0.85rem;
-    width: 3px;
-    border-radius: 2px;
-    background: hsl(var(--primary) / 1);
-  }
 
   .news-timeline-top {
     display: flex;
@@ -492,7 +473,7 @@ const timelineEntries = entries.map((entry, index, array) => {
   }
 
   .news-timeline-top .news-tag-row {
-    margin-inline-start: auto;
+    margin-inline-start: 0;
   }
 
   .news-tag-row {
@@ -509,14 +490,14 @@ const timelineEntries = entries.map((entry, index, array) => {
     border-radius: 999px;
     background: hsl(var(--primary) / 0.1);
     color: hsl(var(--primary) / 1);
-    font-size: 0.78rem;
+    font-size: 0.8125rem;
     font-weight: 600;
   }
 
   .news-list-compact .news-tag {
     min-height: 1.45rem;
     padding: 0 0.45rem;
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
   }
 
   /* Flat variant: no per-entry card chrome, divider lines between entries
@@ -547,5 +528,4 @@ const timelineEntries = entries.map((entry, index, array) => {
       margin-bottom: -0.05rem;
     }
   }
-
 </style>

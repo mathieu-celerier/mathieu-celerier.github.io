@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
+
 import PageLayout from '@/layouts/BaseLayout.astro'
 import PageIntro from '@/components/PageIntro.astro'
 import PublicationCard from '@/components/publications/PublicationCard.astro'
@@ -31,12 +32,15 @@ const typeLabels: Record<string, string> = {
   other: 'Other'
 }
 
-const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
-  (a, b) => (typeLabels[a] ?? a).localeCompare(typeLabels[b] ?? b)
+const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort((a, b) =>
+  (typeLabels[a] ?? a).localeCompare(typeLabels[b] ?? b)
 )
 ---
 
-<PageLayout meta={{ title: 'Publications', ogImage: '/og/publications.png' }} highlightColor='hsl(var(--primary))'>
+<PageLayout
+  meta={{ title: 'Publications', ogImage: '/og/publications.png' }}
+  highlightColor='hsl(var(--primary))'
+>
   <PageIntro
     kicker='Research output'
     title='Publications'
@@ -68,6 +72,8 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
     ) : null
   }
 
+  <p id='pub-result-count' role='status'>{entries.length} publications</p>
+  <p id='pub-empty' hidden>No publications match these filters. Try another year or type.</p>
   {
     years.map((year) => (
       <section class='pub-year-section' data-year-section={year}>
@@ -100,6 +106,7 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
       const year = yearSelect?.value ?? 'all'
       const type = typeSelect?.value ?? 'all'
 
+      let total = 0
       document.querySelectorAll<HTMLElement>('[data-year-section]').forEach((section) => {
         let visibleCount = 0
 
@@ -112,11 +119,17 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
         })
 
         section.hidden = visibleCount === 0
+        total += visibleCount
       })
+      const count = document.getElementById('pub-result-count')
+      const empty = document.getElementById('pub-empty')
+      if (count) count.textContent = `${total} publication${total === 1 ? '' : 's'}`
+      if (empty) empty.hidden = total !== 0
     }
 
     yearSelect?.addEventListener('change', applyFilters)
     typeSelect?.addEventListener('change', applyFilters)
+    applyFilters()
   }
 
   initPublicationFilters()
@@ -124,6 +137,14 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
 </script>
 
 <style>
+  #pub-result-count {
+    font-size: 0.8125rem;
+    color: hsl(var(--muted-foreground));
+    margin: 1rem 0;
+  }
+  #pub-empty {
+    padding: 2rem 0;
+  }
   .pub-year-section {
     display: grid;
     grid-template-columns: 7rem minmax(0, 1fr);
@@ -180,6 +201,10 @@ const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort(
   }
 
   @media (max-width: 600px) {
-    .pub-year-section { grid-template-columns: 1fr; gap: 0.75rem; margin-top: 2.25rem; }
+    .pub-year-section {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-top: 2.25rem;
+    }
   }
 </style>

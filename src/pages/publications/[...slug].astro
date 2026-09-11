@@ -2,6 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { getCollection } from 'astro:content'
+
 import { Button } from 'astro-pure/user'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import YouTube from '@/components/YouTube.astro'
@@ -52,8 +53,11 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
   highlightColor='hsl(var(--primary))'
 >
   <article class='pub-detail'>
+    <a class='styled-link' href='/publications'>← All publications</a>
     <header class='pub-detail-header'>
-      <p class='pub-detail-kicker'>{entry.data.venue || typeLabels[entry.data.type] || 'Publication'}</p>
+      <p class='pub-detail-kicker'>
+        {entry.data.venue || typeLabels[entry.data.type] || 'Publication'}
+      </p>
       <h1 class='pub-detail-title'>{entry.data.title}</h1>
       <p class='pub-detail-authors'>{entry.data.authors}</p>
 
@@ -94,25 +98,46 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     }
 
     <section class='pub-detail-section'>
-      <h2>Links</h2>
+      <h2>Resources</h2>
       <div class='pub-links'>
-        {entry.data.website ? (
-          <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
-        ) : null}
-        {entry.data.url ? (
-          <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
-        ) : null}
-        {entry.data.pdf ? (
-          <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
-        ) : null}
-        {entry.data.code ? (
-          <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
-        ) : null}
-        {entry.data.video && !ytId ? (
-          <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
-        ) : null}
+        {
+          entry.data.website ? (
+            <Button
+              href={entry.data.website}
+              target='_blank'
+              variant='ahead'
+              title='Project page'
+            />
+          ) : null
+        }
+        {
+          entry.data.url ? (
+            <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
+          ) : null
+        }
+        {
+          entry.data.pdf ? (
+            <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
+          ) : null
+        }
+        {
+          entry.data.code ? (
+            <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
+          ) : null
+        }
+        {
+          entry.data.video && !ytId ? (
+            <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
+          ) : null
+        }
         <Button href={bibtexHref} download variant='ahead' title='Download .bib' />
-        <Button as='button' type='button' data-copy-bibtex={bibtexHref} variant='ahead' title='Copy BibTeX' />
+        <Button
+          as='button'
+          type='button'
+          data-copy-bibtex={bibtexHref}
+          variant='ahead'
+          title='Copy BibTeX'
+        />
       </div>
     </section>
 
@@ -124,7 +149,9 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
             <button type='button' class='pub-bibtex-copy' data-copy-bibtex={bibtexHref}>
               Copy
             </button>
-            <pre class='pub-bibtex'><code>{bibtexSource}</code></pre>
+            <pre class='pub-bibtex'>
+              <code>{bibtexSource}</code>
+            </pre>
           </div>
         </section>
       ) : null
@@ -133,24 +160,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
 </PageLayout>
 
 <script>
-  import { showToast } from 'astro-pure/utils'
-
-  document.addEventListener('click', async (event) => {
-    const button = (event.target as HTMLElement)?.closest<HTMLElement>('[data-copy-bibtex]')
-    if (!button) return
-
-    const href = button.dataset.copyBibtex
-    if (!href) return
-
-    try {
-      const response = await fetch(href)
-      const text = await response.text()
-      await navigator.clipboard.writeText(text)
-      showToast({ message: 'BibTeX copied to clipboard' })
-    } catch {
-      showToast({ message: 'Could not copy BibTeX' })
-    }
-  })
+  import '@/lib/copy-bibtex'
 </script>
 
 <style>
@@ -174,12 +184,11 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     display: grid;
     gap: 0.6rem;
     padding: 2.5rem 0 3rem;
-    border-bottom: 1px solid hsl(var(--border) / 1);
   }
 
   .pub-detail-kicker {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -215,7 +224,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     min-height: 1.6rem;
     padding: 0 0.6rem;
     border-radius: 999px;
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
   }
@@ -245,11 +254,15 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
   .pub-detail-section {
     display: grid;
     gap: 0.75rem;
+    padding-top: 2rem;
+    border-top: 1px solid hsl(var(--border));
   }
 
   .pub-detail-section h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font:
+      italic 1.65rem/1.3 Georgia,
+      serif;
   }
 
   .pub-detail-abstract {
@@ -270,7 +283,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
 
   .pub-bibtex {
     margin: 0;
-    padding: 1rem 1.1rem;
+    padding: 3rem 1.1rem 1rem;
     border-radius: calc(1.2 * var(--radius, 0.5rem));
     background: hsl(var(--muted) / 1);
     max-width: 100%;
@@ -290,7 +303,7 @@ const ytId = entry.data.video ? youtubeId(entry.data.video) : null
     border-radius: 999px;
     border: 1px solid hsl(var(--border) / 1);
     background: hsl(var(--background) / 0.9);
-    font-size: 0.76rem;
+    font-size: 0.8125rem;
     cursor: pointer;
   }
 
