@@ -2,23 +2,54 @@
 import { loadCV } from '@/lib/cv-data-loader'
 
 const { basics } = loadCV()
+
+interface Props {
+  context?: 'hero' | 'experiment'
+}
+
+const { context = 'hero' } = Astro.props
+const isExperiment = context === 'experiment'
 ---
 
-<robot-lab class='lab'>
+<robot-lab class:list={['lab', { 'is-experiment': isExperiment }]}>
   <div class='lab-heading'>
-    <span><i></i> HUMAN–ROBOT INTERACTION</span><span>TSUKUBA, JP / CNRS–AIST JRL</span>
+    <span><i></i> {isExperiment ? 'EXPERIMENT 01 / COMPLIANCE' : 'HUMAN–ROBOT INTERACTION'}</span
+    ><span>{isExperiment ? 'INTERACTIVE CONTROL STUDY' : 'TSUKUBA, JP / CNRS–AIST JRL'}</span>
   </div>
   <div class='lab-copy'>
-    <p class='lab-name'>Mathieu Celerier · {basics.position}</p>
-    <h1>Robots.<br />With <em>people.</em></h1>
-    <p class='lab-intro'>
-      Exploring the space where human guidance<br class='desktop-break' /> meets robot motion.
-    </p>
-    <div class='lab-actions'>
-      <a href='/publications'>Explore the research <span>↗</span></a><a href='/cv'
-        >My background →</a
-      >
-    </div>
+    {
+      isExperiment ? (
+        <>
+          <p class='lab-name'>CURRENT MODEL / TASK RESPONSE</p>
+          <h2 class='experiment-title'>When contact changes the plan.</h2>
+          <p class='lab-intro'>
+            Move the human target, then change γₖ to feel the difference between resisting and
+            yielding.
+          </p>
+        </>
+      ) : (
+        <>
+          <p class='lab-name'>Mathieu Celerier · {basics.position}</p>
+          <h1>
+            Robots.
+            <br />
+            With <em>people.</em>
+          </h1>
+          <p class='lab-intro'>
+            Exploring the space where human guidance
+            <br class='desktop-break' /> meets robot motion.
+          </p>
+          <div class='lab-actions'>
+            <>
+              <a href='/publications'>
+                Explore the research <span>↗</span>
+              </a>
+              <a href='/cv'>My background →</a>
+            </>
+          </div>
+        </>
+      )
+    }
   </div>
   <div class='lab-scene'>
     <svg viewBox='0 0 900 650' role='img' aria-labelledby='lab-scene-title'>
@@ -156,9 +187,11 @@ const { basics } = loadCV()
         <text x='55' y='-27'>HUMAN FORCE</text>
       </g>
       <g class='scene-note' fill='currentColor' font-family='monospace' font-size='12'
-        ><text x='540' y='590'>01 / PLANAR REACHING STUDY</text><text x='540' y='611'
-          >CONCEPTUAL MODEL · 2 DOF</text
-        ><text data-telemetry x='540' y='632'>γₖ 0.72 · TCP 640 / 245 · REACHABLE</text></g
+        ><text x='540' y='590'
+          >{isExperiment ? 'LIVE / PLANAR REACHING STUDY' : '01 / PLANAR REACHING STUDY'}</text
+        ><text x='540' y='611'>CONCEPTUAL MODEL · 2 DOF</text><text data-telemetry x='540' y='632'
+          >γₖ 0.72 · TCP 640 / 245 · REACHABLE</text
+        ></g
       >
     </svg>
     <div class='scene-label'>
@@ -443,6 +476,14 @@ const { basics } = loadCV()
     width: 55%;
     pointer-events: none;
   }
+  .experiment-title {
+    max-width: 31rem;
+    margin: 0;
+    font-size: clamp(2.8rem, 5vw, 5.4rem);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+  }
   .lab-name {
     font-size: 0.85rem;
     margin: 0 0 1.5rem;
@@ -680,6 +721,17 @@ const { basics } = loadCV()
       transform: translateX(-50%);
     }
   }
+  .lab.is-experiment {
+    min-height: 690px;
+    margin-top: 0;
+  }
+  .is-experiment .lab-copy {
+    padding-top: 5rem;
+    width: 44%;
+  }
+  .is-experiment .lab-scene {
+    top: 1.5rem;
+  }
   @media (max-width: 800px) {
     .lab {
       min-height: 960px;
@@ -688,6 +740,16 @@ const { basics } = loadCV()
       width: 100%;
       padding: 2rem 1.5rem 0;
       box-sizing: border-box;
+    }
+    .is-experiment .lab-copy {
+      width: 100%;
+      padding: 2rem 1.5rem 0;
+    }
+    .lab.is-experiment {
+      min-height: 900px;
+    }
+    .is-experiment .lab-scene {
+      top: 360px;
     }
     .lab-heading {
       padding: 1.2rem 1.5rem;

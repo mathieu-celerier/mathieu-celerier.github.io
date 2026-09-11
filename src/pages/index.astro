@@ -1,19 +1,19 @@
 ---
 import { getCollection } from 'astro:content'
+import { labSnapshot, openQuestions, researchTracks } from '@/data/lab-home'
+import { loadCV } from '@/lib/cv-data-loader'
 import { homeSelection } from '@/lib/home-selection'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
-import ResearchJourney from '@/components/ResearchJourney.astro'
+import LabField from '@/components/LabField.astro'
 import RobotLab from '@/components/RobotLab.astro'
-
-import { loadCV } from '../lib/cv-data-loader'
 
 const cv = loadCV()
 const allPublications = await getCollection('publications')
-const leadPaper = allPublications.find((entry) => entry.data.bibkey === homeSelection.lead)
-const publications = homeSelection.supporting.flatMap((key) => {
+const selectedKeys = [homeSelection.lead, ...homeSelection.supporting]
+const publications = selectedKeys.flatMap((key) => {
   const entry = allPublications.find((item) => item.data.bibkey === key)
-  return entry && entry.id !== leadPaper?.id ? [entry] : []
+  return entry ? [entry] : []
 })
 const news = (await getCollection('news'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
@@ -22,509 +22,710 @@ const news = (await getCollection('news'))
 
 <PageLayout meta={{ title: 'Home', ogImage: '/og/home.png' }}>
   <main>
-    <RobotLab />
-    <div class='research-statement'>
-      <p class='eyebrow'>Beyond the demonstration</p><p>
-        A robot can follow a target.<br />Working with a person asks <em>more.</em>
-      </p><span>
-        I design control systems that let robots respond safely, predictably, and physically to
-        people.
-      </span>
-    </div>
-    <ResearchJourney />
-    <section class='selected' aria-labelledby='selected-title'>
-      <div class='section-heading'>
-        <div>
-          <p class='eyebrow'>Selected work</p><h2 id='selected-title'>Inside the research.</h2>
-        </div><a class='text-action' href='/publications'>All publications ↗</a>
+    <LabField />
+
+    <section class='now' id='now' aria-labelledby='now-title' data-reveal>
+      <div class='now-index'>
+        <span class='pulse'></span><span>NOW</span><time datetime='2026-09'
+          >{labSnapshot.updated}</time
+        >
       </div>
-      {
-        leadPaper && (
-          <article class='research-feature'>
-            <div class='feature-label'>
-              <>
-                <span class='eyebrow'>Research in focus</span>
-                <span class='feature-year'>{leadPaper.data.year}</span>
-              </>
-            </div>
-            <div class='feature-content'>
-              <>
-                <p class='eyebrow'>Physical human–robot interaction</p>
-                <h3>
-                  <a href={'/publications/' + leadPaper.data.bibkey}>{leadPaper.data.title}</a>
-                </h3>
-                <p class='authors'>{leadPaper.data.authors}</p>
-                <a class='text-action' href={'/publications/' + leadPaper.data.bibkey}>
-                  Read the research <span aria-hidden='true'>↗</span>
-                </a>
-              </>
-            </div>
-            <div class='feature-visual' aria-hidden='true'>
-              <span>EXPLICIT COMPLIANCE</span>
-              <svg viewBox='0 0 220 160'>
-                <path class='feature-axis' d='M22 132H199M22 132V24' />
-                <path class='feature-safe' d='M31 116C69 116 87 101 111 79S160 39 192 35' />
-                <path class='feature-response' d='M31 122C72 121 91 108 116 82S164 45 192 39' />
-                <circle cx='116' cy='82' r='7' />
-                <>
-                  <text x='26' y='151'>
-                    γ=0
-                  </text>
-                  <text x='171' y='151'>
-                    γ=1
-                  </text>
-                </>
-              </svg>
-              <small>STIFF ← TASK RESPONSE → COMPLIANT</small>
-            </div>
-          </article>
-        )
-      }
-      <div class='paper-list'>
+      <div class='now-copy'>
+        <p class='eyebrow'>Currently investigating</p>
+        <h2 id='now-title'>{labSnapshot.inquiry}</h2>
+      </div>
+      <p class='now-note'>{labSnapshot.note}</p>
+    </section>
+
+    <section class='atlas' aria-labelledby='atlas-title'>
+      <header class='atlas-header'>
+        <div>
+          <p class='eyebrow'>Research atlas</p>
+          <h2 id='atlas-title'>One practice.<br /><em>Several territories.</em></h2>
+        </div>
+        <p>
+          The questions move. The underlying practice remains: observe a system, make its limits
+          explicit, and test what changes when another agent enters the loop.
+        </p>
+      </header>
+      <div class='track-list'>
         {
-          publications
-            .filter((entry) => entry.id !== leadPaper?.id)
-            .map((entry, i) => (
-              <article class='paper'>
-                <>
-                  <span class='paper-index'>0{i + 1}</span>
-                  <div>
-                    <>
-                      <p class='paper-meta'>
-                        {entry.data.venue || entry.data.type} <span> / {entry.data.year}</span>
-                      </p>
-                      <h3>
-                        <a href={'/publications/' + entry.data.bibkey}>{entry.data.title}</a>
-                      </h3>
-                      <p class='authors'>{entry.data.authors}</p>
-                    </>
-                  </div>
-                  <a
-                    class='paper-arrow'
-                    href={'/publications/' + entry.data.bibkey}
-                    aria-label={'Read ' + entry.data.title}
-                  >
-                    ↗
-                  </a>
-                </>
-              </article>
-            ))
+          researchTracks.map((track) => (
+            <article class={`track track-${track.id}`} data-reveal>
+              <div class='track-topline'>
+                <span>
+                  {track.index} / {track.title}
+                </span>
+                <span class={`status status-${track.status.toLowerCase()}`}>{track.status}</span>
+              </div>
+              <div class='track-copy'>
+                <h3>{track.question}</h3>
+                <p>{track.detail}</p>
+              </div>
+              <div class='track-visual' aria-hidden='true'>
+                {track.id === 'motion' && (
+                  <svg viewBox='0 0 440 210'>
+                    <path class='ghost' d='M28 163C95 163 118 49 190 49S279 174 412 77' />
+                    <path class='primary-path' d='M28 163C95 163 118 49 190 49S279 174 412 77' />
+                    <circle class='marker' cx='190' cy='49' r='11' />
+                    <path
+                      class='ticks'
+                      d='M28 178V187M92 178V187M156 178V187M220 178V187M284 178V187M348 178V187M412 178V187'
+                    />
+                    <text x='28' y='205'>
+                      t₀
+                    </text>
+                    <text x='398' y='205'>
+                      tₙ
+                    </text>
+                  </svg>
+                )}
+                {track.id === 'constraints' && (
+                  <svg viewBox='0 0 440 210'>
+                    <path
+                      class='safe-zone'
+                      d='M50 161L87 48L221 25L383 71L406 161L294 190L137 187Z'
+                    />
+                    <path class='primary-path' d='M59 147C124 126 155 162 221 111S315 57 379 82' />
+                    <path class='danger' d='M87 48L50 161M383 71L406 161' />
+                    <circle class='marker' cx='221' cy='111' r='11' />
+                    <text x='177' y='103'>
+                      FEASIBLE
+                    </text>
+                  </svg>
+                )}
+                {track.id === 'interaction' && (
+                  <svg viewBox='0 0 440 210'>
+                    <circle class='agent human' cx='96' cy='104' r='34' />
+                    <circle class='agent robot' cx='344' cy='104' r='34' />
+                    <path
+                      class='signal signal-a'
+                      d='M133 91C176 34 206 166 246 91S291 144 307 104'
+                    />
+                    <path
+                      class='signal signal-b'
+                      d='M133 116C176 59 206 191 246 116S291 169 307 129'
+                    />
+                    <text x='73' y='164'>
+                      HUMAN
+                    </text>
+                    <text x='323' y='164'>
+                      ROBOT
+                    </text>
+                    <text x='184' y='28'>
+                      OPEN SIGNAL
+                    </text>
+                  </svg>
+                )}
+              </div>
+            </article>
+          ))
         }
       </div>
     </section>
-    <section class='updates' aria-labelledby='updates-title'>
-      <div>
-        <p class='eyebrow'>Along the way</p><h2 id='updates-title'>Recent news.</h2><a
-          class='text-action'
-          href='/news'>All updates ↗</a
-        >
-      </div><ol>
+
+    <section class='experiment' aria-labelledby='experiment-title'>
+      <header class='experiment-header'>
+        <div>
+          <p class='eyebrow'>Open experiment</p>
+          <h2 id='experiment-title'>Touch the research.</h2>
+        </div>
+        <p>
+          This model comes from my work on explicit compliance. It is one instrument in the lab—not
+          a permanent definition of everything that follows.
+        </p>
+      </header>
+      <RobotLab context='experiment' />
+    </section>
+
+    <section class='evidence' aria-labelledby='evidence-title'>
+      <header class='section-heading'>
+        <div>
+          <p class='eyebrow'>Published evidence</p>
+          <h2 id='evidence-title'>Work that left the lab.</h2>
+        </div>
+        <a class='text-action' href='/publications'>Complete publication record ↗</a>
+      </header>
+      <div class='publication-stack'>
         {
-          news.map((entry) => (
-            <li>
+          publications.map((entry, index) => (
+            <article class='publication' data-reveal>
+              <span class='publication-index'>0{index + 1}</span>
+              <div class='publication-body'>
+                <p class='publication-meta'>
+                  {entry.data.venue || entry.data.type} / {entry.data.year}
+                </p>
+                <h3>
+                  <a href={`/publications/${entry.data.bibkey}`}>{entry.data.title}</a>
+                </h3>
+                <p class='authors'>{entry.data.authors}</p>
+              </div>
+              <a
+                class='publication-link'
+                href={`/publications/${entry.data.bibkey}`}
+                aria-label={`Read ${entry.data.title}`}
+              >
+                ↗
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class='questions' aria-labelledby='questions-title'>
+      <div class='questions-intro'>
+        <p class='eyebrow'>Unresolved / intentionally</p>
+        <h2 id='questions-title'>The lab stays<br /><em>unfinished.</em></h2>
+        <p>These questions are coordinates, not claims. They can change as the research does.</p>
+      </div>
+      <ol>
+        {
+          openQuestions.map((question, index) => (
+            <li data-reveal>
               <>
-                <time datetime={entry.data.date.toISOString()}>
-                  {entry.data.date.toLocaleDateString('en-GB', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </time>
-                <a
-                  href={
-                    entry.data.externalUrl ||
-                    (entry.data.hasPage || entry.body?.includes('{/* more */}')
-                      ? '/news/' + entry.id
-                      : '/news')
-                  }
-                >
-                  {entry.data.title} ↗
-                </a>
+                <span>Q{index + 1}</span>
+                <p>{question}</p>
+                <i aria-hidden='true'>→</i>
               </>
             </li>
           ))
         }
       </ol>
     </section>
+
+    <section class='log' aria-labelledby='log-title'>
+      <div class='log-heading'>
+        <p class='eyebrow'>Lab log</p>
+        <h2 id='log-title'>Recent signals.</h2>
+        <a class='text-action' href='/news'>All updates ↗</a>
+      </div>
+      <ol>
+        {
+          news.map((entry) => (
+            <li>
+              <time datetime={entry.data.date.toISOString()}>
+                {entry.data.date.toLocaleDateString('en-GB', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </time>
+              <a
+                href={
+                  entry.data.externalUrl ||
+                  (entry.data.hasPage || entry.body?.includes('{/* more */}')
+                    ? `/news/${entry.id}`
+                    : '/news')
+                }
+              >
+                {entry.data.title} ↗
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
     <section class='contact'>
-      <div>
-        <p class='eyebrow'>An open conversation</p><p>
-          Interested in physical human–robot interaction?
-        </p>
-      </div><a href={'mailto:' + cv.basics.email}>Let’s <em>talk.</em> ↗</a>
+      <p><span class='pulse'></span> OPEN TO EXCHANGE</p>
+      <a href={`mailto:${cv.basics.email}`}>Bring a question.<br /><em>Let’s explore it.</em> ↗</a>
     </section>
   </main>
 </PageLayout>
 
 <style>
-  .research-statement {
-    position: relative;
-    padding: 5rem 0;
-    max-width: 55rem;
-    padding-left: 4rem;
-    box-sizing: border-box;
+  .eyebrow,
+  .track-topline,
+  .publication-index,
+  .publication-meta {
+    margin: 0;
+    font: 0.7rem/1.5 monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
-  .research-statement::before {
-    content: '';
-    position: absolute;
-    left: 1rem;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: linear-gradient(hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.42));
-  }
-  .research-statement > p:nth-child(2) {
-    font-size: clamp(1.9rem, 4vw, 3.2rem);
-    line-height: 1.18;
-    letter-spacing: -0.04em;
-    margin: 1.25rem 0;
-  }
-  .research-statement em {
-    font-family: Georgia, serif;
+  .eyebrow {
     color: hsl(var(--primary));
   }
-  .research-statement > span {
-    color: hsl(var(--muted-foreground));
-    font-size: 1rem;
+  h2 {
+    margin: 0.65rem 0 0;
+    font-size: clamp(2.4rem, 5vw, 5rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+  h2 em {
+    color: hsl(var(--primary));
+    font-family: Georgia, serif;
+    font-weight: 400;
+  }
+  .text-action {
+    font-size: 0.78rem;
+  }
+  .pulse {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(var(--signal));
+    box-shadow: 0 0 10px hsl(var(--signal));
   }
 
-  .research-feature {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
+  .now {
     display: grid;
-    grid-template-columns: 9rem minmax(0, 1fr) 13rem;
+    grid-template-columns: 8rem minmax(0, 1.5fr) minmax(15rem, 0.7fr);
     gap: 2rem;
-    padding: 3rem;
-    margin-bottom: 1.5rem;
-    background: #173e89;
-    color: #f0f5ff;
-    border-radius: 12px;
+    align-items: start;
+    padding: 8rem 0;
+    border-bottom: 1px solid hsl(var(--border));
   }
-  .research-feature::before {
-    content: '';
-    position: absolute;
-    width: 35rem;
-    height: 35rem;
-    right: -18rem;
-    top: -14rem;
-    border: 1px solid #ffffff22;
-    border-radius: 50%;
-    box-shadow:
-      0 0 0 50px #ffffff05,
-      0 0 0 100px #ffffff04;
-    z-index: -1;
+  .now-index {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.3rem 0.6rem;
+    align-items: center;
+    font: 0.66rem/1.4 monospace;
+    letter-spacing: 0.08em;
   }
-  .research-feature .eyebrow,
-  .research-feature .authors {
-    color: #c5d8fa;
+  .now-index time {
+    grid-column: 2;
+    color: hsl(var(--muted-foreground));
   }
-  .research-feature .feature-year {
-    color: #aecfff;
+  .now-copy h2 {
+    max-width: 43rem;
+    font-size: clamp(2.1rem, 4.6vw, 4.5rem);
   }
-  .research-feature a:hover {
-    color: white;
-    text-decoration: underline;
+  .now-note {
+    margin: 2rem 0 0;
+    padding-left: 1.25rem;
+    border-left: 1px solid hsl(var(--signal));
+    color: hsl(var(--muted-foreground));
+    font-size: 0.9rem;
   }
-  .feature-visual {
+
+  .atlas {
+    padding: 8rem 0;
+  }
+  .atlas-header,
+  .experiment-header {
+    display: grid;
+    grid-template-columns: 1fr 0.7fr;
+    gap: 4rem;
+    align-items: end;
+    margin-bottom: 4rem;
+  }
+  .atlas-header > p,
+  .experiment-header > p {
+    max-width: 30rem;
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+  }
+  .track-list {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .track {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 0.8fr) minmax(21rem, 1.2fr);
+    gap: 2rem;
+    min-height: 300px;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+    align-items: center;
+  }
+  .track-topline {
     align-self: stretch;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-left: 1.5rem;
-    border-left: 1px solid #ffffff36;
-    font: 0.65rem/1.4 monospace;
-    letter-spacing: 0.08em;
-    color: #c5d8fa;
+    color: hsl(var(--muted-foreground));
   }
-  .feature-visual svg {
+  .status {
+    width: fit-content;
+    padding: 0.25rem 0.45rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 20px;
+  }
+  .status-active {
+    color: hsl(var(--signal));
+    border-color: hsl(var(--signal) / 0.55);
+  }
+  .status-emerging {
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.55);
+  }
+  .track-copy h3 {
+    max-width: 25rem;
+    margin: 0;
+    font-size: clamp(1.5rem, 2.7vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.04em;
+  }
+  .track-copy p {
+    max-width: 26rem;
+    margin: 1.2rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.9rem;
+  }
+  .track-visual {
+    overflow: hidden;
+    border-left: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+  }
+  .track-visual svg {
     display: block;
     width: 100%;
   }
-  .feature-visual text {
-    fill: #c5d8fa;
+  .track-visual text {
+    fill: currentColor;
     font: 9px monospace;
+    letter-spacing: 0.08em;
   }
-  .feature-axis {
+  .ghost,
+  .primary-path,
+  .ticks,
+  .safe-zone,
+  .danger,
+  .agent,
+  .signal {
     fill: none;
-    stroke: #ffffff4d;
+    stroke: currentColor;
   }
-  .feature-safe {
-    fill: none;
-    stroke: #ffffff42;
-    stroke-dasharray: 4 5;
+  .ghost {
+    opacity: 0.18;
+    stroke-width: 14;
   }
-  .feature-response {
-    fill: none;
-    stroke: #b7d6ff;
-    stroke-width: 3;
+  .primary-path {
+    stroke: hsl(var(--primary));
+    stroke-width: 2.5;
   }
-  .feature-visual circle {
-    fill: #f06b4d;
+  .ticks {
+    opacity: 0.4;
   }
-  .feature-visual small {
-    font-size: 0.55rem;
+  .marker {
+    fill: hsl(var(--signal));
   }
-  .paper-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
+  .safe-zone {
+    fill: hsl(var(--primary) / 0.06);
+    stroke: hsl(var(--primary));
+    stroke-dasharray: 5 7;
   }
-  .paper-list .paper {
-    grid-template-columns: 1fr 2rem;
-    padding: 1.75rem;
-    border: 1px solid hsl(var(--border));
-    border-radius: 12px;
-    background: hsl(var(--muted) / 0.35);
+  .danger {
+    stroke: hsl(var(--signal));
+    stroke-width: 5;
   }
-  .paper-index {
-    grid-column: 1/-1;
-    font:
-      italic 2rem Georgia,
-      serif !important;
+  .agent {
+    stroke-width: 2;
   }
-  .paper-list .paper h3 {
-    font-size: 1.35rem;
+  .human {
+    fill: hsl(var(--signal) / 0.1);
+    stroke: hsl(var(--signal));
   }
-  @media (max-width: 700px) {
-    .paper-list {
-      grid-template-columns: 1fr;
+  .robot {
+    fill: hsl(var(--primary) / 0.1);
+    stroke: hsl(var(--primary));
+  }
+  .signal {
+    stroke-width: 2;
+  }
+  .signal-a {
+    stroke: hsl(var(--primary));
+  }
+  .signal-b {
+    stroke: hsl(var(--signal));
+    opacity: 0.65;
+  }
+  .track:hover .primary-path {
+    animation: trace 1.2s ease both;
+  }
+  .track:hover .signal-a {
+    animation: signal-shift 1.3s ease-in-out infinite alternate;
+  }
+  @keyframes trace {
+    from {
+      stroke-dasharray: 0 700;
     }
-    .research-feature {
-      padding: 1.5rem;
-      grid-template-columns: 1fr;
-    }
-    .feature-visual {
-      grid-column: 1;
-      padding: 1rem 0 0;
-      border-left: 0;
-      border-top: 1px solid #ffffff36;
+    to {
+      stroke-dasharray: 700 0;
     }
   }
-  @media (min-width: 701px) and (max-width: 900px) {
-    .research-feature {
-      grid-template-columns: 8rem 1fr;
-    }
-    .feature-visual {
-      grid-column: 2;
-      min-height: 11rem;
+  @keyframes signal-shift {
+    to {
+      transform: translateY(8px);
     }
   }
 
-  .feature-label {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 2rem;
-    border-right: 1px solid hsl(var(--border));
+  .experiment {
+    width: calc(100vw - 2rem);
+    max-width: 1500px;
+    margin-left: 50%;
+    padding: 7rem max(1rem, calc((100% - 62rem) / 2));
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
   }
-  .feature-year {
-    font:
-      italic 2.6rem Georgia,
-      serif;
-    color: hsl(var(--primary));
+  .experiment-header {
+    max-width: 62rem;
+    margin-inline: auto;
   }
-  .feature-content h3 {
-    font-size: clamp(1.4rem, 2.7vw, 1.85rem);
-    line-height: 1.25;
-    margin: 0.8rem 0;
-    letter-spacing: -0.025em;
+  .experiment-header > p {
+    color: hsl(var(--background) / 0.67);
   }
-  .feature-content .text-action {
-    margin-top: 1rem;
-  }
-  .paper {
-    transition: background 0.2s;
-  }
-  .paper:hover,
-  .paper:focus-within {
-    background: hsl(var(--muted) / 0.5);
-  }
-  .paper-arrow {
-    transition: transform 0.2s;
-  }
-  .paper:hover .paper-arrow {
-    transform: translate(2px, -2px);
-  }
-  .contact {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-  }
-  .contact em {
-    font-family: Georgia, serif;
-    color: hsl(var(--primary));
-  }
-  @media (max-width: 600px) {
-    .research-feature {
-      grid-template-columns: 1fr;
-      padding: 1.3rem;
-      gap: 1.2rem;
-    }
-    .feature-label {
-      flex-direction: row;
-      align-items: center;
-      border-right: 0;
-      border-bottom: 1px solid hsl(var(--border));
-      padding-bottom: 1rem;
-    }
-    .feature-year {
-      font-size: 1.7rem;
-    }
-    .contact {
-      flex-direction: column;
-      align-items: start;
-      gap: 0.5rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .paper,
-    .paper-arrow {
-      transition: none;
-    }
-    .paper:hover .paper-arrow {
-      transform: none;
-    }
-  }
-  .eyebrow {
-    margin: 0;
-    font-size: 0.8125rem;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: hsl(var(--muted-foreground));
+  .experiment :global(.lab) {
+    color: #142443;
   }
 
-  .text-action {
-    font-size: 0.8125rem;
-    display: inline-block;
-    padding: 0.5rem 0;
-  }
-
-  .selected {
-    padding: 0 0 4.5rem;
+  .evidence {
+    padding: 8rem 0;
   }
   .section-heading {
     display: flex;
     justify-content: space-between;
     align-items: end;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 2rem;
+    margin-bottom: 3rem;
   }
-  h2 {
-    font-size: clamp(1.6rem, 3vw, 2.1rem);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.2;
-    margin: 0.7rem 0 0;
+  .section-heading h2 {
+    font-size: clamp(2.4rem, 4vw, 4rem);
   }
-  .paper {
-    display: grid;
-    grid-template-columns: 2rem 1fr 2rem;
-    gap: 1rem;
+  .publication-stack {
     border-top: 1px solid hsl(var(--border));
-    padding: 1.5rem 0;
   }
-  .paper-index {
-    font-family: monospace;
-    font-size: 0.8125rem;
-    color: hsl(var(--muted-foreground));
-    padding-top: 0.1rem;
+  .publication {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr) 3rem;
+    gap: 2rem;
+    padding: 2.2rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+    transition:
+      padding 220ms ease,
+      background 220ms ease;
   }
-  .paper-meta {
-    font-size: 0.8125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  .publication:hover {
+    padding-inline: 1.25rem;
+    background: hsl(var(--muted) / 0.5);
+  }
+  .publication-index {
     color: hsl(var(--primary));
-    margin: 0 0 0.6rem;
   }
-  .paper-meta span {
+  .publication-meta {
+    margin-bottom: 0.55rem;
     color: hsl(var(--muted-foreground));
   }
-  h3 {
-    font-size: 1.15rem;
+  .publication h3 {
+    max-width: 50rem;
+    margin: 0;
+    font-size: 1.2rem;
     font-weight: 500;
     line-height: 1.4;
-    max-width: 46rem;
-    margin: 0;
   }
   .authors {
-    font-size: 0.8125rem;
+    margin: 0.55rem 0 0;
     color: hsl(var(--muted-foreground));
-    line-height: 1.6;
-    margin: 0.5rem 0 0;
+    font-size: 0.78rem;
   }
-  .paper-arrow {
+  .publication-link {
     align-self: center;
-    font-size: 1.4rem;
-    text-align: right;
+    justify-self: end;
+    font-size: 1.3rem;
   }
-  .updates {
+
+  .questions {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 3rem;
-    padding: 2.5rem 0 4rem;
+    grid-template-columns: minmax(16rem, 0.7fr) minmax(0, 1.3fr);
+    gap: 5rem;
+    padding: 7rem 3rem;
+    border-radius: 12px;
+    background: hsl(var(--muted));
+  }
+  .questions-intro > p:last-child {
+    max-width: 25rem;
+    color: hsl(var(--muted-foreground));
+  }
+  .questions ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
     border-top: 1px solid hsl(var(--border));
   }
-  .updates .text-action {
-    margin-top: 1rem;
-  }
-  .updates ol {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-  .updates li {
+  .questions li {
     display: grid;
-    grid-template-columns: 7rem 1fr;
+    grid-template-columns: 3rem 1fr auto;
     gap: 1rem;
-    padding: 1rem 0;
+    align-items: center;
+    min-height: 7rem;
     border-bottom: 1px solid hsl(var(--border));
   }
-  .updates li:first-child {
-    padding-top: 0;
+  .questions li span {
+    font: 0.65rem monospace;
+    color: hsl(var(--primary));
   }
-  time {
-    font-size: 0.8125rem;
-    color: hsl(var(--muted-foreground));
-    padding-top: 0.2rem;
+  .questions li p {
+    margin: 0;
+    font-size: clamp(1.05rem, 2vw, 1.4rem);
+    line-height: 1.35;
   }
-  .updates li a {
-    font-size: 0.88rem;
-    line-height: 1.5;
+  .questions li i {
+    color: hsl(var(--signal));
+    font-style: normal;
   }
-  .contact {
+
+  .log {
+    display: grid;
+    grid-template-columns: 0.65fr 1.35fr;
+    gap: 4rem;
+    padding: 8rem 0;
+  }
+  .log-heading .text-action {
+    margin-top: 1rem;
+  }
+  .log ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
     border-top: 1px solid hsl(var(--border));
-    padding: 2.5rem 0 0.5rem;
   }
-  .contact p {
+  .log li {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 1rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .log time {
     color: hsl(var(--muted-foreground));
-    font-size: 0.85rem;
+    font-size: 0.76rem;
+  }
+  .log a {
+    font-size: 0.88rem;
+  }
+
+  .contact {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr;
+    gap: 3rem;
+    align-items: start;
+    padding: 5rem 0 2rem;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .contact > p {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font: 0.66rem monospace;
+    letter-spacing: 0.08em;
   }
   .contact > a {
-    font-size: 2.5rem;
-    letter-spacing: -0.04em;
+    font-size: clamp(2.7rem, 6vw, 6rem);
+    line-height: 0.96;
+    letter-spacing: -0.055em;
   }
-  @media (max-width: 760px) {
-    .research-statement {
-      padding: 3.5rem 0;
-      padding-left: 1.5rem;
+  .contact em {
+    color: hsl(var(--primary));
+    font-family: Georgia, serif;
+    font-weight: 400;
+  }
+
+  @media (max-width: 800px) {
+    .now {
+      grid-template-columns: 7rem 1fr;
+      padding: 6rem 0;
     }
-    .research-statement::before {
-      left: 0;
+    .now-note {
+      grid-column: 2;
+    }
+    .atlas-header,
+    .experiment-header {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .track {
+      grid-template-columns: 7rem 1fr;
+    }
+    .track-visual {
+      grid-column: 2;
+      border-left: 0;
+    }
+    .questions {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+      padding: 4rem 2rem;
+    }
+  }
+  @media (max-width: 600px) {
+    .now {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .now-note {
+      grid-column: 1;
+      margin-top: 0;
+    }
+    .atlas {
+      padding: 6rem 0;
+    }
+    .track {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .track-topline {
+      flex-direction: row;
+    }
+    .track-visual {
+      grid-column: 1;
+    }
+    .experiment {
+      width: 100vw;
+      padding: 5rem 0;
+    }
+    .experiment-header {
+      padding-inline: 1rem;
     }
     .section-heading {
       align-items: start;
       flex-direction: column;
     }
-    .updates {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
+    .evidence {
+      padding: 6rem 0;
     }
-    .updates li {
+    .publication {
+      grid-template-columns: 2rem 1fr 1.5rem;
+      gap: 0.75rem;
+    }
+    .publication:hover {
+      padding-inline: 0;
+    }
+    .questions {
+      width: 100vw;
+      margin-left: 50%;
+      padding: 4rem 1rem;
+      transform: translateX(-50%);
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+    .questions li {
+      grid-template-columns: 2rem 1fr auto;
+    }
+    .log {
       grid-template-columns: 1fr;
-      gap: 0.35rem;
+      gap: 2rem;
+      padding: 6rem 0;
+    }
+    .log li {
+      grid-template-columns: 6rem 1fr;
+    }
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track:hover .primary-path,
+    .track:hover .signal-a {
+      animation: none;
+    }
+    .publication {
+      transition: none;
     }
   }
 </style>
