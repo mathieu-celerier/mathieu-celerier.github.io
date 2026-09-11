@@ -12,7 +12,7 @@ const { basics } = loadCV()
     <p class='lab-name'>Mathieu Celerier · {basics.position}</p>
     <h1>Robots.<br />With <em>people.</em></h1>
     <p class='lab-intro'>
-      Exploring the space where human intention<br class='desktop-break' /> meets robot motion.
+      Exploring the space where human guidance<br class='desktop-break' /> meets robot motion.
     </p>
     <div class='lab-actions'>
       <a href='/publications'>Explore the research <span>↗</span></a><a href='/cv'
@@ -49,6 +49,17 @@ const { basics } = loadCV()
         <filter id='lab-shadow' x='-50%' y='-50%' width='200%' height='200%'
           ><feGaussianBlur stdDeviation='12'></feGaussianBlur></filter
         >
+        <marker
+          id='lab-arrow'
+          viewBox='0 0 10 10'
+          refX='8'
+          refY='5'
+          markerWidth='6'
+          markerHeight='6'
+          orient='auto-start-reverse'
+        >
+          <path d='M0 0L10 5L0 10Z' fill='currentColor'></path>
+        </marker>
       </defs>
       <g class='floor'>
         <ellipse cx='490' cy='520' rx='370' ry='135' fill='url(#lab-floor)'></ellipse>
@@ -72,6 +83,8 @@ const { basics } = loadCV()
         fill='#061025'
         opacity='.3'
         filter='url(#lab-shadow)'></ellipse>
+      <path data-force-vector class='force-vector' d='M640 245L640 245' marker-end='url(#lab-arrow)'
+      ></path>
       <path
         d='M425 492Q470 467 515 492V514Q470 541 425 514Z'
         fill='url(#lab-metal)'
@@ -133,10 +146,19 @@ const { basics } = loadCV()
           d='M-55 0H-38M38 0H55M0-55V-38M0 38V55'
           stroke='currentColor'></path>
       </g>
+      <g data-human transform='translate(640 245)' class='human-presence' aria-hidden='true'>
+        <path class='human-arm' d='M42 4C60-2 78-9 97-8C108-7 118-3 124 5'></path>
+        <path
+          class='human-hand'
+          d='M42 4C30 8 22 16 17 25M42 4C32-2 26-10 22-19M53 1C45-9 41-19 40-30M63-2C57-13 55-22 56-31'
+        ></path>
+        <circle cx='42' cy='4' r='4'></circle>
+        <text x='55' y='-27'>HUMAN FORCE</text>
+      </g>
       <g class='scene-note' fill='currentColor' font-family='monospace' font-size='12'
         ><text x='540' y='590'>01 / PLANAR REACHING STUDY</text><text x='540' y='611'
           >CONCEPTUAL MODEL · 2 DOF</text
-        ><text data-telemetry x='540' y='632'>TCP 640 / 245 · REACHABLE</text></g
+        ><text data-telemetry x='540' y='632'>γₖ 0.72 · TCP 640 / 245 · REACHABLE</text></g
       >
     </svg>
     <div class='scene-label'>
@@ -147,28 +169,47 @@ const { basics } = loadCV()
   <div class='lab-bottom'>
     <p><span>THE QUESTION</span> How can physical interaction feel natural?</p>
     <div class='lab-controls' hidden>
-      <label
-        >Target X <output data-output='x'>640</output><input
-          data-axis='x'
-          aria-label='Target horizontal position'
+      <label class='compliance-control'>
+        <span>Task compliance γ<sub>k</sub></span>
+        <output data-output='gamma'>0.72</output>
+        <input
+          data-compliance
+          aria-label='Task compliance gamma k'
           type='range'
-          min='300'
-          max='760'
-          value='640'
-          step='1'
-        /></label
-      >
-      <label
-        >Target Y <output data-output='y'>245</output><input
-          data-axis='y'
-          aria-label='Target vertical position'
-          type='range'
-          min='120'
-          max='400'
-          value='245'
-          step='1'
-        /></label
-      >
+          min='0'
+          max='1'
+          value='.72'
+          step='.01'
+        />
+        <span class='range-ends'><span>stiff · 0</span><span>1 · compliant</span></span>
+      </label>
+      <details class='coordinate-controls'>
+        <summary>Target coordinates</summary>
+        <div>
+          <label
+            >Target X <output data-output='x'>640</output><input
+              data-axis='x'
+              aria-label='Target horizontal position'
+              type='range'
+              min='300'
+              max='760'
+              value='640'
+              step='1'
+            /></label
+          >
+          <label
+            >Target Y <output data-output='y'>245</output><input
+              data-axis='y'
+              aria-label='Target vertical position'
+              type='range'
+              min='120'
+              max='400'
+              value='245'
+              step='1'
+            /></label
+          >
+        </div>
+      </details>
       <button type='button' data-reset>Reset ↺</button>
     </div>
     <noscript><p>A conceptual study of a robot’s reaching workspace.</p></noscript>
@@ -183,16 +224,26 @@ const { basics } = loadCV()
       const yInput = this.querySelector<HTMLInputElement>('[data-axis="y"]')!
       const xOutput = this.querySelector<HTMLOutputElement>('[data-output="x"]')!
       const yOutput = this.querySelector<HTMLOutputElement>('[data-output="y"]')!
+      const gammaInput = this.querySelector<HTMLInputElement>('[data-compliance]')!
+      const gammaOutput = this.querySelector<HTMLOutputElement>('[data-output="gamma"]')!
       const telemetry = this.querySelector<SVGTextElement>('[data-telemetry]')!
       const target = this.querySelector<SVGGElement>('[data-target]')!
+      const human = this.querySelector<SVGGElement>('[data-human]')!
+      const forceVector = this.querySelector<SVGPathElement>('[data-force-vector]')!
       const elbow = this.querySelector<SVGGElement>('[data-elbow]')!
       const gripper = this.querySelector<SVGGElement>('[data-gripper]')!
       const paths = this.querySelectorAll('[data-arm],[data-arm-outline],[data-arm-highlight]')
       const reduced = matchMedia('(prefers-reduced-motion: reduce)')
-      let desired = { x: 640, y: 245 },
-        current = { ...desired },
+      const home = { x: 640, y: 245 }
+      let desired = { ...home },
+        current = { ...home },
+        gamma = 0.72,
         frame = 0,
         dragging = false
+      const responseTarget = () => ({
+        x: home.x + (desired.x - home.x) * gamma,
+        y: home.y + (desired.y - home.y) * gamma
+      })
       const solve = () => {
         const dx = current.x - 470,
           dy = current.y - 460
@@ -214,16 +265,23 @@ const { basics } = loadCV()
           `translate(${tx} ${ty}) rotate(${(Math.atan2(ty - ey, tx - ex) * 180) / Math.PI})`
         )
         target.setAttribute('transform', `translate(${desired.x} ${desired.y})`)
-        telemetry.textContent = `TCP ${Math.round(desired.x)} / ${Math.round(desired.y)} · ${distance <= 418 ? 'REACHABLE' : 'LIMITED'}`
+        human.setAttribute('transform', `translate(${desired.x} ${desired.y})`)
+        forceVector.setAttribute('d', `M${tx} ${ty}L${desired.x} ${desired.y}`)
+        const targetDistance = Math.hypot(desired.x - 470, desired.y - 460)
+        const mode = gamma < 0.18 ? 'STIFF' : gamma > 0.82 ? 'COMPLIANT' : 'BALANCED'
+        this.dataset.mode = mode.toLowerCase()
+        telemetry.textContent = `γₖ ${gamma.toFixed(2)} · TCP ${Math.round(tx)} / ${Math.round(ty)} · ${targetDistance <= 418 ? mode : 'SAFETY LIMITED'}`
       }
       const tick = () => {
-        current.x += (desired.x - current.x) * 0.14
-        current.y += (desired.y - current.y) * 0.14
+        const response = responseTarget()
+        const gain = 0.07 + gamma * 0.09
+        current.x += (response.x - current.x) * gain
+        current.y += (response.y - current.y) * gain
         solve()
-        if (Math.hypot(desired.x - current.x, desired.y - current.y) > 0.2)
+        if (Math.hypot(response.x - current.x, response.y - current.y) > 0.2)
           frame = requestAnimationFrame(tick)
         else {
-          current = { ...desired }
+          current = response
           solve()
           frame = 0
         }
@@ -237,7 +295,7 @@ const { basics } = loadCV()
         if (reduced.matches) {
           cancelAnimationFrame(frame)
           frame = 0
-          current = { ...desired }
+          current = responseTarget()
           solve()
         } else if (!frame) frame = requestAnimationFrame(tick)
       }
@@ -254,7 +312,25 @@ const { basics } = loadCV()
         () => update(Number(xInput.value), Number(yInput.value)),
         options
       )
-      this.querySelector('[data-reset]')!.addEventListener('click', () => update(640, 245), options)
+      gammaInput.addEventListener(
+        'input',
+        () => {
+          gamma = Number(gammaInput.value)
+          gammaOutput.value = gamma.toFixed(2)
+          update(desired.x, desired.y)
+        },
+        options
+      )
+      this.querySelector('[data-reset]')!.addEventListener(
+        'click',
+        () => {
+          gamma = 0.72
+          gammaInput.value = String(gamma)
+          gammaOutput.value = gamma.toFixed(2)
+          update(home.x, home.y)
+        },
+        options
+      )
       const move = (event: PointerEvent) => {
         if (event.pointerType !== 'mouse' && !dragging) return
         const matrix = svg.getScreenCTM()
@@ -278,7 +354,7 @@ const { basics } = loadCV()
         if (reduced.matches) {
           cancelAnimationFrame(frame)
           frame = 0
-          current = { ...desired }
+          current = responseTarget()
           solve()
         }
       }
@@ -353,7 +429,7 @@ const { basics } = loadCV()
     align-items: center;
     gap: 0.6rem;
   }
-  i {
+  .lab-heading i {
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -434,6 +510,36 @@ const { basics } = loadCV()
   }
   .target:active {
     cursor: grabbing;
+  }
+  .force-vector {
+    fill: none;
+    stroke: #ee6a4b;
+    stroke-width: 3;
+    stroke-dasharray: 5 6;
+    color: #ee6a4b;
+    opacity: 0.9;
+  }
+  .human-presence {
+    color: #e45f43;
+    pointer-events: none;
+  }
+  .human-presence path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .human-presence .human-arm {
+    stroke-width: 18;
+    opacity: 0.16;
+  }
+  .human-presence circle {
+    fill: currentColor;
+  }
+  .human-presence text {
+    fill: currentColor;
+    font: 10px monospace;
+    letter-spacing: 0.08em;
   }
   :global(html.dark) .floor {
     color: #548eeb;
@@ -518,6 +624,54 @@ const { basics } = loadCV()
     cursor: pointer;
     min-height: 44px;
   }
+  .compliance-control {
+    min-width: 200px;
+  }
+  .compliance-control input {
+    width: 100%;
+  }
+  .range-ends {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    opacity: 0.62;
+    font-size: 0.56rem;
+  }
+  .coordinate-controls {
+    position: relative;
+    font: 0.65rem/1.2 monospace;
+  }
+  .coordinate-controls summary {
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    list-style: none;
+    white-space: nowrap;
+  }
+  .coordinate-controls summary::after {
+    content: ' +';
+    color: #205ad4;
+  }
+  .coordinate-controls[open] summary::after {
+    content: ' −';
+  }
+  .coordinate-controls > div {
+    position: absolute;
+    z-index: 4;
+    right: 0;
+    bottom: calc(100% + 0.8rem);
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid #8499b177;
+    border-radius: 8px;
+    background: #f5f7f9ee;
+    box-shadow: 0 12px 35px #10204022;
+  }
+  :global(html.dark) .coordinate-controls > div {
+    background: #0b1527f2;
+  }
   @media (min-width: 1100px) {
     .lab {
       width: calc(100vw - 64px);
@@ -590,6 +744,19 @@ const { basics } = loadCV()
     }
     .scene-label {
       right: 23%;
+    }
+    .lab-controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+    }
+    .compliance-control {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-width: 0;
+    }
+    .coordinate-controls > div {
+      right: auto;
+      left: 0;
     }
   }
 </style>

@@ -1,0 +1,317 @@
+<section class='journey' aria-labelledby='journey-title'>
+  <header class='journey-header'>
+    <div>
+      <p class='eyebrow'>Three connected questions</p>
+      <h2 id='journey-title'>From motion<br />to <em>interaction.</em></h2>
+    </div>
+    <p>
+      A control problem becomes a human problem the moment someone enters the robot’s workspace.
+    </p>
+  </header>
+
+  <div class='chapters'>
+    <article class='chapter' data-reveal>
+      <div class='chapter-copy'>
+        <span class='chapter-number'>01 / CONTROL</span>
+        <h3>How much should a robot yield?</h3>
+        <p>
+          Task compliance is explicit. The parameter γ<sub>k</sub> moves continuously from a stiff operational
+          task at 0 to fully compliant behavior at 1.
+        </p>
+        <span class='chapter-detail'>γ<sub>k</sub> ∈ [0, 1] · task-level response</span>
+      </div>
+      <div class='chapter-figure compliance-figure' aria-hidden='true'>
+        <span class='figure-label'>RESPONSE TO EXTERNAL FORCE</span>
+        <svg viewBox='0 0 420 220'>
+          <path class='axis' d='M45 178H385M45 178V32'></path>
+          <path class='guide' d='M45 145C125 143 205 125 385 42'></path>
+          <path class='curve' d='M45 168C125 164 205 132 385 42'></path>
+          <path class='force' d='M282 98H355'></path>
+          <circle class='robot-point' cx='265' cy='105' r='15'></circle>
+          <circle class='human-point' cx='365' cy='98' r='9'></circle>
+          <text x='48' y='203'>STIFF · 0</text><text x='312' y='203'>1 · COMPLIANT</text>
+          <text x='52' y='49'>MOTION</text><text x='300' y='84'>Fext</text>
+        </svg>
+      </div>
+    </article>
+
+    <article class='chapter safety-chapter' data-reveal>
+      <div class='chapter-copy'>
+        <span class='chapter-number'>02 / SAFETY</span>
+        <h3>Can flexibility keep hard guarantees?</h3>
+        <p>
+          A second-order QP keeps joint, velocity, torque, and collision constraints strict—even
+          while external forces reshape the motion.
+        </p>
+        <span class='chapter-detail'>COMPLIANCE INSIDE · CONSTRAINTS OUTSIDE</span>
+      </div>
+      <div class='chapter-figure safety-figure' aria-hidden='true'>
+        <span class='figure-label'>FEASIBLE MOTION SPACE</span>
+        <svg viewBox='0 0 420 220'>
+          <path class='boundary' d='M79 163L53 99L98 43L205 27L333 55L376 126L329 183L189 195Z'
+          ></path>
+          <path class='trajectory' d='M89 149C135 121 165 155 211 118S284 56 346 75'></path>
+          <circle class='trajectory-point' cx='211' cy='118' r='10'></circle>
+          <path class='limit' d='M53 99L98 43M333 55L376 126'></path>
+          <text x='175' y='108'>QP</text><text x='69' y='34'>JOINT LIMIT</text><text x='296' y='44'
+            >COLLISION</text
+          >
+        </svg>
+      </div>
+    </article>
+
+    <article class='chapter' data-reveal>
+      <div class='chapter-copy'>
+        <span class='chapter-number'>03 / OPEN QUESTION</span>
+        <h3>How will people interpret the response?</h3>
+        <p>
+          This is an emerging direction: moving beyond controller performance to investigate how
+          people perceive, anticipate, and physically guide robot behavior.
+        </p>
+        <span class='chapter-detail'>NEXT DIRECTION · PERCEPTION · HUMAN GUIDANCE</span>
+      </div>
+      <div class='chapter-figure experience-figure' aria-hidden='true'>
+        <span class='figure-label'>SHARED SIGNAL</span>
+        <svg viewBox='0 0 420 220'>
+          <circle class='person' cx='83' cy='74' r='22'></circle>
+          <path class='person' d='M45 181C48 125 60 105 83 105S118 125 121 181'></path>
+          <circle class='machine' cx='337' cy='74' r='22'></circle>
+          <path class='machine' d='M306 181V119L337 104L368 119V181'></path>
+          <path class='signal signal-one' d='M115 98C151 44 180 162 211 98S272 151 307 98'></path>
+          <path class='signal signal-two' d='M115 119C151 65 180 183 211 119S272 172 307 119'
+          ></path>
+          <text x='55' y='211'>HUMAN</text><text x='306' y='211'>ROBOT</text><text x='180' y='42'
+            >INTENT</text
+          >
+        </svg>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .journey {
+    position: relative;
+    padding: 2rem 0 6rem;
+  }
+  .journey::before {
+    content: '';
+    position: absolute;
+    top: -2rem;
+    bottom: 3rem;
+    left: 1rem;
+    width: 1px;
+    background: linear-gradient(transparent, hsl(var(--primary) / 0.42), hsl(var(--border)));
+  }
+  .journey-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: end;
+    padding: 4rem 0 4rem 4rem;
+  }
+  .eyebrow,
+  .chapter-number,
+  .figure-label,
+  .chapter-detail {
+    font: 0.72rem/1.4 monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .eyebrow,
+  .chapter-number,
+  .figure-label {
+    color: hsl(var(--primary));
+  }
+  h2 {
+    margin: 0.8rem 0 0;
+    font-size: clamp(2.5rem, 5vw, 4.7rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+  h2 em {
+    color: hsl(var(--primary));
+    font-family: Georgia, serif;
+    font-weight: 400;
+  }
+  .journey-header > p {
+    max-width: 29rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 1.1rem;
+  }
+  .chapters {
+    margin-left: 4rem;
+  }
+  .chapter {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(22rem, 1.2fr);
+    gap: 4rem;
+    align-items: center;
+    min-height: 390px;
+    padding: 3rem;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .chapter:last-child {
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .safety-chapter {
+    background: hsl(var(--muted) / 0.42);
+  }
+  .chapter-copy h3 {
+    margin: 1.2rem 0;
+    max-width: 24rem;
+    font-size: clamp(1.65rem, 3vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+  }
+  .chapter-copy > p {
+    max-width: 31rem;
+    color: hsl(var(--muted-foreground));
+  }
+  .chapter-detail {
+    display: block;
+    margin-top: 2rem;
+    color: hsl(var(--muted-foreground));
+  }
+  .chapter-figure {
+    position: relative;
+    min-width: 0;
+    padding: 2.5rem 1.5rem 1rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 12px;
+    background: hsl(var(--background) / 0.72);
+    overflow: hidden;
+  }
+  .figure-label {
+    position: absolute;
+    top: 1rem;
+    left: 1.25rem;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    color: hsl(var(--muted-foreground));
+  }
+  svg text {
+    fill: currentColor;
+    font: 9px monospace;
+    letter-spacing: 0.08em;
+  }
+  .axis,
+  .guide,
+  .boundary,
+  .trajectory,
+  .limit,
+  .person,
+  .machine,
+  .signal {
+    fill: none;
+    stroke: currentColor;
+  }
+  .axis,
+  .guide {
+    opacity: 0.35;
+  }
+  .guide {
+    stroke-dasharray: 4 7;
+  }
+  .curve,
+  .trajectory {
+    fill: none;
+    stroke: hsl(var(--primary));
+    stroke-width: 3;
+  }
+  .force {
+    stroke: hsl(var(--signal));
+    stroke-width: 3;
+  }
+  .robot-point,
+  .trajectory-point,
+  .machine {
+    fill: hsl(var(--primary) / 0.15);
+    stroke: hsl(var(--primary));
+    stroke-width: 2;
+  }
+  .human-point,
+  .person {
+    fill: hsl(var(--signal) / 0.13);
+    stroke: hsl(var(--signal));
+    stroke-width: 2;
+  }
+  .boundary {
+    fill: hsl(var(--primary) / 0.05);
+    stroke: hsl(var(--primary) / 0.65);
+    stroke-width: 2;
+    stroke-dasharray: 7 7;
+  }
+  .limit {
+    stroke: hsl(var(--signal));
+    stroke-width: 5;
+  }
+  .signal {
+    stroke-width: 2;
+  }
+  .signal-one {
+    stroke: hsl(var(--primary));
+  }
+  .signal-two {
+    stroke: hsl(var(--signal));
+    opacity: 0.55;
+  }
+  .chapter:hover .curve,
+  .chapter:focus-within .curve {
+    animation: trace 1.2s ease both;
+  }
+  .chapter:hover .trajectory-point,
+  .chapter:focus-within .trajectory-point {
+    animation: travel 1.8s ease-in-out infinite alternate;
+  }
+  @keyframes trace {
+    from {
+      stroke-dasharray: 0 600;
+    }
+    to {
+      stroke-dasharray: 600 0;
+    }
+  }
+  @keyframes travel {
+    to {
+      transform: translate(80px, -45px);
+    }
+  }
+  @media (max-width: 760px) {
+    .journey {
+      padding-bottom: 4rem;
+    }
+    .journey::before {
+      left: 0;
+    }
+    .journey-header {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 4rem 0 3rem 1.5rem;
+    }
+    .chapters {
+      margin-left: 1.5rem;
+    }
+    .chapter {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      min-height: 0;
+      padding: 2.5rem 0;
+    }
+    .chapter-figure {
+      padding-inline: 0.5rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chapter:hover .curve,
+    .chapter:focus-within .curve,
+    .chapter:hover .trajectory-point,
+    .chapter:focus-within .trajectory-point {
+      animation: none;
+    }
+  }
+</style>

@@ -2,6 +2,15 @@
 import { loadCV } from '@/lib/cv-data-loader'
 
 const { basics } = loadCV()
+const profiles = [
+  { label: 'Scholar', href: basics.scholar },
+  { label: 'GitHub', href: basics.github ? `https://github.com/${basics.github}` : undefined },
+  { label: 'ORCID', href: basics.orcid },
+  {
+    label: 'LinkedIn',
+    href: basics.linkedin ? `https://www.linkedin.com/in/${basics.linkedin}` : undefined
+  }
+].filter((profile) => profile.href)
 ---
 
 <footer class='site-footer'>
@@ -11,8 +20,15 @@ const { basics } = loadCV()
     </p>
   </div>
   <nav aria-label='Footer navigation'>
-    <a href={`mailto:${basics.email}`}>Email ↗</a><a href='/cv.pdf'>CV PDF ↗</a><a href='/rss.xml'
-      >RSS ↗</a>
+    <a href={`mailto:${basics.email}`}>Email ↗</a><a href='/cv.pdf'>CV PDF ↗</a>
+    {
+      profiles.map((profile) => (
+        <a href={profile.href} target='_blank' rel='noreferrer'>
+          {profile.label} ↗
+        </a>
+      ))
+    }
+    <a href='/rss.xml'>RSS ↗</a>
   </nav>
   <small>© {new Date().getFullYear()} Mathieu Celerier</small>
 </footer>

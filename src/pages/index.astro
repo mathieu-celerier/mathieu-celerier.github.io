@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import { homeSelection } from '@/lib/home-selection'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
+import ResearchJourney from '@/components/ResearchJourney.astro'
 import RobotLab from '@/components/RobotLab.astro'
 
 import { loadCV } from '../lib/cv-data-loader'
@@ -17,41 +18,20 @@ const publications = homeSelection.supporting.flatMap((key) => {
 const news = (await getCollection('news'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3)
-const profiles = [
-  { label: 'Google Scholar', href: cv.basics.scholar },
-  {
-    label: 'GitHub',
-    href: cv.basics.github ? 'https://github.com/' + cv.basics.github : undefined
-  },
-  { label: 'ORCID', href: cv.basics.orcid },
-  {
-    label: 'LinkedIn',
-    href: cv.basics.linkedin ? 'https://www.linkedin.com/in/' + cv.basics.linkedin : undefined
-  }
-].filter((p) => p.href)
 ---
 
 <PageLayout meta={{ title: 'Home', ogImage: '/og/home.png' }}>
   <main>
     <RobotLab />
-    <div class='profile-strip'>
-      <span>Find me elsewhere</span><div>
-        {
-          profiles.map((p) => (
-            <a href={p.href} target='_blank' rel='noreferrer'>
-              {p.label} ↗
-            </a>
-          ))
-        }
-      </div>
-    </div>
     <div class='research-statement'>
       <p class='eyebrow'>Beyond the demonstration</p><p>
         A robot can follow a target.<br />Working with a person asks <em>more.</em>
-      </p><span
-        >My research explores physical interaction through control, compliance, and human
-        experience.</span>
+      </p><span>
+        I design control systems that let robots respond safely, predictably, and physically to
+        people.
+      </span>
     </div>
+    <ResearchJourney />
     <section class='selected' aria-labelledby='selected-title'>
       <div class='section-heading'>
         <div>
@@ -78,6 +58,24 @@ const profiles = [
                   Read the research <span aria-hidden='true'>↗</span>
                 </a>
               </>
+            </div>
+            <div class='feature-visual' aria-hidden='true'>
+              <span>EXPLICIT COMPLIANCE</span>
+              <svg viewBox='0 0 220 160'>
+                <path class='feature-axis' d='M22 132H199M22 132V24' />
+                <path class='feature-safe' d='M31 116C69 116 87 101 111 79S160 39 192 35' />
+                <path class='feature-response' d='M31 122C72 121 91 108 116 82S164 45 192 39' />
+                <circle cx='116' cy='82' r='7' />
+                <>
+                  <text x='26' y='151'>
+                    γ=0
+                  </text>
+                  <text x='171' y='151'>
+                    γ=1
+                  </text>
+                </>
+              </svg>
+              <small>STIFF ← TASK RESPONSE → COMPLIANT</small>
             </div>
           </article>
         )
@@ -160,8 +158,20 @@ const profiles = [
 
 <style>
   .research-statement {
+    position: relative;
     padding: 5rem 0;
     max-width: 55rem;
+    padding-left: 4rem;
+    box-sizing: border-box;
+  }
+  .research-statement::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.42));
   }
   .research-statement > p:nth-child(2) {
     font-size: clamp(1.9rem, 4vw, 3.2rem);
@@ -183,7 +193,7 @@ const profiles = [
     isolation: isolate;
     overflow: hidden;
     display: grid;
-    grid-template-columns: 10rem 1fr;
+    grid-template-columns: 9rem minmax(0, 1fr) 13rem;
     gap: 2rem;
     padding: 3rem;
     margin-bottom: 1.5rem;
@@ -216,6 +226,45 @@ const profiles = [
     color: white;
     text-decoration: underline;
   }
+  .feature-visual {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-left: 1.5rem;
+    border-left: 1px solid #ffffff36;
+    font: 0.65rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    color: #c5d8fa;
+  }
+  .feature-visual svg {
+    display: block;
+    width: 100%;
+  }
+  .feature-visual text {
+    fill: #c5d8fa;
+    font: 9px monospace;
+  }
+  .feature-axis {
+    fill: none;
+    stroke: #ffffff4d;
+  }
+  .feature-safe {
+    fill: none;
+    stroke: #ffffff42;
+    stroke-dasharray: 4 5;
+  }
+  .feature-response {
+    fill: none;
+    stroke: #b7d6ff;
+    stroke-width: 3;
+  }
+  .feature-visual circle {
+    fill: #f06b4d;
+  }
+  .feature-visual small {
+    font-size: 0.55rem;
+  }
   .paper-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -244,6 +293,21 @@ const profiles = [
     .research-feature {
       padding: 1.5rem;
       grid-template-columns: 1fr;
+    }
+    .feature-visual {
+      grid-column: 1;
+      padding: 1rem 0 0;
+      border-left: 0;
+      border-top: 1px solid #ffffff36;
+    }
+  }
+  @media (min-width: 701px) and (max-width: 900px) {
+    .research-feature {
+      grid-template-columns: 8rem 1fr;
+    }
+    .feature-visual {
+      grid-column: 2;
+      min-height: 11rem;
     }
   }
 
@@ -338,22 +402,6 @@ const profiles = [
     padding: 0.5rem 0;
   }
 
-  .profile-strip {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    border-block: 1px solid hsl(var(--border));
-    padding: 1.1rem 0;
-    font-size: 0.8125rem;
-  }
-  .profile-strip > span {
-    color: hsl(var(--muted-foreground));
-  }
-  .profile-strip > div {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.8rem;
-  }
   .selected {
     padding: 0 0 4.5rem;
   }
@@ -461,14 +509,10 @@ const profiles = [
   @media (max-width: 760px) {
     .research-statement {
       padding: 3.5rem 0;
+      padding-left: 1.5rem;
     }
-    .profile-strip {
-      align-items: start;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .profile-strip > div {
-      gap: 1rem;
+    .research-statement::before {
+      left: 0;
     }
     .section-heading {
       align-items: start;

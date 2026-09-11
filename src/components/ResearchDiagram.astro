@@ -51,7 +51,7 @@
         opacity='.4'></circle>
     </g>
     <g fill='currentColor' font-family='monospace' font-size='9'
-      ><text x='276' y='185'>SHARED CONTACT</text><text x='62' y='325'>CONTROL ↔ PERCEPTION</text
+      ><text x='276' y='185'>SHARED CONTACT</text><text x='62' y='325'>CONTROL ↔ INTERACTION</text
       ></g
     >
     <g class='control-view' fill='none' stroke='currentColor' stroke-width='2'>
@@ -63,14 +63,16 @@
     <g class='perception-view' fill='none' stroke='currentColor' stroke-width='2'>
       <path d='M285 70Q315 42 345 70Q315 98 285 70Z'></path><circle cx='315' cy='70' r='9'></circle>
       <path d='M306 99L260 135' stroke-dasharray='4 4'></path>
-      <text x='277' y='115' fill='currentColor' stroke='none' font-size='11'>PERCEPTION</text>
+      <text x='277' y='115' fill='currentColor' stroke='none' font-size='11'>OPEN QUESTION</text>
     </g>
   </svg>
   <figcaption>
     <div class='study-controls' role='group' aria-label='Explore the research illustration'>
       <button type='button' data-study-mode='contact' aria-pressed='true'>01 Contact</button>
       <button type='button' data-study-mode='control' aria-pressed='false'>02 Control</button>
-      <button type='button' data-study-mode='perception' aria-pressed='false'>03 Perception</button>
+      <button type='button' data-study-mode='perception' aria-pressed='false'
+        >03 Next question</button
+      >
     </div>
     <p class='study-caption' aria-live='polite'>
       The point where human intention meets robot motion.
@@ -81,7 +83,7 @@
   const descriptions = {
     contact: 'The point where human intention meets robot motion.',
     control: 'How a robot responds to contact: compliance, stability, and safety.',
-    perception: 'How people experience and interpret a robot’s physical response.'
+    perception: 'An emerging direction: how people interpret and guide a robot’s physical response.'
   }
   document.addEventListener('click', (event) => {
     const button = (event.target as Element)?.closest<HTMLButtonElement>('[data-study-mode]')
