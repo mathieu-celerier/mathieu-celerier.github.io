@@ -5,39 +5,46 @@
  */
 export const labSnapshot = {
   updated: 'SEPTEMBER 2026',
-  inquiry: 'How can robots remain capable, legible, and safe as people reshape their motion?',
-  note: 'My current work starts with control and physical interaction. Questions around how people interpret that response are the next territory to investigate.'
+  inquiry:
+    'Can a robot predict future motion and interaction forces during collaborative manipulation?',
+  note: 'Current postdoctoral project: building a 3D collaborative manipulation benchmark with changing information conditions, synchronized force and state logging, and short-horizon predictive models.'
 } as const
 
 export const researchTracks = [
   {
-    id: 'motion',
+    id: 'trajectory',
     index: '01',
-    status: 'FOUNDATION',
-    title: 'Motion',
-    question: 'How should a robot move when the world refuses to stay still?',
-    detail: 'Whole-body and torque control for motion that can adapt in real time.'
+    status: 'PHD WORK',
+    tone: 'thesis',
+    title: 'Online motion generation',
+    question: 'Disturbance-aware minimum-jerk trajectories.',
+    detail:
+      'A normalized, jerk-bounded formulation replans from the robot’s current state toward a known target during sustained physical contact.'
   },
   {
-    id: 'constraints',
+    id: 'control',
     index: '02',
-    status: 'ACTIVE',
-    title: 'Constraints',
-    question: 'How can responsive behavior keep hard safety guarantees?',
-    detail: 'Optimization-based control that keeps physical limits explicit.'
+    status: 'PHD WORK',
+    tone: 'thesis',
+    title: 'Compliance and safety',
+    question: 'Selective compliance inside a torque-control QP.',
+    detail:
+      'External-force compensation, task- and direction-level Γₖ, and torque, position, velocity, and collision constraints are combined in one controller and evaluated on a Kinova Gen3.'
   },
   {
-    id: 'interaction',
+    id: 'prediction',
     index: '03',
-    status: 'EMERGING',
-    title: 'Interaction',
-    question: 'What does a robot communicate through its physical response?',
-    detail: 'An open direction around human guidance, anticipation, and interpretation.'
+    status: 'POSTDOC',
+    tone: 'current',
+    title: 'Predictive collaboration',
+    question: 'Predicting motion and force in pHRC.',
+    detail:
+      'Current direction: learn short-horizon task-state and interaction-force dynamics from collaborative manipulation data.'
   }
 ] as const
 
 export const openQuestions = [
-  'When should a robot resist—and when should it yield?',
-  'Can safety constraints remain understandable during interaction?',
-  'How do physical responses shape a person’s next action?'
+  'Can future interaction forces be predicted from task state, robot commands, and information conditions?',
+  'Can force prediction adapt compliance before physical conflict occurs?',
+  'Do role, effort sharing, or disagreement improve predictions of collaborative interaction?'
 ] as const

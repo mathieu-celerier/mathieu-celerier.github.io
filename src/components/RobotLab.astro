@@ -21,10 +21,10 @@ const isExperiment = context === 'experiment'
       isExperiment ? (
         <>
           <p class='lab-name'>CURRENT MODEL / TASK RESPONSE</p>
-          <h2 class='experiment-title'>When contact changes the plan.</h2>
+          <h2 class='experiment-title'>Select the response to force.</h2>
           <p class='lab-intro'>
-            Move the human target, then change γₖ to feel the difference between resisting and
-            yielding.
+            Move the target to apply a conceptual external force, then change γₖ between force
+            compensation and compliant motion.
           </p>
         </>
       ) : (
@@ -196,11 +196,13 @@ const isExperiment = context === 'experiment'
     </svg>
     <div class='scene-label'>
       <span class='target-symbol'>⊕</span>
-      <span>Shared space.<br /><strong>Move the target. Find the connection.</strong></span>
+      <span
+        >External force input.<br /><strong>Drag the target to change its direction.</strong></span
+      >
     </div>
   </div>
   <div class='lab-bottom'>
-    <p><span>THE QUESTION</span> How can physical interaction feel natural?</p>
+    <p><span>THE MODEL</span> γₖ selects how much force-induced task motion is restored.</p>
     <div class='lab-controls' hidden>
       <label class='compliance-control'>
         <span>Task compliance γ<sub>k</sub></span>

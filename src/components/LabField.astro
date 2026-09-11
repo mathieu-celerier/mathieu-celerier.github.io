@@ -1,22 +1,24 @@
 ---
-import { researchTracks } from '@/data/lab-home'
 import { loadCV } from '@/lib/cv-data-loader'
 
 const { basics } = loadCV()
 ---
 
-<lab-field class='field' data-active='motion'>
+<lab-field class='field'>
   <div class='field-meta'>
-    <span><i></i> RESEARCH SYSTEM / LIVE</span>
+    <span><i></i> ROBOTICS RESEARCH / MATHIEU CELERIER</span>
     <span>CNRS–AIST JRL · TSUKUBA, JP</span>
   </div>
 
   <div class='field-copy'>
     <p class='identity'>Mathieu Celerier · {basics.position}</p>
-    <h1>Robots for<br /><em>shared<br class='mobile-break' />worlds.</em></h1>
-    <p class='dek'>I study what happens when motion, physical limits, and people meet.</p>
+    <h1>Sustained interaction.<br /><em>Motion to prediction.</em></h1>
+    <p class='dek'>
+      My research spans online trajectory generation and torque control for sustained physical
+      human–robot interaction, and now predictive models for collaboration.
+    </p>
     <div class='field-actions'>
-      <a href='#now'>Enter the lab <span aria-hidden='true'>↓</span></a>
+      <a href='#now'>Current research <span aria-hidden='true'>↓</span></a>
       <a href='/publications'>View publications ↗</a>
     </div>
   </div>
@@ -51,7 +53,7 @@ const { basics } = loadCV()
       </g>
       <g class='field-node node-motion' transform='translate(197 453)'>
         <circle class='halo' r='54'></circle><circle class='core' r='11'></circle>
-        <text x='-80' y='84'>01 / MOTION</text>
+        <text x='-80' y='84'>ONLINE MINIMUM JERK</text>
       </g>
       <g class='field-node node-constraints' transform='translate(636 218)'>
         <circle class='halo' r='54'></circle><rect
@@ -60,52 +62,24 @@ const { basics } = loadCV()
           y='-10'
           width='20'
           height='20'></rect>
-        <text x='-52' y='82'>02 / CONSTRAINTS</text>
+        <text x='-52' y='82'>COMPLIANCE + SAFETY</text>
       </g>
       <g class='field-node node-interaction' transform='translate(590 492)'>
         <circle class='halo' r='54'></circle><path
           class='core'
           d='M-13 0A13 13 0 0026 0A13 13 0 00-13 0Z'></path>
-        <text x='-48' y='84'>03 / INTERACTION</text>
+        <text x='-48' y='84'>PREDICTIVE pHRC</text>
       </g>
       <g class='origin' transform='translate(417 345)'>
         <circle r='26'></circle><circle r='5'></circle><path d='M-40 0H40M0-40V40'></path>
       </g>
       <g class='map-labels'>
-        <text x='95' y='74'>A FIELD OF QUESTIONS</text>
-        <text x='95' y='94'>NOT A FINISHED MAP</text>
-        <text x='648' y='625'>x / RESPONSE</text>
-        <text x='428' y='34'>y / CHANGE</text>
+        <text x='95' y='74'>RESEARCH SCOPE</text>
+        <text x='95' y='94'>FORCE · MOTION · COLLABORATION</text>
+        <text x='648' y='625'>TASK SPACE / x</text>
+        <text x='428' y='34'>TASK SPACE / y</text>
       </g>
     </svg>
-  </div>
-
-  <div class='track-switcher' role='tablist' aria-label='Research fields'>
-    {
-      researchTracks.map((track, index) => (
-        <button
-          type='button'
-          role='tab'
-          data-track={track.id}
-          aria-selected={index === 0 ? 'true' : 'false'}
-        >
-          <span>{track.index}</span>
-          <strong>{track.title}</strong>
-          <small>{track.status}</small>
-        </button>
-      ))
-    }
-  </div>
-
-  <div class='field-readout' aria-live='polite'>
-    {
-      researchTracks.map((track, index) => (
-        <p data-readout={track.id} hidden={index !== 0}>
-          <span>{track.status} TERRITORY</span>
-          {track.question}
-        </p>
-      ))
-    }
   </div>
 </lab-field>
 
@@ -114,24 +88,9 @@ const { basics } = loadCV()
     cleanup?: () => void
 
     connectedCallback() {
-      const buttons = [...this.querySelectorAll<HTMLButtonElement>('[data-track]')]
-      const readouts = [...this.querySelectorAll<HTMLElement>('[data-readout]')]
       const reduced = matchMedia('(prefers-reduced-motion: reduce)')
       const controller = new AbortController()
       const options = { signal: controller.signal }
-
-      const activate = (id: string) => {
-        this.dataset.active = id
-        buttons.forEach((button) =>
-          button.setAttribute('aria-selected', String(button.dataset.track === id))
-        )
-        readouts.forEach((readout) => (readout.hidden = readout.dataset.readout !== id))
-      }
-
-      buttons.forEach((button) => {
-        button.addEventListener('click', () => activate(button.dataset.track!), options)
-        button.addEventListener('pointerenter', () => activate(button.dataset.track!), options)
-      })
 
       this.addEventListener(
         'pointermove',
@@ -167,7 +126,7 @@ const { basics } = loadCV()
     --field-y: 0;
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(31rem, 1.1fr);
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr;
     position: relative;
     isolation: isolate;
     width: calc(100vw - 2rem);
@@ -241,9 +200,6 @@ const { basics } = loadCV()
     font-family: Georgia, serif;
     font-weight: 400;
     white-space: nowrap;
-  }
-  .mobile-break {
-    display: none;
   }
   .dek {
     max-width: 26rem;
@@ -343,97 +299,24 @@ const { basics } = loadCV()
   .origin circle:nth-child(2) {
     fill: currentColor;
   }
-  .field[data-active='motion'] .node-motion,
-  .field[data-active='constraints'] .node-constraints,
-  .field[data-active='interaction'] .node-interaction {
+  .node-motion {
+    color: hsl(var(--primary));
+  }
+  .node-constraints {
     color: hsl(var(--signal));
   }
-  .field[data-active='motion'] .node-motion .halo,
-  .field[data-active='constraints'] .node-constraints .halo,
-  .field[data-active='interaction'] .node-interaction .halo {
-    animation: node-pulse 2.6s ease-in-out infinite;
-  }
-  .track-switcher {
-    grid-column: 2;
-    align-self: end;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    margin: 0 1.5rem 1.5rem;
-    border: 1px solid hsl(var(--border));
-    border-radius: 8px;
-    overflow: hidden;
-    background: hsl(var(--background) / 0.84);
-    backdrop-filter: blur(12px);
-  }
-  .track-switcher button {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.1rem 0.65rem;
-    min-height: 72px;
-    padding: 0.85rem;
-    border: 0;
-    border-right: 1px solid hsl(var(--border));
-    background: transparent;
-    color: hsl(var(--foreground));
-    text-align: left;
-    cursor: pointer;
-  }
-  .track-switcher button:last-child {
-    border-right: 0;
-  }
-  .track-switcher button[aria-selected='true'] {
-    background: hsl(var(--primary));
-    color: hsl(var(--background));
-  }
-  .track-switcher span,
-  .track-switcher small {
-    font: 0.58rem/1.4 monospace;
-    letter-spacing: 0.08em;
-  }
-  .track-switcher strong {
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  .track-switcher small {
-    grid-column: 2;
-    opacity: 0.66;
-  }
-  .field-readout {
-    position: absolute;
-    right: 2rem;
-    top: 5.5rem;
-    width: 13rem;
+  .node-interaction {
     color: hsl(var(--muted-foreground));
-    text-align: right;
-  }
-  .field-readout p {
-    margin: 0;
-    font-size: 0.72rem;
-    line-height: 1.5;
-  }
-  .field-readout span {
-    display: block;
-    margin-bottom: 0.35rem;
-    font: 0.58rem/1.4 monospace;
-    letter-spacing: 0.09em;
-    color: hsl(var(--signal));
   }
   @keyframes signal-flow {
     to {
       stroke-dashoffset: -260;
     }
   }
-  @keyframes node-pulse {
-    50% {
-      transform: scale(1.13);
-      opacity: 0.16;
-    }
-  }
   @media (max-width: 900px) {
     .field {
       grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 1fr;
       min-height: 840px;
     }
     .field-copy {
@@ -448,12 +331,6 @@ const { basics } = loadCV()
       right: -18%;
       width: 88vw;
       opacity: 0.78;
-    }
-    .track-switcher {
-      grid-column: 1;
-    }
-    .field-readout {
-      display: none;
     }
   }
   @media (max-width: 560px) {
@@ -478,25 +355,12 @@ const { basics } = loadCV()
       margin-left: 0;
       white-space: normal;
     }
-    .mobile-break {
-      display: block;
-    }
     .field-map {
       top: 19rem;
       right: -45%;
       width: 145vw;
     }
-    .track-switcher {
-      margin: 0 0.75rem 0.75rem;
-    }
-    .track-switcher button {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      min-width: 0;
-      padding: 0.65rem;
-    }
-    .track-switcher small {
+    .map-labels {
       display: none;
     }
   }
@@ -505,8 +369,7 @@ const { basics } = loadCV()
       transition: none;
       transform: none;
     }
-    .trace,
-    .field-node .halo {
+    .trace {
       animation: none !important;
     }
   }

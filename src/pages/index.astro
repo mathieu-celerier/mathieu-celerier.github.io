@@ -40,12 +40,13 @@ const news = (await getCollection('news'))
     <section class='atlas' aria-labelledby='atlas-title'>
       <header class='atlas-header'>
         <div>
-          <p class='eyebrow'>Research atlas</p>
-          <h2 id='atlas-title'>One practice.<br /><em>Several territories.</em></h2>
+          <p class='eyebrow'>PhD work and current project</p>
+          <h2 id='atlas-title'>Motion generation,<br /><em>control, prediction.</em></h2>
         </div>
         <p>
-          The questions move. The underlying practice remains: observe a system, make its limits
-          explicit, and test what changes when another agent enters the loop.
+          My PhD addressed online motion generation and safe, adaptable torque control for sustained
+          physical interaction. My postdoctoral project asks how learned models can predict
+          collaborative motion and interaction forces.
         </p>
       </header>
       <div class='track-list'>
@@ -56,18 +57,18 @@ const news = (await getCollection('news'))
                 <span>
                   {track.index} / {track.title}
                 </span>
-                <span class={`status status-${track.status.toLowerCase()}`}>{track.status}</span>
+                <span class={`status status-${track.tone}`}>{track.status}</span>
               </div>
               <div class='track-copy'>
                 <h3>{track.question}</h3>
                 <p>{track.detail}</p>
               </div>
               <div class='track-visual' aria-hidden='true'>
-                {track.id === 'motion' && (
+                {track.id === 'trajectory' && (
                   <svg viewBox='0 0 440 210'>
-                    <path class='ghost' d='M28 163C95 163 118 49 190 49S279 174 412 77' />
-                    <path class='primary-path' d='M28 163C95 163 118 49 190 49S279 174 412 77' />
-                    <circle class='marker' cx='190' cy='49' r='11' />
+                    <path class='ghost' d='M28 170C145 170 295 40 412 40' />
+                    <path class='primary-path' d='M28 170C145 170 295 40 412 40' />
+                    <circle class='marker' cx='220' cy='105' r='11' />
                     <path
                       class='ticks'
                       d='M28 178V187M92 178V187M156 178V187M220 178V187M284 178V187M348 178V187M412 178V187'
@@ -78,9 +79,12 @@ const news = (await getCollection('news'))
                     <text x='398' y='205'>
                       tₙ
                     </text>
+                    <text x='273' y='175'>
+                      x(t) · MINIMUM JERK
+                    </text>
                   </svg>
                 )}
-                {track.id === 'constraints' && (
+                {track.id === 'control' && (
                   <svg viewBox='0 0 440 210'>
                     <path
                       class='safe-zone'
@@ -94,7 +98,7 @@ const news = (await getCollection('news'))
                     </text>
                   </svg>
                 )}
-                {track.id === 'interaction' && (
+                {track.id === 'prediction' && (
                   <svg viewBox='0 0 440 210'>
                     <circle class='agent human' cx='96' cy='104' r='34' />
                     <circle class='agent robot' cx='344' cy='104' r='34' />
@@ -113,7 +117,7 @@ const news = (await getCollection('news'))
                       ROBOT
                     </text>
                     <text x='184' y='28'>
-                      OPEN SIGNAL
+                      SHORT-HORIZON MODEL
                     </text>
                   </svg>
                 )}
@@ -127,12 +131,12 @@ const news = (await getCollection('news'))
     <section class='experiment' aria-labelledby='experiment-title'>
       <header class='experiment-header'>
         <div>
-          <p class='eyebrow'>Open experiment</p>
-          <h2 id='experiment-title'>Touch the research.</h2>
+          <p class='eyebrow'>Interactive research model</p>
+          <h2 id='experiment-title'>From stiff to compliant.</h2>
         </div>
         <p>
-          This model comes from my work on explicit compliance. It is one instrument in the lab—not
-          a permanent definition of everything that follows.
+          This 2D model reduces the task compliance matrix Γₖ from my PhD work to one scalar γₖ.
+          Move the target to compare a stiff task at 0 with a fully compliant task at 1.
         </p>
       </header>
       <RobotLab context='experiment' />
@@ -141,8 +145,8 @@ const news = (await getCollection('news'))
     <section class='evidence' aria-labelledby='evidence-title'>
       <header class='section-heading'>
         <div>
-          <p class='eyebrow'>Published evidence</p>
-          <h2 id='evidence-title'>Work that left the lab.</h2>
+          <p class='eyebrow'>Selected publications</p>
+          <h2 id='evidence-title'>Research in detail.</h2>
         </div>
         <a class='text-action' href='/publications'>Complete publication record ↗</a>
       </header>
@@ -175,9 +179,9 @@ const news = (await getCollection('news'))
 
     <section class='questions' aria-labelledby='questions-title'>
       <div class='questions-intro'>
-        <p class='eyebrow'>Unresolved / intentionally</p>
-        <h2 id='questions-title'>The lab stays<br /><em>unfinished.</em></h2>
-        <p>These questions are coordinates, not claims. They can change as the research does.</p>
+        <p class='eyebrow'>Current postdoctoral questions</p>
+        <h2 id='questions-title'>Prediction in<br /><em>physical collaboration.</em></h2>
+        <p>Working hypotheses for the benchmark and predictive models now under development.</p>
       </div>
       <ol>
         {
@@ -196,8 +200,8 @@ const news = (await getCollection('news'))
 
     <section class='log' aria-labelledby='log-title'>
       <div class='log-heading'>
-        <p class='eyebrow'>Lab log</p>
-        <h2 id='log-title'>Recent signals.</h2>
+        <p class='eyebrow'>Recent activity</p>
+        <h2 id='log-title'>Updates.</h2>
         <a class='text-action' href='/news'>All updates ↗</a>
       </div>
       <ol>
@@ -345,11 +349,11 @@ const news = (await getCollection('news'))
     border: 1px solid hsl(var(--border));
     border-radius: 20px;
   }
-  .status-active {
+  .status-current {
     color: hsl(var(--signal));
     border-color: hsl(var(--signal) / 0.55);
   }
-  .status-emerging {
+  .status-thesis {
     color: hsl(var(--primary));
     border-color: hsl(var(--primary) / 0.55);
   }
