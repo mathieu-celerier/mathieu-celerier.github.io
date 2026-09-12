@@ -51,19 +51,19 @@ export const collaborativeInsertion = {
   ],
   snapshot: [
     {
-      value: '84.1%',
-      label: 'last clean closed-loop simulation result',
-      note: 'The latest result retained after checking policy-serving timing.'
+      value: '85.6%',
+      label: 'insertions seated, closed loop in simulation',
+      note: 'Overall rate across six interaction regimes, from a paired evaluation with verified policy serving.'
     },
     {
-      value: '35',
-      label: 'causal observation variables',
-      note: 'Robot state, interaction history, and online partner estimates.'
+      value: '1236',
+      label: 'training episodes',
+      note: 'Collected from two structurally different simulated partners across the regime matrix.'
     },
     {
-      value: '0.0%',
+      value: '0.00%',
       label: 'starved policy ticks',
-      note: 'Measured in the last clean evaluation arm.'
+      note: 'Serving health is measured per episode and reported with every result, not assumed.'
     }
   ],
   stages: [
@@ -89,8 +89,8 @@ export const collaborativeInsertion = {
     ]
   ],
   currentLimit:
-    'A serving regression appeared after the last clean evaluation and invalidates later arms. Hardware demonstrations are also paused because one joint-torque calibration is unavailable. The page therefore reports the last verified simulation result, not the newest run.',
-  next: 'Re-establish deterministic policy serving, repeat the paired evaluation, then resume physical demonstrations after the torque-sensing channel is repaired.'
+    'Every figure here comes from a paired evaluation in which policy serving was verified healthy, because an earlier set of results was silently invalidated by a serving slowdown that no status line reported. Serving health is now measured per episode and published alongside the result. Physical demonstrations remain paused for a separate reason: one joint reports identically zero torque under load, and because the whole-arm force estimate consumes joint torques directly, that single channel corrupts the estimate the demonstrator is observed through.',
+  next: 'Four rounds of targeted data aggregation moved the hardest regime by 4.4 points at p = 0.63 — inside the noise — so the method is treated as spent rather than repeated. The open options are a different expert, a loss that penalizes commanded stretch directly, or writing up the current result and its ceiling.'
 } as const
 
 export const thesis = {

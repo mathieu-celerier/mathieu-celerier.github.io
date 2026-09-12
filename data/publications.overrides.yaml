@@ -21,18 +21,25 @@ celerier2025explicit:
   video: 'https://youtu.be/T1H7nLsjT4Y'
   featured: true
   abstract: >-
-    Robots operating in close physical contact must reconcile precise motion,
-    context-dependent compliance, and safety. This work introduces a
-    quadratic-programming torque-control framework that incorporates external
-    torque estimates into inverse dynamics, embeds a task- and direction-level
-    explicit compliance parameter, and formulates force-aware position,
-    velocity, torque, and collision constraints. The framework is evaluated
-    experimentally across interaction scenarios including null-space and
-    full-body compliance and task-space inertia shaping.
+    A torque-controlled robot in sustained contact has to hold a task where
+    precision matters and yield where contact matters, without suspending its
+    safety limits in either case. This work places an explicit task- and
+    direction-level compliance matrix Γₖ inside a force-compensated
+    acceleration-level quadratic program, alongside force-aware barrier
+    constraints on position, velocity, torque, and collision. Γₖ is more than a
+    compliance level: it generalizes to rendering virtual dynamics such as
+    effective inertia and virtual wrenches, and it simultaneously fixes how
+    sensitive each task is to force-estimation error, since the residual task
+    acceleration error scales with (I − Γₖ). A fully compliant task is
+    therefore immune to estimation error while a rigid one is maximally exposed
+    — compliance and estimator robustness are set by the same parameter. The
+    individual ingredients are established: the contribution is their explicit
+    task-level composition and the coupling that composition exposes.
   highlights:
-    - 'Sets compliance per task and direction through the matrix Γₖ.'
-    - 'Compensates estimated external efforts before deliberately restoring compliant motion.'
-    - 'Integrates force-aware safety constraints in the same acceleration-level QP.'
+    - 'Sets compliance per task and per direction through a single matrix Γₖ inside a force-compensated QP.'
+    - 'The same Γₖ fixes each task’s sensitivity to force-estimation error — a fully compliant task is immune, a rigid one maximally exposed.'
+    - 'Γₖ generalizes beyond a compliance level to rendering virtual dynamics, including effective inertia and virtual wrenches.'
+    - 'Composes established components rather than claiming inverse-dynamics force compensation, QP control, momentum observers, or barrier constraints as individually novel.'
 cariou2025safe:
   status: accepted
   abstract: >-
