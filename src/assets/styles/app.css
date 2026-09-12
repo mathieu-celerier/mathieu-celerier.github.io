@@ -10,6 +10,8 @@
   --background: 42 38% 97%;
   --muted: 218 27% 93%;
   --card: 42 45% 99%;
+  --experiment-background: 222 40% 23%;
+  --experiment-foreground: 42 38% 97%;
 
   /* Basic */
   --border: 217 22% 78%;
@@ -26,6 +28,8 @@
   --background: 222 34% 8%;
   --muted: 220 25% 14%;
   --card: 222 29% 12%;
+  --experiment-background: 220 28% 13%;
+  --experiment-foreground: 210 30% 94%;
 
   /* Basic */
   --border: 216 20% 26%;

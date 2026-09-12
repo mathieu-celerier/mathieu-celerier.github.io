@@ -466,18 +466,15 @@ const news = (await getCollection('news'))
     padding: 7rem max(1rem, calc((100% - 62rem) / 2));
     transform: translateX(-50%);
     box-sizing: border-box;
-    background: hsl(var(--foreground));
-    color: hsl(var(--background));
+    background: hsl(var(--experiment-background));
+    color: hsl(var(--experiment-foreground));
   }
   .experiment-header {
     max-width: 62rem;
     margin-inline: auto;
   }
   .experiment-header > p {
-    color: hsl(var(--background) / 0.67);
-  }
-  .experiment :global(.lab) {
-    color: #142443;
+    color: hsl(var(--experiment-foreground) / 0.72);
   }
 
   .evidence {
