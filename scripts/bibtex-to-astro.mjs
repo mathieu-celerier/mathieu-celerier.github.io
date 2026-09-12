@@ -191,7 +191,7 @@ function writeEntry(entry) {
 
 function main() {
   const bib = fs.readFileSync(BIB_PATH, 'utf8')
-  const parsed = parse(bib)
+  const parsed = parse(bib, { sentenceCase: false })
   const entries = parsed.entries || []
 
   ensureDir(OUT_DIR)
