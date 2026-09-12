@@ -4,6 +4,7 @@ import { OGImageRoute } from 'astro-og-canvas'
 import config from '@/site-config'
 
 const staticPages: Record<string, { title: string; description?: string }> = {
+  default: { title: config.title, description: config.description },
   home: { title: config.title, description: config.description },
   research: {
     title: 'Research',
