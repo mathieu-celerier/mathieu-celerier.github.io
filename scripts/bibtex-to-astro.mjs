@@ -26,6 +26,7 @@ function normalizeWhitespace(s) {
   return String(s ?? '')
     .replace(/\s+/g, ' ')
     .trim()
+    .normalize('NFC')
 }
 
 function slugify(s) {

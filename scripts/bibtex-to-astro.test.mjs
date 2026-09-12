@@ -13,6 +13,10 @@ test("formatCreator composes firstName/lastName with accents preserved", () => {
   );
 });
 
+test("formatCreator normalizes decomposed accents", () => {
+  assert.equal(formatCreator({ firstName: "Ce\u0301lia", lastName: "Saghour" }), "Célia Saghour");
+});
+
 test("formatCreator includes prefix/suffix when present", () => {
   assert.equal(
     formatCreator({ prefix: "von", firstName: "Anna", lastName: "Berg", suffix: "Jr." }),
