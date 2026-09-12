@@ -1,10 +1,13 @@
 ---
 import { loadCV } from '@/lib/cv-data-loader'
 
+import { Image } from 'astro:assets'
+
 import PageLayout from '@/layouts/BaseLayout.astro'
 import PageIntro from '@/components/PageIntro.astro'
 import ResearchDiagram from '@/components/ResearchDiagram.astro'
 import ResearchNotebook from '@/components/ResearchNotebook.astro'
+import portrait from '@/assets/portrait/mathieu-celerier.webp'
 
 const cv = loadCV()
 ---
@@ -32,7 +35,15 @@ const cv = loadCV()
   </nav>
 
   <section class='profile' id='profile' data-reveal>
-    <div class='profile-mark' aria-hidden='true'>mc<span>.</span></div>
+    <figure class='profile-portrait'>
+      <Image
+        src={portrait}
+        alt='Mathieu Celerier'
+        widths={[300, 450, 900]}
+        sizes='(max-width: 900px) 40vw, 300px'
+        loading='eager'
+      />
+    </figure>
     <div class='profile-copy'>
       <p class='section-label'>Profile</p>
       <h2>I work where planned robot motion meets an unplanned human force.</h2>
@@ -227,19 +238,18 @@ const cv = loadCV()
     gap: 3rem;
     scroll-margin-top: 2rem;
   }
-  .profile-mark {
+  .profile-portrait {
     display: grid;
-    place-items: center;
-    width: 7rem;
-    height: 7rem;
-    border: 1px solid hsl(var(--foreground));
-    border-radius: 50%;
-    font:
-      italic 2.7rem Georgia,
-      serif;
+    justify-items: start;
+    gap: 1.25rem;
+    margin: 0;
   }
-  .profile-mark span {
-    color: hsl(var(--primary));
+  .profile-portrait img {
+    width: 100%;
+    max-width: 16rem;
+    height: auto;
+    border: 1px solid hsl(var(--border));
+    filter: grayscale(1) contrast(1.04);
   }
   .profile h2,
   .personal-note h2,
@@ -432,10 +442,8 @@ const cv = loadCV()
       grid-template-columns: 1fr;
       gap: 2rem;
     }
-    .profile-mark {
-      width: 5rem;
-      height: 5rem;
-      font-size: 2rem;
+    .profile-portrait img {
+      max-width: 11rem;
     }
     .section-heading,
     .personal-note,

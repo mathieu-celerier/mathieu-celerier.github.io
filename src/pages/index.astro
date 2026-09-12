@@ -234,6 +234,23 @@ const news = (await getCollection('news'))
     <section class='contact'>
       <p><span class='pulse'></span> OPEN TO EXCHANGE</p>
       <a href={`mailto:${cv.basics.email}`}>Bring a question.<br /><em>Let’s explore it.</em> ↗</a>
+      <div class='contact-detail'>
+        <p class='contact-availability'>Worth an email:</p>
+        <ul>
+          <li>
+            Predictive and world models for collaboration, where the environment is another
+            adaptive agent rather than a passive scene.
+          </li>
+          <li>
+            Compliant, safety-constrained torque control — particularly on platforms other than the
+            ones I have already broken.
+          </li>
+          <li>
+            Human motor-control models used as controllers rather than as descriptions, and whether
+            that substitution holds.
+          </li>
+        </ul>
+      </div>
     </section>
   </main>
 </PageLayout>
@@ -622,6 +639,27 @@ const news = (await getCollection('news'))
     line-height: 0.96;
     letter-spacing: -0.055em;
   }
+  .contact-detail {
+    grid-column: 2;
+    max-width: 38rem;
+    margin-top: 2.5rem;
+  }
+  .contact-availability {
+    margin: 0 0 1.25rem;
+    color: hsl(var(--foreground));
+  }
+  .contact-detail ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .contact-detail li {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+    font-size: 0.92rem;
+  }
   .contact em {
     color: hsl(var(--primary));
     font-family: Georgia, serif;
@@ -718,6 +756,10 @@ const news = (await getCollection('news'))
     }
     .contact {
       grid-template-columns: 1fr;
+    }
+    .contact-detail {
+      grid-column: 1;
+      margin-top: 1.5rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {
