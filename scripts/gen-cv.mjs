@@ -149,18 +149,28 @@ function main() {
     TEXINPUTS: `${AWESOME_DIR}${path.delimiter}${process.env.TEXINPUTS || ''}`
   }
 
-  // latexmk must be available (TeX Live + latexmk installed)
-  run(
-    'latexmk',
-    [
-      '-xelatex',
-      '-interaction=nonstopmode',
-      '-halt-on-error',
-      `-outdir=${OUT_DIR}`,
-      OUT_TEX
-    ],
-    { env }
-  )
+  // latexmk requires a TeX Live install, which isn't available on every build
+  // environment (e.g. Netlify preview builds). Fall back to whatever cv.pdf is
+  // already committed rather than failing the whole site build.
+  try {
+    run(
+      'latexmk',
+      [
+        '-xelatex',
+        '-interaction=nonstopmode',
+        '-halt-on-error',
+        `-outdir=${OUT_DIR}`,
+        OUT_TEX
+      ],
+      { env }
+    )
+  } catch (err) {
+    if (err.code === 'ENOENT' && fs.existsSync(PUBLIC_PDF)) {
+      console.warn('latexmk not found; keeping existing public/cv.pdf as-is')
+      return
+    }
+    throw err
+  }
 
   if (!fs.existsSync(OUT_PDF)) throw new Error('PDF was not produced by latexmk.')
 
