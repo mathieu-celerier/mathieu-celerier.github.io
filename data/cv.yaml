@@ -15,20 +15,16 @@ basics:
 
 summary:
   paragraph: >
-    Postdoctoral researcher in CNRS-AIST JRL (Joint Robotics Laboratory) at
-    National Institute of Advanced Industrial Science and Technology (AIST) in
-    Tsukuba, Japan, in collaboration with the University of Montpellier (UM),
-    France. My research interest includes semi-collaborative physical human-robot
-    interaction and human-centered perception of physical human-robot interaction.
-    I obtained my M.Sc. in Microelectronics and Automation Engineering from
-    Polytech Montpellier and worked on dual-arm manipulation of deformable objects
-    during my engineering internships at LIRMM.
+    Postdoctoral researcher at the CNRS-AIST Joint Robotics Laboratory in Tsukuba,
+    Japan. I study how robots generate motion, respond safely to physical contact,
+    and learn collaborative behavior from interaction. My PhD developed online
+    disturbance-aware motion generation and an explicit-compliance framework for
+    torque-controlled robots. My current work connects physical human-robot
+    interaction with imitation learning for collaborative manipulation.
   pdf_paragraph: |
-    Postdoctoral researcher in CNRS-AIST JRL (Joint Robotics Laboratory) at National Institute of Advanced Industrial Science and Technology (AIST) in Tsukuba, Japan, with University of Montpellier (UM), France, through a collaboration between UM and AIST.
+    Postdoctoral researcher at the CNRS-AIST Joint Robotics Laboratory in Tsukuba, Japan. I study how robots generate motion, respond safely to physical contact, and learn collaborative behavior from interaction.
 
-    My research interest includes semi collaborative physical human-robot interaction and human centered perception of physical human-robot interaction.
-
-    I obtained my M.Sc in Microelectronic and Automation Engineering in 2021 from Polytech Montpellier Engineering School. I carried out my final Engineering School Internship as Research Engineer, working on Dual Arm Manipulation of Deformable Objects at Laboratory of Informatics, Robotics and Microelectronics of Montpellier (LIRMM), France.
+    My PhD developed online disturbance-aware motion generation and an explicit-compliance framework for torque-controlled robots. My current work connects physical human-robot interaction with imitation learning for collaborative manipulation.
 
 experience:
   - title: 'Postdoctoral researcher'
@@ -179,7 +175,7 @@ skills:
       - 'Torque control'
       - 'Inverse dynamics QP'
       - 'pHRI'
-      - 'User studies'
+      - 'Imitation learning'
   - category: 'Software'
     items:
       - 'C++'

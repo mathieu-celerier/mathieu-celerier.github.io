@@ -5,6 +5,26 @@ import config from '@/site-config'
 
 const staticPages: Record<string, { title: string; description?: string }> = {
   home: { title: config.title, description: config.description },
+  research: {
+    title: 'Research',
+    description: 'Motion, compliance, safety, and learning for physical human–robot collaboration.'
+  },
+  'research/explicit-compliance': {
+    title: 'Explicit compliance',
+    description: 'Task-level compliance, force-aware safety, and constrained torque control.'
+  },
+  'research/collaborative-insertion': {
+    title: 'Collaborative insertion',
+    description: 'An evolving simulation-to-robot study of learning a physical partner’s role.'
+  },
+  'research/thesis': {
+    title: 'Doctoral thesis',
+    description: 'Sustained Physical Human-Robot Interaction.'
+  },
+  activity: {
+    title: 'Activity',
+    description: 'Talks, research notes, publications, and milestones.'
+  },
   news: { title: 'News', description: 'Research milestones, talks, papers, and project updates.' },
   cv: { title: 'CV', description: 'Curriculum vitae' },
   publications: {

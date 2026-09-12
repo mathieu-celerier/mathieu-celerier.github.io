@@ -16,11 +16,22 @@ import '@/assets/styles/app.css'
 interface Props {
   meta: SiteMeta
   highlightColor?: string
+  structuredData?: Record<string, unknown> | Record<string, unknown>[]
+  scholarlyMeta?: {
+    title: string
+    authors: string[]
+    year: string
+    venue?: string
+    doi?: string
+    pdf?: string
+  }
 }
 
 const {
   meta: { articleDate, description = config.description, ogImage, title },
   highlightColor,
+  structuredData,
+  scholarlyMeta,
   ...props
 } = Astro.props
 ---
@@ -28,6 +39,27 @@ const {
 <html lang={config.locale.lang}>
   <head>
     <BaseHead {articleDate} {description} {ogImage} {title} />
+    {
+      structuredData ? (
+        <script is:inline type='application/ld+json' set:html={JSON.stringify(structuredData)} />
+      ) : null
+    }
+    {
+      scholarlyMeta ? (
+        <>
+          <meta name='citation_title' content={scholarlyMeta.title} />
+          {scholarlyMeta.authors.map((author) => (
+            <meta name='citation_author' content={author} />
+          ))}
+          <meta name='citation_publication_date' content={scholarlyMeta.year} />
+          {scholarlyMeta.venue ? (
+            <meta name='citation_journal_title' content={scholarlyMeta.venue} />
+          ) : null}
+          {scholarlyMeta.doi ? <meta name='citation_doi' content={scholarlyMeta.doi} /> : null}
+          {scholarlyMeta.pdf ? <meta name='citation_pdf_url' content={scholarlyMeta.pdf} /> : null}
+        </>
+      ) : null
+    }
     <ClientRouter />
     <ThemeProvider />
   </head>
@@ -77,9 +109,25 @@ const {
         const observer = new IntersectionObserver(
           (entries, obs) => {
             for (const entry of entries) {
-              if (entry.isIntersecting) {
+              // A fast scroll or an anchor jump can move an item completely
+              // past the viewport before IntersectionObserver reports an
+              // intersecting frame. Never leave those sections hidden.
+              if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
                 entry.target.classList.add('revealed')
                 obs.unobserve(entry.target)
+              }
+            }
+
+            // When a jump skips several observed sections, the browser may
+            // only report the destination. Reveal every section now above
+            // the fold as part of the same observer tick.
+            for (const target of targets) {
+              if (
+                !target.classList.contains('revealed') &&
+                target.getBoundingClientRect().top < window.innerHeight
+              ) {
+                target.classList.add('revealed')
+                obs.unobserve(target)
               }
             }
           },

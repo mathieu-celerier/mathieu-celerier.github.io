@@ -1,15 +1,12 @@
----
-import PageLayout from '@/layouts/BaseLayout.astro'
-import NewsList from '@/components/NewsList.astro'
-import PageIntro from '@/components/PageIntro.astro'
----
-
-<PageLayout meta={{ title: 'News', ogImage: '/og/news.png' }} highlightColor='hsl(var(--primary))'>
-  <PageIntro
-    kicker='Field notes'
-    title='News'
-    copy='A running log of research milestones, publications, talks, and work in progress.'
-  />
-
-  <NewsList showHeading={false} />
-</PageLayout>
+<html lang='en-US'>
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv='refresh' content='0;url=/activity#updates' />
+    <meta name='robots' content='noindex' />
+    <link rel='canonical' href='https://mathieu-celerier.github.io/activity#updates' />
+    <title>Research updates · Mathieu Celerier</title>
+  </head>
+  <body>
+    <p>Research updates have moved to <a href='/activity#updates'>Activity</a>.</p>
+  </body>
+</html>

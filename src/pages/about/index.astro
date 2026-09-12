@@ -1,123 +1,462 @@
 ---
+import { loadCV } from '@/lib/cv-data-loader'
+
 import PageLayout from '@/layouts/BaseLayout.astro'
-import ToolSection from '@/components/about/ToolSection.astro'
-import EditorialSection from '@/components/EditorialSection.astro'
 import PageIntro from '@/components/PageIntro.astro'
 import ResearchDiagram from '@/components/ResearchDiagram.astro'
-import mcrtcLogo from '@/assets/tools/mcrtc.png'
-
-import { loadCV, type CVSkill } from '../../lib/cv-data-loader.ts'
+import ResearchNotebook from '@/components/ResearchNotebook.astro'
 
 const cv = loadCV()
-const githubHandle = cv.basics.github
-
-// Same icon set as the CV page, so both pages point at the same official assets.
-const skillIconMap = {
-  'C++': import('@/assets/tools/cpp.svg?raw'),
-  Python: import('@/assets/tools/python.svg?raw'),
-  'ROS 2': import('@/assets/tools/ros2.svg?raw'),
-  mc_rtc: mcrtcLogo
-} as const
-
-const skillLinkMap: Record<string, string> = {
-  'C++': 'https://isocpp.org/',
-  Python: 'https://www.python.org/',
-  'ROS 2': 'https://www.ros.org/',
-  mc_rtc: 'https://jrl-umi3218.github.io/mc_rtc/'
-}
-
-const skillDescriptionMap: Record<string, string> = {
-  'C++': 'Real-time control and robotics software',
-  Python: 'Data analysis, prototyping, and visualization',
-  'ROS 2': 'Robotics middleware',
-  mc_rtc: 'Whole-body control framework'
-}
-
-const softwareTools = (
-  cv.skills?.find((skill: CVSkill) => skill.category === 'Software')?.items ?? []
-)
-  .filter((item: string): item is keyof typeof skillIconMap => item in skillIconMap)
-  .map((item: keyof typeof skillIconMap) => ({
-    name: item,
-    description: skillDescriptionMap[item],
-    href: skillLinkMap[item],
-    icon: skillIconMap[item]
-  }))
 ---
 
-<PageLayout meta={{ title: 'About', ogImage: '/og/about.png' }}>
+<PageLayout
+  meta={{
+    title: 'About',
+    description:
+      'Robotics researcher working on physical human–robot collaboration, compliance, safety, and learning.',
+    ogImage: '/og/about.png'
+  }}
+  highlightColor='hsl(var(--primary))'
+>
   <PageIntro
     kicker='About'
-    title='Sustained physical human–robot interaction.'
-    copy='My work spans online motion generation, torque control, and predictive models for collaborative manipulation.'
+    title='A robotics researcher working through contact.'
+    copy='I develop motion, control, and learning methods for robots that physically collaborate with people.'
   />
-  <EditorialSection label='01 / Profile' title='Research & background' id='profile'>
-    <p>{cv.summary?.paragraph}</p>
-  </EditorialSection>
-  <EditorialSection label='02 / Questions' title='Research interests' id='research-interests'>
-    <ul>
-      <li>Sustained physical human–robot interaction and collaborative manipulation</li>
-      <li>Online minimum-jerk reference generation under disturbances</li>
-      <li>Torque-controlled manipulators and inverse-dynamics QP control</li>
-      <li>Task-level and null-space compliance with force-aware safety constraints</li>
-      <li>Predictive world models for collaborative motion and interaction forces</li>
-    </ul>
 
-    <div class='about-diagram'><ResearchDiagram /></div>
-  </EditorialSection>
-  <EditorialSection label='03 / Practice' title='Tools & technical stack' id='tools'>
-    <p>
-      Tools and environments representative of those used in my research and software development.
-    </p>
+  <nav class='about-index' aria-label='On this page'>
+    <a href='#profile'>Profile <span>↓</span></a>
+    <a href='#trajectory'>Trajectory <span>↓</span></a>
+    <a href='#approach'>Research approach <span>↓</span></a>
+    <a href='#connect'>Connect <span>↓</span></a>
+  </nav>
 
-    <ToolSection class='mb-5' title='Programming & Robotics' tools={softwareTools} />
+  <section class='profile' id='profile' data-reveal>
+    <div class='profile-mark' aria-hidden='true'>mc<span>.</span></div>
+    <div class='profile-copy'>
+      <p class='section-label'>Profile</p>
+      <h2>I work where planned robot motion meets an unplanned human force.</h2>
+      <p>{cv.summary?.paragraph}</p>
+      <p>
+        The recurring question is practical: when a person changes the state of a moving robot, how
+        should the machine preserve its task, yield safely, and understand what its partner is
+        trying to contribute? I approach that question through models that can be implemented and
+        tested on complete robotic systems.
+      </p>
+      <div class='profile-actions'>
+        <a href='/research'>Explore my research →</a>
+        <a href='/cv'>View the web CV →</a>
+      </div>
+    </div>
+    <aside class='profile-facts'>
+      <div><span>Position</span><strong>{cv.basics.position}</strong></div>
+      <div><span>Affiliation</span><strong>CNRS–AIST Joint Robotics Laboratory</strong></div>
+      <div><span>Based in</span><strong>Tsukuba, Japan</strong></div>
+      <div><span>Current focus</span><strong>Learning collaborative manipulation</strong></div>
+    </aside>
+  </section>
 
-    <ToolSection
-      class='mb-5'
-      title='Development Environment'
-      tools={[
-        {
-          name: 'Linux (Ubuntu)',
-          description: 'Primary development and experiment platform',
-          href: 'https://ubuntu.com/',
-          icon: import('@/assets/tools/ubuntu.svg?raw')
-        },
-        {
-          name: 'Neovim',
-          description: 'Editing, code review, and writing',
-          href: 'https://neovim.io/',
-          icon: import('@/assets/tools/neovim.svg?raw')
-        }
-      ]}
-    />
-  </EditorialSection>
-  <EditorialSection label='04 / Connect' title='Online presence' id='online-presence'>
-    <p>Public profiles and repositories related to my academic and technical work:</p>
+  <section class='personal-note' data-reveal>
+    <div>
+      <p class='section-label'>How I think on paper</p>
+      <h2>Write the physical choice before hiding it in code.</h2>
+      <p>
+        My working diagrams usually begin with a small question: which part of the robot’s response
+        belongs to the task, which part belongs to contact, and which limits cannot be negotiated?
+        The notation becomes useful only when that choice can be tested on the complete system.
+      </p>
+    </div>
+    <ResearchNotebook />
+  </section>
 
-    <a
-      class='styled-link'
-      href={`https://github.com/${githubHandle}`}
-      target='_blank'
-      rel='noreferrer'>GitHub repositories ↗</a
-    >
-  </EditorialSection>
+  <section class='trajectory' id='trajectory'>
+    <header class='section-heading' data-reveal>
+      <p class='section-label'>Academic trajectory</p>
+      <h2>From manipulation software to sustained interaction.</h2>
+    </header>
+    <ol>
+      <li data-reveal>
+        <div class='trajectory-time'>2019—2021</div>
+        <div>
+          <p class='trajectory-place'>Bristol · Montpellier</p>
+          <h3>Robotics foundations</h3>
+          <p>
+            Robotics software, simulation, and dual-arm manipulation of deformable objects during
+            engineering studies and internships.
+          </p>
+        </div>
+      </li>
+      <li data-reveal>
+        <div class='trajectory-time'>2021—2025</div>
+        <div>
+          <p class='trajectory-place'>University of Montpellier · CNRS–AIST JRL</p>
+          <h3>Doctoral research in physical interaction</h3>
+          <p>
+            Online minimum-jerk motion, force-compensated torque control, selective compliance, and
+            safety constraints for sustained physical contact.
+          </p>
+        </div>
+      </li>
+      <li data-reveal>
+        <div class='trajectory-time'>2026—Now</div>
+        <div>
+          <p class='trajectory-place'>CNRS–AIST JRL · Tsukuba</p>
+          <h3>Learning collaborative roles</h3>
+          <p>
+            Simulation-to-robot experiments in which a policy learns to replace one member of a
+            two-person manipulation task from state and interaction history.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class='approach' id='approach' data-reveal>
+    <div class='approach-copy'>
+      <p class='section-label'>Research approach</p>
+      <h2>Theory, implementation, and physical evidence.</h2>
+      <p>
+        I move between mathematical formulation, real-time C++ controllers, simulation, data
+        analysis, and physical experiments. The diagram summarizes the three levels currently
+        connecting my work.
+      </p>
+      <ResearchDiagram />
+    </div>
+    <div class='practice-grid'>
+      <article>
+        <span>01</span><h3>Formulate</h3><p>
+          Make assumptions, variables, and safety conditions explicit.
+        </p>
+      </article>
+      <article>
+        <span>02</span><h3>Implement</h3><p>
+          Build controllers and learning pipelines that run inside the robotic stack.
+        </p>
+      </article>
+      <article>
+        <span>03</span><h3>Measure</h3><p>
+          Check the actual forces, motion, constraints, failures, and timing.
+        </p>
+      </article>
+      <article>
+        <span>04</span><h3>Revise</h3><p>
+          Use experimental failures to change the model rather than hide its limits.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class='connect' id='connect' data-reveal>
+    <div>
+      <p class='section-label'>Connect</p>
+      <h2>Research, software, and correspondence.</h2>
+    </div>
+    <div class='connect-links'>
+      <a href={`mailto:${cv.basics.email}`}
+        ><span>Email</span><strong>{cv.basics.email}</strong><i>↗</i></a
+      >
+      {
+        cv.basics.scholar ? (
+          <a href={cv.basics.scholar} target='_blank' rel='noreferrer'>
+            <>
+              <span>Publications</span>
+              <strong>Google Scholar</strong>
+              <i>↗</i>
+            </>
+          </a>
+        ) : null
+      }
+      {
+        cv.basics.orcid ? (
+          <a href={cv.basics.orcid} target='_blank' rel='noreferrer'>
+            <>
+              <span>Research identity</span>
+              <strong>ORCID</strong>
+              <i>↗</i>
+            </>
+          </a>
+        ) : null
+      }
+      {
+        cv.basics.github ? (
+          <a href={`https://github.com/${cv.basics.github}`} target='_blank' rel='noreferrer'>
+            <>
+              <span>Open-source work</span>
+              <strong>GitHub</strong>
+              <i>↗</i>
+            </>
+          </a>
+        ) : null
+      }
+    </div>
+  </section>
 </PageLayout>
+
 <style>
-  p,
-  li {
+  .section-label {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.68rem/1.5 monospace;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .about-index {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 2.5rem 0 6rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .about-index a {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    font-size: 0.84rem;
+  }
+  .about-index a + a {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .about-index span {
+    color: hsl(var(--primary));
+  }
+  .about-index a:hover {
+    background: hsl(var(--primary) / 0.07);
+  }
+  .profile {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1.25fr) minmax(15rem, 0.55fr);
+    gap: 3rem;
+    scroll-margin-top: 2rem;
+  }
+  .profile-mark {
+    display: grid;
+    place-items: center;
+    width: 7rem;
+    height: 7rem;
+    border: 1px solid hsl(var(--foreground));
+    border-radius: 50%;
+    font:
+      italic 2.7rem Georgia,
+      serif;
+  }
+  .profile-mark span {
+    color: hsl(var(--primary));
+  }
+  .profile h2,
+  .personal-note h2,
+  .section-heading h2,
+  .approach h2,
+  .connect h2 {
+    margin: 0.7rem 0 1.4rem;
+    font-size: clamp(2.2rem, 4.2vw, 4rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .profile-copy > p:not(.section-label),
+  .approach-copy > p:not(.section-label) {
+    color: hsl(var(--muted-foreground));
     font-size: 1rem;
     line-height: 1.8;
+  }
+  .profile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .profile-actions a {
+    color: hsl(var(--primary));
+    font-size: 0.86rem;
+  }
+  .profile-facts {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .profile-facts div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .profile-facts span {
     color: hsl(var(--muted-foreground));
+    font: 0.62rem monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
-  ul {
-    padding-left: 1.2rem;
-    list-style: disc;
+  .profile-facts strong {
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.4;
   }
-  li {
-    margin-bottom: 0.6rem;
+  .trajectory,
+  .personal-note,
+  .approach,
+  .connect {
+    padding-top: 8rem;
+    scroll-margin-top: 2rem;
   }
-  .about-diagram {
-    max-width: 32rem;
-    margin-top: 2rem;
+  .personal-note {
+    display: grid;
+    grid-template-columns: 0.75fr 1.25fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .personal-note > div > p:last-child {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.75;
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 3rem;
+    margin-bottom: 2rem;
+  }
+  .section-heading h2 {
+    margin: 0;
+  }
+  .trajectory ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .trajectory li {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 3rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .trajectory-time {
+    color: hsl(var(--primary));
+    font: 0.75rem monospace;
+  }
+  .trajectory-place {
+    margin: 0;
+    color: hsl(var(--primary));
+    font-size: 0.78rem;
+  }
+  .trajectory h3 {
+    margin: 0.5rem 0;
+    font-size: 1.55rem;
+    font-weight: 500;
+  }
+  .trajectory li p:last-child {
+    max-width: 45rem;
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.7;
+  }
+  .approach {
+    display: grid;
+    grid-template-columns: minmax(25rem, 1.1fr) minmax(18rem, 0.9fr);
+    gap: 4rem;
+    align-items: end;
+  }
+  .approach :global(research-diagram) {
+    margin-top: 2.5rem;
+  }
+  .practice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid hsl(var(--border));
+  }
+  .practice-grid article {
+    min-height: 11rem;
+    padding: 1.25rem;
+    border-right: 1px solid hsl(var(--border));
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .practice-grid article:nth-child(even) {
+    border-right: 0;
+  }
+  .practice-grid span {
+    color: hsl(var(--primary));
+    font: 0.65rem monospace;
+  }
+  .practice-grid h3 {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1.1rem;
+  }
+  .practice-grid p {
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+  .connect {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .connect h2 {
+    font-size: clamp(2rem, 3.6vw, 3.4rem);
+  }
+  .connect-links {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .connect-links a {
+    display: grid;
+    grid-template-columns: 8rem 1fr auto;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .connect-links span {
+    color: hsl(var(--muted-foreground));
+    font: 0.63rem monospace;
+    text-transform: uppercase;
+  }
+  .connect-links strong {
+    font-size: 0.88rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+  .connect-links i {
+    font-style: normal;
+  }
+  @media (max-width: 800px) {
+    .about-index {
+      grid-template-columns: repeat(2, 1fr);
+      margin-bottom: 4rem;
+    }
+    .about-index a:nth-child(3) {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .about-index a:nth-child(4) {
+      border-top: 1px solid hsl(var(--border));
+    }
+    .profile {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .profile-mark {
+      width: 5rem;
+      height: 5rem;
+      font-size: 2rem;
+    }
+    .section-heading,
+    .personal-note,
+    .trajectory li,
+    .approach,
+    .connect {
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+    }
+    .trajectory,
+    .personal-note,
+    .approach,
+    .connect {
+      padding-top: 5rem;
+    }
+    .practice-grid article {
+      min-height: 9rem;
+      padding: 1rem;
+    }
+    .connect-links a {
+      grid-template-columns: 6rem 1fr auto;
+    }
   }
 </style>

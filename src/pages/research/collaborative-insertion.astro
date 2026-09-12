@@ -1,0 +1,474 @@
+---
+import { collaborativeInsertion } from '@/data/research'
+
+import PageLayout from '@/layouts/BaseLayout.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import ResearchPlate from '@/components/ResearchPlate.astro'
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ResearchProject',
+  name: 'Learning-based collaborative peg-in-hole insertion',
+  description: collaborativeInsertion.question,
+  creator: { '@type': 'Person', name: 'Mathieu Celerier' },
+  url: 'https://mathieu-celerier.github.io/research/collaborative-insertion',
+  codeRepository: 'https://github.com/mathieu-celerier/collaborative_peg_in_hole_controller'
+}
+---
+
+<PageLayout
+  meta={{
+    title: 'Collaborative insertion',
+    description:
+      'An evolving simulation-to-robot study of imitation learning for collaborative insertion.',
+    ogImage: '/og/research/collaborative-insertion.png'
+  }}
+  {structuredData}
+  highlightColor='hsl(var(--primary))'
+>
+  <a class='back-link' href='/research'>← Research overview</a>
+  <PageIntro
+    kicker='Current postdoctoral project'
+    title='Learning one partner’s role in a shared insertion task.'
+    copy={collaborativeInsertion.question}
+  />
+
+  <div class='project-status'>
+    <div><span>Status</span><strong>{collaborativeInsertion.status}</strong></div>
+    <div><span>Snapshot</span><strong>{collaborativeInsertion.updated}</strong></div>
+    <div><span>Method</span><strong>Imitation learning · closed-loop simulation</strong></div>
+  </div>
+
+  <section class='setup' data-reveal>
+    <div>
+      <p class='section-label'>Experimental setup</p>
+      <h2>Two people act on one system, but through different channels.</h2>
+      <p>
+        One partner acts upstream of the wrist force/torque sensor; the other acts on the shared
+        tool downstream. Keeping those channels separate turns a vague idea of “collaboration” into
+        a concrete learning problem: observe Partner B and the robot state, then reproduce Partner
+        A’s contribution.
+      </p>
+    </div>
+    <ResearchPlate mode='learning' label='Collaborative insertion signal model' />
+  </section>
+
+  <section class='role-table' aria-label='Partner roles'>
+    {
+      collaborativeInsertion.roles.map((role, index) => (
+        <article data-reveal>
+          <div class='role-index'>0{index + 1}</div>
+          <div>
+            <>
+              <p>{role.role}</p>
+              <h2>{role.name}</h2>
+            </>
+          </div>
+          <dl>
+            <div>
+              <>
+                <dt>Physical action</dt>
+                <dd>{role.action}</dd>
+              </>
+            </div>
+            <div>
+              <>
+                <dt>Observed through</dt>
+                <dd>{role.signal}</dd>
+              </>
+            </div>
+            <div>
+              <>
+                <dt>In the learned system</dt>
+                <dd>{role.replacement}</dd>
+              </>
+            </div>
+          </dl>
+        </article>
+      ))
+    }
+  </section>
+
+  <section class='pipeline'>
+    <header class='section-heading' data-reveal>
+      <p class='section-label'>Research pipeline</p>
+      <h2>A simulation-first route to a physical experiment.</h2>
+    </header>
+    <ol>
+      {
+        collaborativeInsertion.stages.map((stage) => (
+          <li data-reveal>
+            <>
+              <span>{stage[0]}</span>
+              <h3>{stage[1]}</h3>
+              <p>{stage[2]}</p>
+            </>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class='snapshot'>
+    <header data-reveal>
+      <p class='section-label'>Last clean evaluation</p>
+      <h2>Evidence with its measurement boundary attached.</h2>
+    </header>
+    <div>
+      {
+        collaborativeInsertion.snapshot.map((metric) => (
+          <article data-reveal>
+            <>
+              <strong>{metric.value}</strong>
+              <h3>{metric.label}</h3>
+              <p>{metric.note}</p>
+            </>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class='failure-record' data-reveal>
+    <div>
+      <p class='section-label'>Current limitation</p>
+      <h2>A later timing regression stops the story here.</h2>
+    </div>
+    <div>
+      <p>{collaborativeInsertion.currentLimit}</p>
+      <p><strong>Next:</strong> {collaborativeInsertion.next}</p>
+    </div>
+  </section>
+
+  <section class='project-principles'>
+    <header class='section-heading' data-reveal>
+      <p class='section-label'>What the project has changed</p>
+      <h2>The useful results include the failures.</h2>
+    </header>
+    <div>
+      <article data-reveal>
+        <span>01</span><h3>Action representation</h3><p>
+          Predicting intent relative to the policy’s own hand state improved the leading regime
+          because the impedance consumes that displacement directly.
+        </p>
+      </article>
+      <article data-reveal>
+        <span>02</span><h3>Partner observability</h3><p>
+          Causal estimates of force statistics, speed, stiffness, and damping help the policy
+          distinguish interaction regimes.
+        </p>
+      </article>
+      <article data-reveal>
+        <span>03</span><h3>Serving is part of the method</h3><p>
+          Chunk latency, starvation, filtering phase, and simulator timing can invalidate an
+          apparent learning result even when offline loss looks correct.
+        </p>
+      </article>
+      <article data-reveal>
+        <span>04</span><h3>Hardware remains a separate test</h3><p>
+          Simulation supports controlled ablation and clean sensing, but it does not substitute for
+          renewed physical demonstrations.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class='project-links' data-reveal>
+    <div><p class='section-label'>Artifacts</p><h2>Follow the implementation.</h2></div>
+    <nav aria-label='Project resources'>
+      <a
+        href='https://github.com/mathieu-celerier/collaborative_peg_in_hole_controller'
+        target='_blank'
+        rel='noreferrer'><span>Experiment controller</span><i>↗</i></a
+      >
+      <a href='/research/explicit-compliance'><span>Control foundation</span><i>→</i></a>
+      <a href='/activity'><span>Research activity</span><i>→</i></a>
+    </nav>
+  </section>
+</PageLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin: 1.5rem 0 2rem;
+    color: hsl(var(--primary));
+    font-size: 0.86rem;
+  }
+  .section-label,
+  .project-status span {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.67rem/1.5 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .project-status {
+    display: grid;
+    grid-template-columns: 0.9fr 0.55fr 1fr;
+    margin: 2.5rem 0 7rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .project-status div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem;
+  }
+  .project-status div + div {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .project-status strong {
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+  h2 {
+    margin: 0.7rem 0 1.2rem;
+    font-size: clamp(2.2rem, 4vw, 4rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .setup {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 4rem;
+    align-items: end;
+  }
+  .setup > div > p:last-child,
+  .failure-record p,
+  .project-principles p {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.75;
+  }
+  .role-table {
+    margin-top: 7rem;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .role-table article {
+    display: grid;
+    grid-template-columns: 4rem 0.7fr 1.3fr;
+    gap: 2rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .role-index,
+  .pipeline li > span,
+  .project-principles article > span {
+    color: hsl(var(--primary));
+    font: 0.67rem monospace;
+  }
+  .role-table article > div p {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.65rem monospace;
+    text-transform: uppercase;
+  }
+  .role-table h2 {
+    margin: 0.4rem 0;
+    font-size: 2rem;
+  }
+  dl {
+    margin: 0;
+  }
+  dl > div {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 1rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  dt {
+    color: hsl(var(--muted-foreground));
+    font: 0.65rem monospace;
+    text-transform: uppercase;
+  }
+  dd {
+    margin: 0;
+  }
+  .pipeline,
+  .snapshot,
+  .project-principles {
+    padding-top: 8rem;
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 4rem;
+    margin-bottom: 2rem;
+  }
+  .section-heading h2 {
+    margin-top: 0;
+  }
+  .pipeline ol {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .pipeline li {
+    min-height: 17rem;
+    padding: 1.5rem;
+    border-right: 1px solid hsl(var(--border));
+  }
+  .pipeline li:last-child {
+    border-right: 0;
+  }
+  .pipeline h3,
+  .snapshot h3,
+  .project-principles h3 {
+    margin: 2.5rem 0 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+  }
+  .pipeline li p,
+  .snapshot article p {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.65;
+  }
+  .snapshot > header {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 4rem;
+  }
+  .snapshot > header h2 {
+    margin-top: 0;
+  }
+  .snapshot > div {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-block: 1px solid hsl(var(--border));
+  }
+  .snapshot article {
+    min-height: 18rem;
+    padding: 2rem;
+    border-right: 1px solid hsl(var(--border));
+  }
+  .snapshot article:last-child {
+    border-right: 0;
+  }
+  .snapshot article > strong {
+    color: hsl(var(--primary));
+    font: 500 clamp(2.8rem, 5vw, 5rem)/1 monospace;
+    letter-spacing: -0.06em;
+  }
+  .failure-record {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 4rem;
+    margin-top: 7rem;
+    padding: 3rem;
+    border: 1px solid hsl(var(--signal) / 0.45);
+    background: hsl(var(--signal) / 0.035);
+  }
+  .failure-record h2 {
+    font-size: clamp(2rem, 3.4vw, 3.2rem);
+  }
+  .failure-record strong {
+    color: hsl(var(--foreground));
+  }
+  .project-principles > div {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid hsl(var(--border));
+  }
+  .project-principles article {
+    min-height: 17rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .project-principles article:nth-child(odd) {
+    border-right: 1px solid hsl(var(--border));
+  }
+  .project-links {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 4rem;
+    padding: 8rem 0 2rem;
+  }
+  .project-links h2 {
+    font-size: clamp(2rem, 3.5vw, 3.4rem);
+  }
+  .project-links nav {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .project-links a {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .project-links i {
+    font-style: normal;
+  }
+  @media (max-width: 800px) {
+    .project-status,
+    .setup,
+    .role-table article,
+    .section-heading,
+    .snapshot > header,
+    .failure-record,
+    .project-links {
+      grid-template-columns: 1fr;
+    }
+    .project-status {
+      margin-bottom: 4rem;
+    }
+    .project-status div + div {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .setup,
+    .section-heading,
+    .snapshot > header,
+    .failure-record,
+    .project-links {
+      gap: 1.25rem;
+    }
+    .role-table {
+      margin-top: 4rem;
+    }
+    .role-table article {
+      gap: 0.6rem;
+    }
+    .pipeline,
+    .snapshot,
+    .project-principles,
+    .project-links {
+      padding-top: 5rem;
+    }
+    .pipeline ol,
+    .snapshot > div {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .pipeline li:nth-child(2),
+    .snapshot article:nth-child(2) {
+      border-right: 0;
+    }
+    .pipeline li {
+      border-bottom: 1px solid hsl(var(--border));
+    }
+    .failure-record {
+      margin-top: 5rem;
+      padding: 1.5rem;
+    }
+  }
+  @media (max-width: 540px) {
+    dl > div {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+    .pipeline ol,
+    .snapshot > div,
+    .project-principles > div {
+      grid-template-columns: 1fr;
+    }
+    .pipeline li,
+    .snapshot article,
+    .project-principles article {
+      min-height: 0;
+      border-right: 0 !important;
+    }
+  }
+</style>

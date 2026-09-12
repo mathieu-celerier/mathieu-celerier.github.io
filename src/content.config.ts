@@ -43,6 +43,9 @@ const publications = defineCollection({
     code: z.string().url().optional(),
     video: z.string().url().optional(),
     featured: z.boolean().optional(),
+    status: z
+      .enum(['published', 'accepted', 'submitted', 'in-revision', 'ongoing'])
+      .default('published'),
     highlights: z.array(z.string()).optional(),
     citations: z.number().int().nonnegative().optional(),
     image: z.string().optional(),

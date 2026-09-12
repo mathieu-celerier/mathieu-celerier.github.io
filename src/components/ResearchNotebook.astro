@@ -1,0 +1,97 @@
+<figure class='notebook' aria-labelledby='notebook-title'>
+  <figcaption>
+    <span id='notebook-title'>Working note · selective response</span><span>MC / pHRI</span>
+  </figcaption>
+  <div class='sheet'>
+    <svg viewBox='0 0 720 390' role='img' aria-label='Annotated research note about compliance'>
+      <path class='rule' d='M36 90H684M36 150H684M36 210H684M36 270H684M36 330H684'></path>
+      <text class='formula' x='70' y='120'>response = nominal + Γₖ · contact</text>
+      <path class='underline' d='M307 133C358 141 404 138 456 133'></path>
+      <text class='note' x='340' y='169'>choose by task + direction</text>
+      <path class='arrow' d='M424 176C406 194 380 205 354 221'></path>
+      <text class='formula small' x='86' y='246'>Γₖ = 0</text>
+      <text class='note' x='82' y='277'>preserve</text>
+      <text class='formula small' x='294' y='246'>0 &lt; Γₖ &lt; I</text>
+      <text class='note' x='301' y='277'>shape</text>
+      <text class='formula small' x='536' y='246'>Γₖ = I</text>
+      <text class='note' x='548' y='277'>yield</text>
+      <path
+        class='circle'
+        d='M267 216C339 197 459 204 486 242C510 278 447 304 360 303C282 301 240 270 267 216Z'
+      ></path>
+      <text class='aside' x='474' y='344'>keep constraints hard ↗</text>
+    </svg>
+  </div>
+</figure>
+
+<style>
+  .notebook {
+    margin: 0;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background));
+    transform: rotate(-0.7deg);
+    box-shadow: 0.8rem 0.8rem 0 hsl(var(--primary) / 0.07);
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+    font: 0.62rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .sheet {
+    overflow: hidden;
+    background:
+      linear-gradient(hsl(var(--primary) / 0.045) 1px, transparent 1px), hsl(var(--background));
+    background-size: 100% 3.75rem;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  text {
+    fill: hsl(var(--foreground));
+  }
+  .formula {
+    font:
+      500 26px Georgia,
+      serif;
+    font-style: italic;
+  }
+  .formula.small {
+    font-size: 22px;
+  }
+  .note,
+  .aside {
+    font: 18px cursive;
+    fill: hsl(var(--primary));
+  }
+  .aside {
+    font-size: 16px;
+  }
+  .rule {
+    stroke: hsl(var(--border) / 0.4);
+  }
+  .underline,
+  .arrow,
+  .circle {
+    fill: none;
+    stroke: hsl(var(--signal));
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .arrow {
+    marker-end: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .notebook:hover {
+      transform: rotate(0deg) translateY(-2px);
+      transition: transform 220ms ease;
+    }
+  }
+</style>

@@ -10,7 +10,16 @@ const thumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
 
 <youtube-facade class='yt-facade' data-id={id} data-title={title}>
   <button type='button' class='yt-facade-button' aria-label={`Play video: ${title}`}>
-    <img src={thumbnail} alt='' loading='lazy' class='yt-facade-thumb' />
+    <img
+      src={thumbnail}
+      alt=''
+      width='480'
+      height='360'
+      loading='lazy'
+      decoding='async'
+      fetchpriority='low'
+      class='yt-facade-thumb'
+    />
     <span class='yt-facade-play' aria-hidden='true'>
       <svg viewBox='0 0 68 48' width='68' height='48'>
         <path
@@ -38,7 +47,11 @@ const thumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
       const iframe = document.createElement('iframe')
       iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1`
       iframe.title = title
-      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture')
+      iframe.setAttribute(
+        'allow',
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+      )
+      iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin')
       iframe.allowFullscreen = true
       iframe.className = 'yt-facade-iframe'
       this.replaceChildren(iframe)

@@ -1,0 +1,350 @@
+---
+import { thesis } from '@/data/research'
+
+import PageLayout from '@/layouts/BaseLayout.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import ResearchPlate from '@/components/ResearchPlate.astro'
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  learningResourceType: 'Doctoral thesis',
+  name: thesis.title,
+  alternateName: thesis.subtitle,
+  author: { '@type': 'Person', name: 'Mathieu Celerier' },
+  dateCreated: '2025',
+  provider: { '@type': 'CollegeOrUniversity', name: 'University of Montpellier' },
+  url: 'https://mathieu-celerier.github.io/research/thesis',
+  description: thesis.abstract
+}
+const scholarlyMeta = {
+  title: thesis.title,
+  authors: ['Mathieu Celerier'],
+  year: '2025',
+  venue: 'University of Montpellier'
+}
+---
+
+<PageLayout
+  meta={{
+    title: 'Doctoral thesis',
+    description: thesis.abstract.slice(0, 158),
+    ogImage: '/og/research/thesis.png'
+  }}
+  {structuredData}
+  {scholarlyMeta}
+  highlightColor='hsl(var(--primary))'
+>
+  <a class='back-link' href='/research'>← Research overview</a>
+  <PageIntro kicker='Doctoral thesis' title={thesis.title} copy={thesis.subtitle} />
+
+  <div class='thesis-meta'>
+    <div><span>Defense</span><strong>{thesis.defended}</strong></div>
+    <div><span>Institution</span><strong>{thesis.institution}</strong></div>
+    <div><span>Supervision</span><strong>{thesis.advisors.join(' · ')}</strong></div>
+  </div>
+
+  <section class='thesis-opening' data-reveal>
+    <div class='thesis-mark' aria-hidden='true'><span>PhD</span><small>2021—2025</small></div>
+    <div>
+      <p class='section-label'>Abstract</p>
+      <h2>Motion and control for interaction that does not stop at first contact.</h2>
+      <p>{thesis.abstract}</p>
+    </div>
+  </section>
+
+  <section class='throughline' data-reveal>
+    <header>
+      <p class='section-label'>Research throughline</p>
+      <h2>From a disturbed trajectory to a safe physical response.</h2>
+    </header>
+    <ResearchPlate mode='system' label='Thesis system view' />
+  </section>
+
+  <section class='contributions'>
+    <header class='section-heading' data-reveal>
+      <p class='section-label'>Three contributions</p>
+      <h2>The thesis responds at three connected levels.</h2>
+    </header>
+    <ol>
+      <li data-reveal>
+        <span>01</span><div>
+          <h3>Generate motion online</h3><p>
+            Reinterpret canonical minimum-jerk motion as a real-time, disturbance-aware reference
+            generator that accepts non-zero boundary conditions and bounds jerk.
+          </p>
+        </div>
+      </li>
+      <li data-reveal>
+        <span>02</span><div>
+          <h3>Make compliance explicit</h3><p>
+            Integrate inverse dynamics, external-effort compensation, task-dependent compliance, and
+            formal safety constraints inside one convex quadratic program.
+          </p>
+        </div>
+      </li>
+      <li data-reveal>
+        <span>03</span><div>
+          <h3>Validate the complete chain</h3><p>
+            Implement the architecture on a torque-controlled 7-DoF arm and evaluate sustained
+            contact, multidirectional disturbance, tracking, and role negotiation.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class='chapter-map'>
+    <header class='section-heading' data-reveal>
+      <p class='section-label'>Structure</p>
+      <h2>Five chapters, one narrowing argument.</h2>
+    </header>
+    <ol>
+      {
+        thesis.chapters.map((chapter) => (
+          <li data-reveal>
+            <>
+              <span>{chapter[0]}</span>
+              <h3>{chapter[1]}</h3>
+              <p>{chapter[2]}</p>
+            </>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class='people' data-reveal>
+    <div><p class='section-label'>Supervision</p><h2>{thesis.advisors.join(' & ')}</h2></div>
+    <div>
+      <p class='section-label'>Manuscript reviewers</p><h2>{thesis.reviewers.join(' & ')}</h2>
+    </div>
+  </section>
+
+  <section class='availability' data-reveal>
+    <div>
+      <p class='section-label'>Manuscript availability</p>
+      <h2>The final public deposit is not linked yet.</h2>
+      <p>
+        I will add the manuscript and defense material here when the deposited version is available.
+        The current site deliberately does not expose an outdated draft or placeholder PDF.
+      </p>
+    </div>
+    <nav aria-label='Thesis resources'>
+      <a href='/news/2025-12-16-phd-defense'><span>Defense note</span><i>→</i></a>
+      <a href='/research/explicit-compliance'><span>Compliance case study</span><i>→</i></a>
+      <a href='/publications'><span>Associated publications</span><i>→</i></a>
+      <a href='/cv.pdf'><span>Curriculum vitae</span><i>↗</i></a>
+    </nav>
+  </section>
+</PageLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin: 1.5rem 0 2rem;
+    color: hsl(var(--primary));
+    font-size: 0.86rem;
+  }
+  .section-label,
+  .thesis-meta span {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.67rem/1.5 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .thesis-meta {
+    display: grid;
+    grid-template-columns: 0.6fr 1.2fr 1fr;
+    margin: 2.5rem 0 7rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .thesis-meta div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem;
+  }
+  .thesis-meta div + div {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .thesis-meta strong {
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+  h2 {
+    margin: 0.7rem 0 1.2rem;
+    font-size: clamp(2.2rem, 4vw, 4rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .thesis-opening {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .thesis-mark {
+    display: grid;
+    justify-items: start;
+    gap: 0.7rem;
+    padding-top: 0.5rem;
+  }
+  .thesis-mark span {
+    color: hsl(var(--primary));
+    font:
+      italic 4rem/1 Georgia,
+      serif;
+  }
+  .thesis-mark small {
+    color: hsl(var(--muted-foreground));
+    font: 0.65rem monospace;
+  }
+  .thesis-opening p:last-child,
+  .availability p {
+    max-width: 50rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+  .throughline {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 4rem;
+    align-items: end;
+    padding: 8rem 0;
+  }
+  .throughline h2 {
+    font-size: clamp(2rem, 3.6vw, 3.4rem);
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 4rem;
+    margin-bottom: 2rem;
+  }
+  .section-heading h2 {
+    margin-top: 0;
+  }
+  .contributions > ol,
+  .chapter-map > ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .contributions > ol > li {
+    display: grid;
+    grid-template-columns: 4rem 0.75fr 1.25fr;
+    gap: 2rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .contributions li > span,
+  .chapter-map li > span {
+    color: hsl(var(--primary));
+    font: 0.67rem monospace;
+  }
+  .contributions h3,
+  .chapter-map h3 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+  .contributions li p,
+  .chapter-map li p {
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.7;
+  }
+  .chapter-map {
+    padding-top: 8rem;
+  }
+  .chapter-map li {
+    display: grid;
+    grid-template-columns: 4rem 0.7fr 1.3fr;
+    gap: 2rem;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .people {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    margin-top: 8rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--border));
+  }
+  .people > div {
+    min-height: 18rem;
+    padding: 2rem;
+    background: hsl(var(--background));
+  }
+  .people h2 {
+    font-size: clamp(2rem, 3.5vw, 3.3rem);
+  }
+  .availability {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    padding: 8rem 0 2rem;
+  }
+  .availability nav {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .availability a {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .availability i {
+    font-style: normal;
+  }
+  @media (max-width: 760px) {
+    .thesis-meta,
+    .thesis-opening,
+    .throughline,
+    .section-heading,
+    .availability {
+      grid-template-columns: 1fr;
+    }
+    .thesis-meta {
+      margin-bottom: 4rem;
+    }
+    .thesis-meta div + div {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .thesis-opening,
+    .throughline,
+    .section-heading,
+    .availability {
+      gap: 1.25rem;
+    }
+    .throughline,
+    .chapter-map,
+    .availability {
+      padding-top: 5rem;
+    }
+    .contributions > ol > li,
+    .chapter-map li {
+      grid-template-columns: 2.5rem 1fr;
+      gap: 0.7rem 1rem;
+    }
+    .contributions li p,
+    .chapter-map li p {
+      grid-column: 2;
+    }
+    .people {
+      grid-template-columns: 1fr;
+      margin-top: 5rem;
+    }
+    .people > div {
+      min-height: 12rem;
+    }
+  }
+</style>

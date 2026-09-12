@@ -28,8 +28,7 @@ const links = [
 const contactItems = [
   { label: 'Email', value: cv.basics.email, href: `mailto:${cv.basics.email}` },
   cv.basics.location ? { label: 'Location', value: cv.basics.location } : null,
-  cv.basics.mobile ? { label: 'Phone', value: cv.basics.mobile } : null,
-  cv.basics.date_of_birth ? { label: 'Born', value: cv.basics.date_of_birth } : null
+  cv.basics.mobile ? { label: 'Phone', value: cv.basics.mobile } : null
 ].filter((item): item is ContactItem => item !== null)
 
 const skillIconMap = {
@@ -252,9 +251,16 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 }))
 ---
 
-<PageLayout meta={{ title: 'CV', ogImage: '/og/cv.png' }} highlightColor='hsl(var(--primary))'>
+<PageLayout
+  meta={{
+    title: 'CV',
+    description: 'Academic experience, education, technical skills, and research focus.',
+    ogImage: '/og/cv.png'
+  }}
+  highlightColor='hsl(var(--primary))'
+>
   <section class='cv-shell'>
-    <section class='cv-hero'>
+    <section class='cv-hero' id='overview'>
       <div class='cv-hero-main'>
         <p class='cv-kicker'>Curriculum Vitae</p>
         <h1 class='cv-title'>{fullName}</h1>
@@ -297,6 +303,25 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       </div>
     </section>
 
+    <nav class='cv-index' aria-label='CV sections'>
+      <a href='#overview'>Overview</a>
+      <a href='#experience'>Experience</a>
+      <a href='#education'>Education</a>
+      <a href='#skills'>Skills</a>
+    </nav>
+
+    <section class='cv-focus' aria-labelledby='cv-focus-title'>
+      <div>
+        <p class='cv-section-kicker'>Research focus</p>
+        <h2 id='cv-focus-title'>Motion, interaction control, and collaborative learning.</h2>
+      </div>
+      <ol>
+        <li><span>01</span><a href='/research#motion'>Online motion generation</a></li>
+        <li><span>02</span><a href='/research#control'>Explicit compliance and safety</a></li>
+        <li><span>03</span><a href='/research#learning'>Learning collaborative roles</a></li>
+      </ol>
+    </section>
+
     {
       /* Decorative summary strip: the same data is fully readable in the
          Experience/Education sections below, so this is hidden from
@@ -307,7 +332,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
          of how much horizontal room neighbors need). A single floating
          tooltip (positioned by JS, viewport-clamped) sidesteps both. */
       timelineBars.length ? (
-        <section class='cv-timeline' aria-hidden='true'>
+        <section class='cv-timeline' aria-label='Interactive career timeline'>
           <div class='cv-timeline-track' style={`height: ${trackHeight}rem`}>
             {timelineTicks.map((tick) => (
               <span class='cv-timeline-grid' style={`left: ${tick.percent}%`}>
@@ -316,7 +341,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
             ))}
             <div class='cv-timeline-axis' style={`top: ${axisTop}rem`} />
             {timelineBars.map((bar) => (
-              <span
+              <a
                 class:list={[
                   'cv-timeline-bar',
                   `cv-timeline-bar-${bar.lane}`,
@@ -325,6 +350,8 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
                 style={`left: ${bar.leftPct}%; width: ${bar.widthPct}%; top: ${barTop(bar)}rem`}
                 data-timeline-label={[bar.label, bar.place, bar.dates].filter(Boolean).join(' · ')}
                 data-timeline-target={bar.targetId}
+                href={`#${bar.targetId}`}
+                aria-label={[bar.label, bar.place, bar.dates].filter(Boolean).join(', ')}
               />
             ))}
           </div>
@@ -339,7 +366,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
     {
       cv.experience?.length ? (
-        <section class='cv-section'>
+        <section class='cv-section' id='experience'>
           <div class='cv-section-header'>
             <p class='cv-section-kicker'>Career</p>
             <h2>Experience</h2>
@@ -372,7 +399,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
     {
       cv.education?.length ? (
-        <section class='cv-section'>
+        <section class='cv-section' id='education'>
           <div class='cv-section-header'>
             <p class='cv-section-kicker'>Academic background</p>
             <h2>Education</h2>
@@ -402,7 +429,7 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
 
     {
       skillSections.length || nonIconSkillSections.length ? (
-        <section class='cv-section'>
+        <section class='cv-section' id='skills'>
           <div class='cv-section-header'>
             <p class='cv-section-kicker'>Toolbox</p>
             <h2>Skills</h2>
@@ -476,6 +503,14 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
       const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
       if (bar) hide()
     })
+    document.addEventListener('focusin', (event) => {
+      const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
+      if (bar) show(bar)
+    })
+    document.addEventListener('focusout', (event) => {
+      const bar = (event.target as HTMLElement)?.closest<HTMLElement>('.cv-timeline-bar')
+      if (bar) hide()
+    })
     document.addEventListener('scroll', hide, true)
 
     document.addEventListener('click', (event) => {
@@ -503,6 +538,68 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     max-width: 78rem;
     margin: 0 auto;
     padding-top: 0.75rem;
+  }
+
+  .cv-index {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: -4rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+
+  .cv-index a {
+    padding: 0.9rem 1rem;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.82rem;
+  }
+
+  .cv-index a + a {
+    border-left: 1px solid hsl(var(--border));
+  }
+
+  .cv-index a:hover,
+  .cv-index a:focus-visible {
+    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.06);
+  }
+
+  .cv-focus {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.8fr) minmax(22rem, 1.2fr);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .cv-focus h2 {
+    margin: 0.7rem 0 0;
+    font-size: clamp(1.8rem, 3.4vw, 3rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+  }
+
+  .cv-focus ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .cv-focus li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .cv-focus li span {
+    color: hsl(var(--primary));
+    font: 0.65rem monospace;
+  }
+
+  .cv-focus li a {
+    font-size: 0.9rem;
   }
 
   .cv-hero,
@@ -809,8 +906,11 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.16);
   }
 
-  .cv-timeline-bar:hover {
+  .cv-timeline-bar:hover,
+  .cv-timeline-bar:focus-visible {
     filter: brightness(1.15);
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
   }
 
   /* Floating tooltip, positioned by the script above (position:fixed,
@@ -893,6 +993,21 @@ const timelineTicks = [2016, 2018, 2020, 2022, 2024, 2026].map((year) => ({
     .cv-section-header {
       grid-template-columns: 1fr;
       gap: 0.6rem;
+    }
+    .cv-index {
+      grid-template-columns: repeat(2, 1fr);
+      margin-top: 0;
+    }
+    .cv-index a:nth-child(3) {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .cv-index a:nth-child(4) {
+      border-top: 1px solid hsl(var(--border));
+    }
+    .cv-focus {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
   }
 </style>

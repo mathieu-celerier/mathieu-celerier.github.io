@@ -1,0 +1,438 @@
+---
+import { labSnapshot } from '@/data/lab-home'
+import projects from '@/data/projects.generated.json'
+
+import PageLayout from '@/layouts/BaseLayout.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import ResearchPlate from '@/components/ResearchPlate.astro'
+
+const software = projects[0]?.links ?? []
+---
+
+<PageLayout
+  meta={{
+    title: 'Research',
+    description: 'Motion, compliance, safety, and learning for physical human–robot collaboration.',
+    ogImage: '/og/research.png'
+  }}
+  highlightColor='hsl(var(--primary))'
+>
+  <PageIntro
+    kicker='Research program'
+    title='Physical collaboration, from contact to learned action.'
+    copy='I work across motion generation, torque control, and robot learning to study sustained physical interaction between people and robots.'
+  />
+
+  <nav class='research-index' aria-label='On this page'>
+    <a href='#motion'><span>01</span> Motion generation</a>
+    <a href='#control'><span>02</span> Compliance and safety</a>
+    <a href='#learning'><span>03</span> Collaborative learning</a>
+    <a href='#thesis'><span>04</span> Doctoral thesis</a>
+  </nav>
+
+  <section class='research-intro' data-reveal>
+    <p class='section-label'>One interaction, several control levels</p>
+    <h2>A robot in contact cannot separate how it moves from how it responds.</h2>
+    <p>
+      Planned motion is disturbed by a person. The controller must decide where to preserve the
+      task, where to yield, and which limits remain inviolable. A collaborative policy must then
+      reason from that same history of motion and force. My research approaches these as connected
+      parts of one physical system.
+    </p>
+    <ResearchPlate mode='system' label='Research architecture' />
+  </section>
+
+  <section class='research-chapter' id='motion' data-reveal>
+    <div class='chapter-copy'>
+      <p class='section-label'>01 / Motion generation · Doctoral work</p>
+      <h2>Recovering smooth motion after contact changes the state.</h2>
+      <p>
+        Canonical minimum-jerk trajectories are smooth and predictable, but their usual formulation
+        assumes fixed boundary conditions. Sustained physical interaction breaks that assumption:
+        the robot can be displaced while it moves.
+      </p>
+      <p>
+        My doctoral work reframes the model as a family of canonical trajectories. The controller
+        continuously identifies a nearby reference and returns toward it while bounding jerk,
+        instead of regenerating an unconstrained trajectory from every disturbed state.
+      </p>
+      <a
+        class='text-action'
+        href='https://github.com/mathieu-celerier/minimum_jerk_controller'
+        target='_blank'
+        rel='noreferrer'>Controller code ↗</a
+      >
+    </div>
+    <ResearchPlate mode='motion' />
+  </section>
+
+  <section class='research-chapter chapter-reverse' id='control' data-reveal>
+    <div class='chapter-copy'>
+      <p class='section-label'>02 / Compliance and safety · Doctoral work</p>
+      <h2>Making compliance explicit inside constrained torque control.</h2>
+      <p>
+        Compensating an estimated external force makes acceleration tracking precise under contact,
+        but it also makes the robot stiff by default. The compliance matrix Γₖ deliberately restores
+        the selected part of the force-induced motion, per task and per direction.
+      </p>
+      <p>
+        The same quadratic program combines that response with torque, position, velocity, and
+        collision constraints. This connects compliant behavior and force-aware safety instead of
+        treating them as separate controllers.
+      </p>
+      <div class='chapter-links'>
+        <a class='text-action' href='/research/explicit-compliance'>Explore the case study →</a>
+        <a class='text-action' href='/publications/celerier2025explicit'>Paper dossier →</a>
+        <a class='text-action' href='/publications/muraccioliDemonstratingControlFramework2025'
+          >See the RSS demonstration →</a
+        >
+      </div>
+    </div>
+    <ResearchPlate mode='control' />
+  </section>
+
+  <section class='research-chapter' id='learning' data-reveal>
+    <div class='chapter-copy'>
+      <p class='section-label'>03 / Collaborative learning · Current postdoctoral work</p>
+      <h2>Learning what one partner contributes to a shared manipulation task.</h2>
+      <p>
+        In the current collaborative-insertion project, two people act on opposite sides of a
+        force/torque sensor. Their physical contributions are observed through separate channels.
+        The learning objective is to replace one partner with a policy while the other continues to
+        interact with the tool.
+      </p>
+      <p>
+        A simulation-first benchmark supports controlled variation of roles and effort, imitation
+        learning, and evaluation before transferring the method to a physical manipulator. The
+        broader question is how interaction history can make a partner's role observable to a robot.
+      </p>
+      <div class='chapter-links'>
+        <a class='text-action' href='/research/collaborative-insertion'
+          >Open the evolving project →</a
+        >
+        <a
+          class='text-action'
+          href='https://github.com/mathieu-celerier/collaborative_peg_in_hole_controller'
+          target='_blank'
+          rel='noreferrer'>Experiment controller ↗</a
+        >
+      </div>
+    </div>
+    <ResearchPlate mode='learning' />
+  </section>
+
+  <section class='current-question' data-reveal>
+    <div>
+      <p class='section-label'>Current question · {labSnapshot.updated}</p>
+      <h2>{labSnapshot.inquiry}</h2>
+    </div>
+    <div>
+      <p>{labSnapshot.note}</p>
+      <a class='text-action' href='/research/collaborative-insertion'
+        >Follow the current project →</a
+      >
+    </div>
+  </section>
+
+  <section class='thesis' id='thesis' data-reveal>
+    <div class='thesis-index'>
+      <span>PhD</span>
+      <time datetime='2025-12-16'>Defended 16 December 2025</time>
+    </div>
+    <div class='thesis-main'>
+      <p class='section-label'>Doctoral thesis</p>
+      <h2>Sustained Physical Human-Robot Interaction</h2>
+      <p class='thesis-subtitle'>
+        From Human-Inspired Motions to Safe, Adaptable, Precise Control toward Human-Centered
+        Industry
+      </p>
+      <p>
+        University of Montpellier · CNRS–AIST Joint Robotics Laboratory<br />Advisors: Gentiane
+        Venture and Mehdi Benallegue
+      </p>
+      <ol>
+        <li><span>01</span> Disturbance-aware, jerk-bounded online motion generation.</li>
+        <li><span>02</span> Explicit, selective compliance inside a force-compensated QP.</li>
+        <li><span>03</span> Real-time validation under sustained physical contact.</li>
+      </ol>
+      <div class='chapter-links'>
+        <a class='text-action' href='/research/thesis'>Open thesis dossier →</a>
+        <a class='text-action' href='/news/2025-12-16-phd-defense'>Defense note →</a>
+        <a class='text-action' href='/publications'>Related publications →</a>
+        <a class='text-action' href='/cv.pdf'>CV PDF ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section class='software' data-reveal>
+    <header>
+      <p class='section-label'>Open research software</p>
+      <h2>Implementations used to test the ideas.</h2>
+    </header>
+    <div class='software-grid'>
+      {
+        software.map((item, index) => (
+          <a href={item.url} target='_blank' rel='noreferrer'>
+            <span>0{index + 1}</span>
+            <strong>{item.label}</strong>
+            <i aria-hidden='true'>↗</i>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .section-label {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.68rem/1.5 monospace;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .research-index {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 2.5rem 0 6rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .research-index a {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1rem;
+    font-size: 0.84rem;
+  }
+  .research-index a + a {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .research-index span {
+    color: hsl(var(--primary));
+    font: 0.62rem monospace;
+  }
+  .research-index a:hover {
+    background: hsl(var(--primary) / 0.07);
+  }
+  .research-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(25rem, 1.1fr);
+    gap: 1.5rem 4rem;
+    align-items: end;
+    margin-bottom: 8rem;
+  }
+  .research-intro h2,
+  .chapter-copy h2,
+  .current-question h2,
+  .thesis h2,
+  .software h2 {
+    margin: 0.65rem 0 1.2rem;
+    font-size: clamp(2.3rem, 4.4vw, 4.4rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+  }
+  .research-intro > p:not(.section-label),
+  .chapter-copy > p:not(.section-label),
+  .current-question > p,
+  .current-question > div:last-child > p,
+  .thesis-main > p:not(.section-label),
+  .thesis-subtitle {
+    color: hsl(var(--muted-foreground));
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .research-intro :global(.research-plate) {
+    grid-column: 2;
+    grid-row: 1 / 4;
+  }
+  .research-chapter {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(25rem, 1.05fr);
+    gap: 4rem;
+    align-items: center;
+    min-height: 32rem;
+    padding: 5rem 0;
+    border-top: 1px solid hsl(var(--border));
+    scroll-margin-top: 2rem;
+  }
+  .chapter-reverse .chapter-copy {
+    grid-column: 2;
+  }
+  .chapter-reverse :global(.research-plate) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .chapter-copy h2 {
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+  }
+  .chapter-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .text-action {
+    color: hsl(var(--primary));
+    font-size: 0.86rem;
+  }
+  .current-question {
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    gap: 4rem;
+    align-items: end;
+    margin: 6rem 0;
+    padding: 2.5rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--primary) / 0.055);
+  }
+  .current-question h2 {
+    font-size: clamp(2rem, 4vw, 3.8rem);
+  }
+  .thesis {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: 3rem;
+    padding: 5rem 0;
+    border-block: 1px solid hsl(var(--border));
+    scroll-margin-top: 2rem;
+  }
+  .thesis-index {
+    display: grid;
+    align-content: start;
+    gap: 0.8rem;
+  }
+  .thesis-index span {
+    font:
+      italic 4rem/1 Georgia,
+      serif;
+    color: hsl(var(--primary));
+  }
+  .thesis-index time {
+    color: hsl(var(--muted-foreground));
+    font: 0.68rem/1.5 monospace;
+    text-transform: uppercase;
+  }
+  .thesis h2 {
+    margin-bottom: 0.4rem;
+  }
+  .thesis-subtitle {
+    max-width: 48rem;
+    margin: 0 0 1.5rem;
+    font:
+      italic 1.35rem/1.45 Georgia,
+      serif !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  .thesis ol {
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .thesis li {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .thesis li span {
+    color: hsl(var(--primary));
+    font: 0.68rem monospace;
+  }
+  .software {
+    padding: 7rem 0 2rem;
+  }
+  .software header {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 3rem;
+    margin-bottom: 2rem;
+  }
+  .software h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+  }
+  .software-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid hsl(var(--border));
+  }
+  .software-grid a {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    gap: 1rem;
+    padding: 1.2rem 0.8rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .software-grid a:nth-child(odd) {
+    border-right: 1px solid hsl(var(--border));
+  }
+  .software-grid span {
+    color: hsl(var(--primary));
+    font: 0.65rem monospace;
+  }
+  .software-grid strong {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .software-grid i {
+    font-style: normal;
+  }
+  @media (max-width: 760px) {
+    .research-index {
+      grid-template-columns: repeat(2, 1fr);
+      margin-bottom: 4rem;
+    }
+    .research-index a:nth-child(3) {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .research-index a:nth-child(4) {
+      border-top: 1px solid hsl(var(--border));
+    }
+    .research-intro,
+    .research-chapter,
+    .current-question,
+    .thesis {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .research-intro {
+      margin-bottom: 4rem;
+    }
+    .research-intro :global(.research-plate),
+    .chapter-reverse .chapter-copy,
+    .chapter-reverse :global(.research-plate) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .research-chapter {
+      padding: 3.5rem 0;
+    }
+    .chapter-reverse .chapter-copy {
+      order: 1;
+    }
+    .chapter-reverse :global(.research-plate) {
+      order: 2;
+    }
+    .current-question {
+      margin: 4rem 0;
+      padding: 1.5rem;
+    }
+    .thesis-index {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+    .software header {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .software-grid {
+      grid-template-columns: 1fr;
+    }
+    .software-grid a:nth-child(odd) {
+      border-right: 0;
+    }
+  }
+</style>

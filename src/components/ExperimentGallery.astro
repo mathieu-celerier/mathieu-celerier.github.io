@@ -1,0 +1,119 @@
+---
+import ResearchPlate from '@/components/ResearchPlate.astro'
+import YouTube from '@/components/YouTube.astro'
+
+export interface ExperimentItem {
+  index: string
+  title: string
+  caption: string
+  notice: string
+  videoId?: string
+  plate?: 'motion' | 'control' | 'learning' | 'system'
+  label?: string
+  status?: string
+}
+
+interface Props {
+  items: ExperimentItem[]
+  heading?: string
+}
+
+const { items, heading = 'Experimental evidence' } = Astro.props
+---
+
+<section class='experiment-gallery' aria-label={heading}>
+  {
+    items.map((item) => (
+      <article class='experiment-item' data-reveal>
+        <header>
+          <span>{item.index}</span>
+          <div>
+            {item.status ? <p>{item.status}</p> : null}
+            <h3>{item.title}</h3>
+          </div>
+        </header>
+        <div class='experiment-media'>
+          {item.videoId ? <YouTube id={item.videoId} title={item.title} /> : null}
+          {item.plate ? <ResearchPlate mode={item.plate} label={item.label ?? item.title} /> : null}
+        </div>
+        <p class='caption'>{item.caption}</p>
+        <p class='notice'>
+          <strong>Notice</strong>
+          {item.notice}
+        </p>
+      </article>
+    ))
+  }
+</section>
+
+<style>
+  .experiment-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid hsl(var(--border));
+  }
+  .experiment-item {
+    min-width: 0;
+    padding: 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .experiment-item:nth-child(odd) {
+    border-right: 1px solid hsl(var(--border));
+  }
+  header {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    min-height: 6.5rem;
+  }
+  header > span,
+  header p,
+  .notice strong {
+    color: hsl(var(--primary));
+    font: 0.65rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  header p {
+    margin: 0 0 0.45rem;
+  }
+  h3 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+  .experiment-media {
+    margin: 1rem 0 1.25rem;
+  }
+  .experiment-media :global(.research-plate) {
+    min-height: 100%;
+  }
+  .caption,
+  .notice {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.65;
+  }
+  .caption {
+    margin: 0;
+  }
+  .notice {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+    margin: 1rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid hsl(var(--border));
+    font-size: 0.88rem;
+  }
+  @media (max-width: 760px) {
+    .experiment-gallery {
+      grid-template-columns: 1fr;
+    }
+    .experiment-item {
+      padding: 1.5rem 0;
+      border-right: 0 !important;
+    }
+  }
+</style>

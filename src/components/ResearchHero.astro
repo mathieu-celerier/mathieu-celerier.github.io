@@ -1,0 +1,699 @@
+---
+import { labSnapshot } from '@/data/lab-home'
+import { loadCV } from '@/lib/cv-data-loader'
+
+const { basics } = loadCV()
+---
+
+<research-hero class='hero'>
+  <div class='hero-meta'>
+    <span><i></i> MATHIEU CELERIER / ROBOTICS RESEARCHER</span>
+    <span>CNRS–AIST JRL · TSUKUBA, JP</span>
+  </div>
+
+  <div class='hero-copy'>
+    <p class='identity'>{basics.position} · Physical human–robot interaction</p>
+    <h1>I study how robots<br /><span>move, yield,</span> and <em>anticipate.</em></h1>
+    <p class='dek'>
+      My PhD developed disturbance-aware motion generation and explicit compliance within
+      constrained torque control. I now study how interaction history can help a robot learn its
+      partner’s role.
+    </p>
+    <div class='hero-actions'>
+      <a href='#now'>Current research <span aria-hidden='true'>↓</span></a>
+      <a href='/publications'>View publications ↗</a>
+    </div>
+  </div>
+
+  <div class='interaction-plate'>
+    <div class='plate-heading'>
+      <span>PHYSICAL COLLABORATION / SYSTEM VIEW</span>
+      <span>FORCE → RESPONSE → INTENT</span>
+    </div>
+
+    <svg viewBox='0 0 760 570' role='img' aria-labelledby='interaction-title interaction-desc'>
+      <title id='interaction-title'>A human and robot moving a shared object</title>
+      <desc id='interaction-desc'>
+        A neutral robotic arm responds to a measured human force while following a constrained
+        motion and predicting the future direction of the shared object.
+      </desc>
+      <defs>
+        <pattern id='minor-grid' width='24' height='24' patternUnits='userSpaceOnUse'>
+          <path d='M24 0H0V24' fill='none' stroke='currentColor' stroke-opacity='.055'></path>
+        </pattern>
+        <linearGradient id='prediction-cone' x1='0' x2='1'>
+          <stop stop-color='currentColor' stop-opacity='.22'></stop>
+          <stop offset='1' stop-color='currentColor' stop-opacity='0'></stop>
+        </linearGradient>
+        <marker
+          id='arrow-force'
+          viewBox='0 0 10 10'
+          refX='9'
+          refY='5'
+          markerWidth='6'
+          markerHeight='6'
+          orient='auto-start-reverse'
+        >
+          <path d='M0 0L10 5L0 10Z' fill='currentColor'></path>
+        </marker>
+      </defs>
+
+      <rect class='grid' width='760' height='570' fill='url(#minor-grid)'></rect>
+
+      <g class='workspace'>
+        <path d='M78 500A310 310 0 01666 326'></path>
+        <path d='M115 500A274 274 0 01627 338'></path>
+        <text x='80' y='476'>CONSTRAINED WORKSPACE</text>
+      </g>
+
+      <g class='target'>
+        <path d='M531 520H671V565H531Z'></path>
+        <path d='M583 520V552H619V520'></path>
+        <path d='M601 492V574M570 536H632'></path>
+        <text x='643' y='563'>TARGET</text>
+      </g>
+
+      <g class='planned-motion'>
+        <path
+          class='prediction-area'
+          d='M510 271C556 300 595 350 608 429L661 402C625 337 580 286 510 271Z'></path>
+        <path class='reference' d='M508 271C558 301 594 356 601 475'></path>
+        <path class='perturbed' d='M508 271C544 292 551 334 579 345C602 355 611 406 601 475'></path>
+        <circle class='progress-dot' r='5'></circle>
+        <g class='future-object future-a' transform='translate(563 326) rotate(58)'>
+          <rect x='-66' y='-10' width='132' height='20' rx='10'></rect>
+        </g>
+        <g class='future-object future-b' transform='translate(601 414) rotate(82)'>
+          <rect x='-66' y='-10' width='132' height='20' rx='10'></rect>
+        </g>
+        <text x='618' y='374'>x̂(t + H)</text>
+        <text x='617' y='393'>PREDICTED INTENT</text>
+      </g>
+
+      <g class='robot' aria-label='Neutral robotic arm'>
+        <path class='base' d='M91 520H211L224 555H78Z'></path>
+        <path class='link link-1' d='M151 500L157 409'></path>
+        <path class='link link-2' d='M157 409L275 351'></path>
+        <path class='link link-3' d='M275 351L376 405'></path>
+        <path class='link link-4' d='M376 405L469 294'></path>
+        <g class='joint'
+          ><circle cx='151' cy='500' r='24'></circle><circle cx='151' cy='500' r='6'></circle></g
+        >
+        <g class='joint'
+          ><circle cx='157' cy='409' r='23'></circle><circle cx='157' cy='409' r='6'></circle></g
+        >
+        <g class='joint'
+          ><circle cx='275' cy='351' r='23'></circle><circle cx='275' cy='351' r='6'></circle></g
+        >
+        <g class='joint'
+          ><circle cx='376' cy='405' r='21'></circle><circle cx='376' cy='405' r='5'></circle></g
+        >
+        <g class='joint'
+          ><circle cx='469' cy='294' r='19'></circle><circle cx='469' cy='294' r='5'></circle></g
+        >
+        <path class='tool' d='M469 294L501 274'></path>
+        <text x='81' y='565'>TORQUE-CONTROLLED ROBOT</text>
+      </g>
+
+      <g class='shared-object' transform='translate(585 270)'>
+        <rect x='-78' y='-15' width='156' height='30' rx='15'></rect>
+        <circle cx='-73' cy='0' r='8'></circle>
+        <path d='M78 -24V24M88 -19V19M98 -13V13'></path>
+      </g>
+
+      <g class='human-input'>
+        <path class='hand' d='M748 239C717 240 702 249 684 263C673 272 660 271 648 269'></path>
+        <path class='force' d='M734 208H643' marker-end='url(#arrow-force)'></path>
+        <text x='604' y='190'>Fₕ / MEASURED FORCE</text>
+      </g>
+
+      <g class='compliance'>
+        <ellipse cx='506' cy='271' rx='49' ry='67'></ellipse>
+        <path d='M506 194V213M506 329V348M444 271H463M549 271H568'></path>
+        <text x='397' y='177'>Γₖ</text>
+        <text x='417' y='177'>SELECTIVE RESPONSE</text>
+      </g>
+
+      <g class='history'>
+        <text x='74' y='76'>INTERACTION HISTORY</text>
+        <path class='axis' d='M74 145V91H278'></path>
+        <path
+          class='force-trace'
+          d='M76 131C91 130 97 107 111 108S131 139 148 130S169 97 185 105S207 137 224 124S246 92 276 101'
+        ></path>
+        <path class='motion-trace' d='M76 135C107 135 112 127 140 127S168 113 195 113S229 99 276 99'
+        ></path>
+        <text x='285' y='105'>Fₕ(t)</text>
+        <text x='285' y='132'>x(t)</text>
+      </g>
+
+      <g class='callout callout-motion'>
+        <circle cx='579' cy='345' r='4'></circle>
+        <path d='M575 345H393V303'></path>
+        <text x='324' y='284'>DISTURBANCE-AWARE</text>
+        <text x='324' y='299'>MOTION GENERATION</text>
+      </g>
+    </svg>
+
+    <aside class='current-project'>
+      <span><i></i> CURRENT POSTDOCTORAL WORK</span>
+      <strong><a href='/research/collaborative-insertion'>{labSnapshot.heroTitle} →</a></strong>
+      <p>{labSnapshot.heroNote}</p>
+    </aside>
+  </div>
+
+  <nav class='research-arc' aria-label='Research areas'>
+    <a href='#research-trajectory' data-layer='motion'>
+      <span>01 / MOVE</span>
+      <strong>Generate motion online</strong>
+      <i aria-hidden='true'>↓</i>
+    </a>
+    <a href='#research-control' data-layer='control'>
+      <span>02 / YIELD</span>
+      <strong>Adapt to applied forces</strong>
+      <i aria-hidden='true'>↓</i>
+    </a>
+    <a href='#research-prediction' data-layer='prediction'>
+      <span>03 / ANTICIPATE</span>
+      <strong>Learn a partner’s role</strong>
+      <i aria-hidden='true'>↓</i>
+    </a>
+  </nav>
+</research-hero>
+
+<script>
+  class ResearchHero extends HTMLElement {
+    cleanup?: () => void
+
+    connectedCallback() {
+      const controller = new AbortController()
+      const links = this.querySelectorAll<HTMLAnchorElement>('[data-layer]')
+
+      links.forEach((link) => {
+        const focus = () => (this.dataset.focus = link.dataset.layer)
+        const clear = () => delete this.dataset.focus
+        link.addEventListener('mouseenter', focus, { signal: controller.signal })
+        link.addEventListener('focus', focus, { signal: controller.signal })
+        link.addEventListener('mouseleave', clear, { signal: controller.signal })
+        link.addEventListener('blur', clear, { signal: controller.signal })
+      })
+
+      this.cleanup = () => controller.abort()
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.()
+    }
+  }
+
+  if (!customElements.get('research-hero')) customElements.define('research-hero', ResearchHero)
+</script>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(25rem, 0.84fr) minmax(34rem, 1.16fr);
+    grid-template-rows: auto 1fr auto;
+    position: relative;
+    isolation: isolate;
+    width: calc(100vw - 2rem);
+    max-width: 1500px;
+    min-height: min(850px, calc(100svh - 2rem));
+    margin: 1.5rem 0 0 50%;
+    transform: translateX(-50%);
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 14px;
+    background: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted) / 0.48));
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(circle at 74% 43%, hsl(var(--primary) / 0.12), transparent 32%);
+  }
+  .hero-meta {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+    font: 0.66rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    color: hsl(var(--muted-foreground));
+  }
+  .hero-meta span:first-child,
+  .current-project > span {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .hero-meta i,
+  .current-project i {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(var(--signal));
+    box-shadow: 0 0 12px hsl(var(--signal));
+  }
+  .hero-copy {
+    align-self: center;
+    z-index: 2;
+    padding: 4rem 1rem 4rem 3.5rem;
+  }
+  .identity {
+    margin: 0 0 1.8rem;
+    font: 0.72rem/1.5 monospace;
+    letter-spacing: 0.04em;
+    color: hsl(var(--muted-foreground));
+  }
+  h1 {
+    margin: 0;
+    max-width: 43rem;
+    font-size: clamp(3.7rem, 4.7vw, 5rem);
+    font-weight: 500;
+    line-height: 0.88;
+    letter-spacing: -0.065em;
+  }
+  h1 span {
+    color: hsl(var(--primary));
+  }
+  h1 em {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .dek {
+    max-width: 34rem;
+    margin: 2rem 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 1rem;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem;
+    align-items: center;
+    font-size: 0.82rem;
+  }
+  .hero-actions a:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 3rem;
+    min-width: 10rem;
+    padding: 0.85rem 1rem;
+    border-radius: 4px;
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+  .interaction-plate {
+    align-self: center;
+    position: relative;
+    min-width: 0;
+    margin: 2rem 2rem 2rem 0;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 9px;
+    background: hsl(var(--background) / 0.62);
+    box-shadow: 0 25px 80px hsl(var(--foreground) / 0.07);
+  }
+  .plate-heading {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+    font: 0.58rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    color: hsl(var(--muted-foreground));
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    color: hsl(var(--primary));
+  }
+  svg text {
+    fill: hsl(var(--muted-foreground));
+    font: 10px monospace;
+    letter-spacing: 0.08em;
+  }
+  .workspace,
+  .target,
+  .planned-motion,
+  .compliance,
+  .history,
+  .callout {
+    fill: none;
+    stroke: currentColor;
+  }
+  .workspace {
+    opacity: 0.22;
+    stroke-dasharray: 3 8;
+  }
+  .workspace text,
+  .target text,
+  .planned-motion text,
+  .compliance text,
+  .history text,
+  .callout text,
+  .robot text {
+    stroke: none;
+  }
+  .target {
+    opacity: 0.5;
+  }
+  .target path:first-child {
+    fill: hsl(var(--primary) / 0.05);
+  }
+  .prediction-area {
+    fill: url(#prediction-cone);
+    stroke: none;
+  }
+  .reference,
+  .perturbed {
+    fill: none;
+    stroke-width: 2;
+  }
+  .reference {
+    opacity: 0.62;
+    stroke-dasharray: 5 8;
+    animation: trace-flow 13s linear infinite;
+  }
+  .perturbed {
+    color: hsl(var(--signal));
+    opacity: 0.8;
+    stroke-dasharray: 2 7;
+  }
+  .progress-dot {
+    fill: hsl(var(--primary));
+    stroke: hsl(var(--background));
+    stroke-width: 2;
+    offset-path: path('M508 271C558 301 594 356 601 475');
+    animation: path-progress 7s ease-in-out infinite;
+  }
+  .future-object {
+    fill: hsl(var(--primary) / 0.04);
+    stroke: currentColor;
+    stroke-dasharray: 4 7;
+  }
+  .future-a {
+    opacity: 0.4;
+  }
+  .future-b {
+    opacity: 0.22;
+  }
+  .robot .link {
+    fill: none;
+    stroke: hsl(var(--foreground));
+    stroke-width: 34;
+    stroke-linecap: round;
+  }
+  .robot .link-2,
+  .robot .link-4 {
+    stroke: hsl(var(--foreground) / 0.88);
+  }
+  .robot .base {
+    fill: hsl(var(--foreground));
+  }
+  .robot .joint circle:first-child {
+    fill: hsl(var(--card));
+    stroke: hsl(var(--foreground));
+    stroke-width: 7;
+  }
+  .robot .joint circle:last-child {
+    fill: hsl(var(--primary));
+  }
+  .robot .tool {
+    fill: none;
+    stroke: hsl(var(--foreground));
+    stroke-width: 16;
+    stroke-linecap: round;
+  }
+  .shared-object rect {
+    fill: hsl(var(--card));
+    stroke: hsl(var(--foreground));
+    stroke-width: 3;
+  }
+  .shared-object circle {
+    fill: hsl(var(--signal));
+  }
+  .shared-object path {
+    fill: none;
+    stroke: hsl(var(--foreground));
+    stroke-width: 3;
+  }
+  .human-input {
+    color: hsl(var(--signal));
+  }
+  .human-input .hand {
+    fill: none;
+    stroke: hsl(var(--foreground));
+    stroke-width: 18;
+    stroke-linecap: round;
+    opacity: 0.72;
+  }
+  .force {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    animation: force-pulse 3.5s ease-in-out infinite;
+  }
+  .human-input text {
+    fill: currentColor;
+  }
+  .compliance {
+    opacity: 0.58;
+    stroke-dasharray: 3 7;
+    animation: compliance-breathe 4s ease-in-out infinite;
+    transform-origin: 506px 271px;
+  }
+  .compliance text {
+    fill: hsl(var(--primary));
+  }
+  .history .axis {
+    opacity: 0.28;
+  }
+  .force-trace,
+  .motion-trace {
+    stroke-width: 1.5;
+  }
+  .force-trace {
+    color: hsl(var(--signal));
+  }
+  .motion-trace {
+    opacity: 0.6;
+  }
+  .callout {
+    opacity: 0.58;
+    stroke-dasharray: 2 5;
+  }
+  .callout circle {
+    fill: currentColor;
+  }
+  .current-project {
+    display: grid;
+    grid-template-columns: minmax(9rem, 0.7fr) minmax(11rem, 0.85fr) minmax(15rem, 1.45fr);
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border-top: 1px solid hsl(var(--border));
+    background: hsl(var(--card) / 0.76);
+  }
+  .current-project > span {
+    color: hsl(var(--muted-foreground));
+    font: 0.58rem/1.4 monospace;
+    letter-spacing: 0.08em;
+  }
+  .current-project strong {
+    display: block;
+    font-size: 0.94rem;
+  }
+  .current-project strong a {
+    color: inherit;
+  }
+  .current-project strong a:hover {
+    color: hsl(var(--primary));
+  }
+  .current-project p {
+    margin: 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .research-arc {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid hsl(var(--border));
+  }
+  .research-arc a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.2rem 1rem;
+    padding: 1.05rem 1.4rem;
+    transition: background 180ms ease;
+  }
+  .research-arc a + a {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .research-arc a:hover,
+  .research-arc a:focus-visible {
+    background: hsl(var(--primary) / 0.08);
+  }
+  .research-arc span {
+    grid-column: 1;
+    color: hsl(var(--primary));
+    font: 0.62rem/1.4 monospace;
+    letter-spacing: 0.08em;
+  }
+  .research-arc strong {
+    grid-column: 1;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .research-arc i {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: center;
+    font-style: normal;
+  }
+  .hero[data-focus='motion'] .planned-motion,
+  .hero[data-focus='control'] .compliance,
+  .hero[data-focus='control'] .human-input,
+  .hero[data-focus='prediction'] .history,
+  .hero[data-focus='prediction'] .prediction-area,
+  .hero[data-focus='prediction'] .future-object {
+    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.5));
+  }
+  @keyframes trace-flow {
+    to {
+      stroke-dashoffset: -130;
+    }
+  }
+  @keyframes path-progress {
+    0%,
+    10% {
+      offset-distance: 0%;
+      opacity: 0;
+    }
+    20%,
+    82% {
+      opacity: 1;
+    }
+    92%,
+    100% {
+      offset-distance: 100%;
+      opacity: 0;
+    }
+  }
+  @keyframes force-pulse {
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: translateX(5px);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(-5px);
+    }
+  }
+  @keyframes compliance-breathe {
+    0%,
+    100% {
+      transform: scaleX(0.9);
+      opacity: 0.4;
+    }
+    50% {
+      transform: scaleX(1.08);
+      opacity: 0.7;
+    }
+  }
+  @media (max-width: 1050px) {
+    .hero {
+      grid-template-columns: minmax(21rem, 0.78fr) minmax(30rem, 1.22fr);
+    }
+    .hero-copy {
+      padding-left: 2rem;
+    }
+    h1 {
+      font-size: clamp(3.3rem, 6vw, 5.5rem);
+    }
+  }
+  @media (max-width: 820px) {
+    .hero {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto;
+    }
+    .hero-copy {
+      padding: 3.5rem 2rem 2.5rem;
+    }
+    .interaction-plate {
+      margin: 0 2rem 2.5rem;
+    }
+    .research-arc {
+      grid-row: 4;
+    }
+  }
+  @media (max-width: 560px) {
+    .hero {
+      width: 100vw;
+      margin-top: 0.75rem;
+      border-inline: 0;
+      border-radius: 0;
+    }
+    .hero-meta span:last-child {
+      display: none;
+    }
+    .hero-copy {
+      padding: 2.8rem 1.25rem 2.2rem;
+    }
+    h1 {
+      font-size: clamp(3.15rem, 14.3vw, 4.2rem);
+      line-height: 0.9;
+    }
+    h1 em {
+      white-space: normal;
+    }
+    .dek {
+      font-size: 0.94rem;
+    }
+    .interaction-plate {
+      margin: 0 0 0;
+      border-inline: 0;
+      border-radius: 0;
+    }
+    .plate-heading span:last-child {
+      display: none;
+    }
+    .interaction-plate svg {
+      width: 100%;
+      transform: none;
+    }
+    .current-project {
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+      margin: 0;
+      padding: 1rem;
+    }
+    .research-arc {
+      grid-template-columns: 1fr;
+    }
+    .research-arc a + a {
+      border-top: 1px solid hsl(var(--border));
+      border-left: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reference,
+    .progress-dot,
+    .force,
+    .compliance {
+      animation: none !important;
+    }
+    .progress-dot {
+      display: none;
+    }
+  }
+</style>

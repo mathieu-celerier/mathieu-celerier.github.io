@@ -5,9 +5,11 @@
  */
 export const labSnapshot = {
   updated: 'SEPTEMBER 2026',
-  inquiry:
-    'Can a robot predict future motion and interaction forces during collaborative manipulation?',
-  note: 'Current postdoctoral project: building a 3D collaborative manipulation benchmark with changing information conditions, synchronized force and state logging, and short-horizon predictive models.'
+  inquiry: 'Can a robot learn to take over one partner’s role in collaborative insertion?',
+  note: 'Current postdoctoral project: learning a relative intent action from causal robot state, interaction history, and online partner estimates in a simulation-first insertion benchmark.',
+  heroTitle: 'Learning collaborative insertion',
+  heroNote:
+    'A living simulation-to-robot study of role observability, action representation, closed-loop learning, and the failures between them.'
 } as const
 
 export const researchTracks = [
@@ -36,15 +38,15 @@ export const researchTracks = [
     index: '03',
     status: 'POSTDOC',
     tone: 'current',
-    title: 'Predictive collaboration',
-    question: 'Predicting motion and force in pHRC.',
+    title: 'Learning collaborative roles',
+    question: 'Learning relative intent from causal interaction history.',
     detail:
-      'Current direction: learn short-horizon task-state and interaction-force dynamics from collaborative manipulation data.'
+      'A policy replaces one partner in collaborative insertion using robot state, force history, online partner estimates, and an intent action expressed relative to its own hand.'
   }
 ] as const
 
 export const openQuestions = [
-  'Can future interaction forces be predicted from task state, robot commands, and information conditions?',
-  'Can force prediction adapt compliance before physical conflict occurs?',
-  'Do role, effort sharing, or disagreement improve predictions of collaborative interaction?'
+  'Can a learned partner lead reliably across both soft and stiff interaction regimes?',
+  'Which causal interaction statistics are sufficient to distinguish a collaborator’s role?',
+  'Which simulation gains survive deterministic serving and physical transfer?'
 ] as const

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
+import { loadCV } from '@/lib/cv-data-loader'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
 import PageIntro from '@/components/PageIntro.astro'
@@ -7,204 +8,248 @@ import PublicationCard from '@/components/publications/PublicationCard.astro'
 
 const entries = (await getCollection('publications')).sort((a, b) => {
   if (b.data.year !== a.data.year) return b.data.year - a.data.year
-  if (Boolean(b.data.featured) !== Boolean(a.data.featured)) {
+  if (Boolean(b.data.featured) !== Boolean(a.data.featured))
     return Number(b.data.featured) - Number(a.data.featured)
-  }
   return a.data.title.localeCompare(b.data.title)
 })
-
-const groupedByYear = entries.reduce<Map<number, typeof entries>>((map, entry) => {
-  const group = map.get(entry.data.year) ?? []
-  group.push(entry)
-  map.set(entry.data.year, group)
-  return map
-}, new Map())
-
-const years = [...groupedByYear.keys()].sort((a, b) => b - a)
-
-const typeLabels: Record<string, string> = {
-  journal: 'Journal',
-  conference: 'Conference',
-  workshop: 'Workshop',
-  preprint: 'Preprint',
-  thesis: 'Thesis',
-  demo: 'Demo',
-  other: 'Other'
-}
-
-const typesPresent = [...new Set(entries.map((entry) => entry.data.type))].sort((a, b) =>
-  (typeLabels[a] ?? a).localeCompare(typeLabels[b] ?? b)
-)
+const featured = entries.filter((entry) => entry.data.featured)
+const cv = loadCV()
+const years = [...new Set(entries.map((entry) => entry.data.year))].sort((a, b) => b - a)
+const grouped = years.map((year) => ({
+  year,
+  entries: entries.filter((entry) => entry.data.year === year)
+}))
 ---
 
 <PageLayout
-  meta={{ title: 'Publications', ogImage: '/og/publications.png' }}
+  meta={{
+    title: 'Publications',
+    description:
+      'Peer-reviewed work on robot motion, safe compliant control, and physical human–robot interaction.',
+    ogImage: '/og/publications.png'
+  }}
   highlightColor='hsl(var(--primary))'
 >
   <PageIntro
     kicker='Research output'
-    title='Publications'
-    copy='Journal articles, conference papers, and other research output.'
+    title='Publications and technical contributions.'
+    copy='Selected work in physical human–robot interaction, constrained control, robot learning, and manipulation.'
   />
 
-  {
-    years.length ? (
-      <div class='pub-filters' role='group' aria-label='Filter publications'>
-        <label class='pub-filter'>
-          <span class='pub-filter-label'>Year</span>
-          <select id='pub-filter-year'>
-            <option value='all'>All years</option>
-            {years.map((year) => (
-              <option value={year}>{year}</option>
-            ))}
-          </select>
-        </label>
-        <label class='pub-filter'>
-          <span class='pub-filter-label'>Type</span>
-          <select id='pub-filter-type'>
-            <option value='all'>All types</option>
-            {typesPresent.map((type) => (
-              <option value={type}>{typeLabels[type] ?? type}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-    ) : null
-  }
+  <div class='publication-summary'>
+    <div><span>Public record</span><strong>{entries.length} research records</strong></div>
+    <div><span>Covered period</span><strong>{Math.min(...years)}—{Math.max(...years)}</strong></div>
+    <div><span>Primary area</span><strong>Physical human–robot interaction</strong></div>
+    {
+      cv.basics.scholar ? (
+        <a href={cv.basics.scholar} target='_blank' rel='noreferrer'>
+          <>
+            <span>Complete profile</span>
+            <strong>Google Scholar ↗</strong>
+          </>
+        </a>
+      ) : null
+    }
+  </div>
 
-  <p id='pub-result-count' role='status'>{entries.length} publications</p>
-  <p id='pub-empty' hidden>No publications match these filters. Try another year or type.</p>
   {
-    years.map((year) => (
-      <section class='pub-year-section' data-year-section={year}>
-        <h2 class='pub-year-heading'>{year}</h2>
-        <div class='pub-stack'>
-          {groupedByYear.get(year)!.map((entry) => (
-            <PublicationCard entry={entry} />
+    featured.length ? (
+      <section class='selected'>
+        <header class='section-heading'>
+          <p>Selected contributions</p>
+          <h2>Research in context.</h2>
+        </header>
+        <div class='selected-grid'>
+          {featured.map((entry, index) => (
+            <article data-reveal>
+              <div class='selected-index'>
+                0{index + 1} / {entry.data.year}
+              </div>
+              <p class='selected-venue'>
+                {entry.data.status === 'published'
+                  ? entry.data.venue || entry.data.type
+                  : entry.data.status.replace('-', ' ')}
+              </p>
+              <h3>
+                <a href={`/publications/${entry.data.bibkey}`}>{entry.data.title}</a>
+              </h3>
+              <p class='selected-contribution'>
+                {entry.data.highlights?.[0] ?? entry.data.abstract}
+              </p>
+              <div class='selected-links'>
+                <a href={`/publications/${entry.data.bibkey}`}>Open dossier →</a>
+                {entry.data.video ? (
+                  <a href={entry.data.video} target='_blank' rel='noreferrer'>
+                    Video ↗
+                  </a>
+                ) : null}
+                {entry.data.code ? (
+                  <a href={entry.data.code} target='_blank' rel='noreferrer'>
+                    Code ↗
+                  </a>
+                ) : null}
+              </div>
+            </article>
           ))}
         </div>
       </section>
-    ))
+    ) : null
   }
+
+  <section class='record'>
+    <header class='section-heading'>
+      <p>Complete record</p>
+      <h2>Chronological list.</h2>
+    </header>
+    {
+      grouped.map((group) => (
+        <section class='pub-year-section'>
+          <h3>{group.year}</h3>
+          <div>
+            {group.entries.map((entry) => (
+              <PublicationCard entry={entry} compact />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </section>
 </PageLayout>
 
-<script>
-  // Under Astro's ClientRouter, this module only executes once per browser
-  // session — navigating back to /publications after visiting another page
-  // does NOT re-run it. So initialization is wrapped in a function and run
-  // both on first load and on every `astro:page-load` (fired after every
-  // client-side navigation, including the very first page load).
-  function initPublicationFilters() {
-    const yearSelect = document.getElementById('pub-filter-year') as HTMLSelectElement | null
-    const typeSelect = document.getElementById('pub-filter-type') as HTMLSelectElement | null
-
-    // Guard against double-binding if this ever runs twice for the same DOM.
-    if (yearSelect?.dataset.filtersBound === 'true') return
-    if (yearSelect) yearSelect.dataset.filtersBound = 'true'
-
-    function applyFilters() {
-      const year = yearSelect?.value ?? 'all'
-      const type = typeSelect?.value ?? 'all'
-
-      let total = 0
-      document.querySelectorAll<HTMLElement>('[data-year-section]').forEach((section) => {
-        let visibleCount = 0
-
-        section.querySelectorAll<HTMLElement>('.pub-card-wrapper').forEach((card) => {
-          const matchesYear = year === 'all' || card.dataset.year === year
-          const matchesType = type === 'all' || card.dataset.type === type
-          const visible = matchesYear && matchesType
-          card.hidden = !visible
-          if (visible) visibleCount += 1
-        })
-
-        section.hidden = visibleCount === 0
-        total += visibleCount
-      })
-      const count = document.getElementById('pub-result-count')
-      const empty = document.getElementById('pub-empty')
-      if (count) count.textContent = `${total} publication${total === 1 ? '' : 's'}`
-      if (empty) empty.hidden = total !== 0
-    }
-
-    yearSelect?.addEventListener('change', applyFilters)
-    typeSelect?.addEventListener('change', applyFilters)
-    applyFilters()
-  }
-
-  initPublicationFilters()
-  document.addEventListener('astro:page-load', initPublicationFilters)
-</script>
-
 <style>
-  #pub-result-count {
-    font-size: 0.8125rem;
-    color: hsl(var(--muted-foreground));
-    margin: 1rem 0;
+  .publication-summary {
+    display: grid;
+    grid-template-columns: 0.55fr 0.55fr 1fr 0.8fr;
+    margin: 2.5rem 0 7rem;
+    border-block: 1px solid hsl(var(--border));
   }
-  #pub-empty {
-    padding: 2rem 0;
+  .publication-summary > * {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem;
+  }
+  .publication-summary > * + * {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .publication-summary span,
+  .section-heading p,
+  .selected-index {
+    color: hsl(var(--primary));
+    font: 0.65rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .publication-summary strong {
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+  .section-heading p {
+    margin: 0;
+  }
+  .section-heading h2 {
+    margin: 0;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .selected-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid hsl(var(--border));
+  }
+  .selected-grid article {
+    min-height: 27rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .selected-grid article:nth-child(odd) {
+    border-right: 1px solid hsl(var(--border));
+  }
+  .selected-venue {
+    margin: 4rem 0 0.8rem;
+    color: hsl(var(--primary));
+    font-size: 0.78rem;
+    text-transform: uppercase;
+  }
+  .selected-grid h3 {
+    margin: 0;
+    font-size: clamp(1.7rem, 3vw, 2.7rem);
+    font-weight: 500;
+    line-height: 1.03;
+    letter-spacing: -0.04em;
+  }
+  .selected-grid h3 a {
+    color: inherit;
+  }
+  .selected-contribution {
+    max-width: 35rem;
+    margin-top: 1.2rem;
+    color: hsl(var(--muted-foreground));
+    line-height: 1.65;
+  }
+  .selected-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-top: 2rem;
+    font-size: 0.82rem;
+  }
+  .selected-links a {
+    color: hsl(var(--primary));
+  }
+  .record {
+    padding-top: 8rem;
   }
   .pub-year-section {
     display: grid;
     grid-template-columns: 7rem minmax(0, 1fr);
     gap: 1.5rem;
-    margin-top: 3rem;
-    padding-top: 0.25rem;
+    margin-top: 2rem;
   }
-
-  .pub-year-section:first-of-type {
-    margin-top: 0.5rem;
-  }
-
-  .pub-year-heading {
-    margin: 0;
+  .pub-year-section > h3 {
+    margin: 1.75rem 0 0;
+    color: hsl(var(--primary));
     font-size: 1rem;
-    font-variant-numeric: tabular-nums;
-    color: hsl(var(--primary) / 1);
+    font-weight: 500;
   }
-
-  .pub-stack {
-    display: grid;
-    gap: 1.1rem;
-  }
-
-  .pub-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-    padding: 0.85rem 1rem;
-    border: 1px solid hsl(var(--border) / 1);
-    background: hsl(var(--card) / 0.7);
-  }
-
-  .pub-filter {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-    color: hsl(var(--muted-foreground) / 1);
-  }
-
-  .pub-filter-label {
-    font-weight: 600;
-  }
-
-  .pub-filter select {
-    border: 1px solid hsl(var(--border) / 1);
-    border-radius: 0.35rem;
-    background: hsl(var(--card) / 1);
-    color: hsl(var(--foreground) / 1);
-    padding: 0.3rem 0.55rem;
-    font-size: 0.85rem;
-  }
-
-  @media (max-width: 600px) {
+  @media (max-width: 760px) {
+    .publication-summary {
+      grid-template-columns: repeat(2, 1fr);
+      margin-bottom: 5rem;
+    }
+    .publication-summary > *:nth-child(3) {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .publication-summary > *:nth-child(4) {
+      border-top: 1px solid hsl(var(--border));
+    }
+    .section-heading {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+    .selected-grid {
+      grid-template-columns: 1fr;
+    }
+    .selected-grid article {
+      min-height: 23rem;
+      padding: 1.2rem 0;
+      border-right: 0 !important;
+    }
+    .record {
+      padding-top: 5rem;
+    }
     .pub-year-section {
       grid-template-columns: 1fr;
-      gap: 0.75rem;
-      margin-top: 2.25rem;
+      gap: 0;
     }
   }
 </style>

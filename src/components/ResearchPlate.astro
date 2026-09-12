@@ -1,0 +1,358 @@
+---
+interface Props {
+  mode: 'motion' | 'control' | 'learning' | 'system'
+  label?: string
+}
+
+const { mode, label } = Astro.props
+const titles = {
+  motion: 'Online motion generation under disturbance',
+  control: 'Explicit compliance and constrained torque control',
+  learning: 'Learning a role from collaborative interaction',
+  system: 'A physical human–robot interaction control system'
+}
+---
+
+<figure class={`research-plate plate-${mode}`}>
+  <figcaption><span>{label ?? titles[mode]}</span><span>TECHNICAL VIEW</span></figcaption>
+  {
+    mode === 'motion' && (
+      <svg viewBox='0 0 640 300' role='img' aria-label={titles[mode]}>
+        <path
+          class='grid'
+          d='M40 50H608M40 100H608M40 150H608M40 200H608M40 250H608M90 30V270M190 30V270M290 30V270M390 30V270M490 30V270M590 30V270'
+        />
+        <path class='axis' d='M50 244H603M55 253V43' />
+        <path class='reference' d='M61 225C150 225 171 213 213 165S279 72 369 72H585' />
+        <path
+          class='actual'
+          d='M61 225C151 225 172 213 213 165C248 125 269 109 292 122C314 134 321 181 354 176C389 170 390 74 476 72H585'
+        />
+        <path class='recovery' d='M292 122C326 95 351 75 402 73' />
+        <circle class='event' cx='292' cy='122' r='8' />
+        <path class='force-arrow' d='M292 54V104' />
+        <text x='307' y='56'>
+          EXTERNAL DISTURBANCE
+        </text>
+        <text x='402' y='102'>
+          CLOSEST CANONICAL TRAJECTORY
+        </text>
+        <text x='498' y='226'>
+          x(t)
+        </text>
+        <text x='572' y='267'>
+          t
+        </text>
+      </svg>
+    )
+  }
+  {
+    mode === 'control' && (
+      <svg viewBox='0 0 640 300' role='img' aria-label={titles[mode]}>
+        <path class='flow' d='M62 150H146M254 150H344M452 150H567' />
+        <g class='block force-block'>
+          <>
+            <rect x='42' y='111' width='105' height='78' rx='5' />
+            <text x='63' y='144'>
+              EXTERNAL
+            </text>
+            <text x='77' y='162'>
+              FORCE
+            </text>
+          </>
+        </g>
+        <g class='block qp-block'>
+          <>
+            <rect x='147' y='91' width='108' height='118' rx='5' />
+            <text x='184' y='139'>
+              QP
+            </text>
+            <text x='164' y='160'>
+              Γₖ RESPONSE
+            </text>
+            <text x='167' y='180'>
+              + SAFETY
+            </text>
+          </>
+        </g>
+        <g class='block dynamics-block'>
+          <>
+            <rect x='344' y='105' width='109' height='90' rx='5' />
+            <text x='361' y='144'>
+              INVERSE
+            </text>
+            <text x='357' y='163'>
+              DYNAMICS
+            </text>
+          </>
+        </g>
+        <g class='arm' transform='translate(566 151)'>
+          <>
+            <path d='M-4 82V30L43 -2L76 24L111 -24' />
+            <circle cx='-4' cy='30' r='9' />
+            <circle cx='43' cy='-2' r='9' />
+            <circle cx='76' cy='24' r='9' />
+            <circle cx='111' cy='-24' r='9' />
+          </>
+        </g>
+        <path class='constraint' d='M171 69H426' />
+        <text x='203' y='58'>
+          TORQUE · POSITION · VELOCITY · COLLISION
+        </text>
+        <text x='50' y='230'>
+          MEASURED / ESTIMATED
+        </text>
+        <text x='344' y='230'>
+          COMMANDED ACCELERATION
+        </text>
+      </svg>
+    )
+  }
+  {
+    mode === 'learning' && (
+      <svg viewBox='0 0 640 300' role='img' aria-label={titles[mode]}>
+        <path
+          class='grid'
+          d='M38 62H602M38 112H602M38 162H602M38 212H602M88 36V258M188 36V258M288 36V258M388 36V258M488 36V258M588 36V258'
+        />
+        <g class='partner partner-a'>
+          <>
+            <circle cx='75' cy='141' r='30' />
+            <text x='50' y='193'>
+              PARTNER A
+            </text>
+          </>
+        </g>
+        <g class='partner partner-b'>
+          <>
+            <circle cx='565' cy='141' r='30' />
+            <text x='540' y='193'>
+              PARTNER B
+            </text>
+          </>
+        </g>
+        <path class='object' d='M108 141H532' />
+        <path
+          class='signal signal-a'
+          d='M111 126C158 74 195 191 245 126S333 183 378 117S457 164 529 126'
+        />
+        <path
+          class='signal signal-b'
+          d='M111 154C163 107 194 210 250 151S338 194 383 143S459 184 529 154'
+        />
+        <rect class='history-window' x='196' y='83' width='183' height='118' rx='5' />
+        <path class='prediction' d='M379 85L491 61V221L379 199Z' />
+        <text x='218' y='72'>
+          INTERACTION HISTORY
+        </text>
+        <text x='413' y='238'>
+          PREDICTED ROLE / INTENT
+        </text>
+      </svg>
+    )
+  }
+  {
+    mode === 'system' && (
+      <svg viewBox='0 0 640 300' role='img' aria-label={titles[mode]}>
+        <path class='flow' d='M54 150H137M238 150H326M427 150H511' />
+        <g class='block'>
+          <>
+            <rect x='38' y='111' width='100' height='78' rx='5' />
+            <text x='58' y='145'>
+              SENSING
+            </text>
+            <text x='55' y='164'>
+              FORCE / STATE
+            </text>
+          </>
+        </g>
+        <g class='block'>
+          <>
+            <rect x='138' y='96' width='101' height='108' rx='5' />
+            <text x='154' y='144'>
+              ESTIMATION
+            </text>
+            <text x='154' y='164'>
+              + HISTORY
+            </text>
+          </>
+        </g>
+        <g class='block'>
+          <>
+            <rect x='326' y='96' width='102' height='108' rx='5' />
+            <text x='350' y='144'>
+              CONTROL
+            </text>
+            <text x='348' y='164'>
+              QP / POLICY
+            </text>
+          </>
+        </g>
+        <g class='block'>
+          <>
+            <rect x='511' y='111' width='91' height='78' rx='5' />
+            <text x='530' y='145'>
+              ROBOT
+            </text>
+            <text x='523' y='164'>
+              INTERACTION
+            </text>
+          </>
+        </g>
+        <path class='feedback' d='M557 190C557 257 88 257 88 190' />
+        <text x='246' y='273'>
+          PHYSICAL FEEDBACK
+        </text>
+      </svg>
+    )
+  }
+</figure>
+
+<style>
+  .research-plate {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 70% 40%, hsl(var(--primary) / 0.09), transparent 38%),
+      hsl(var(--card) / 0.55);
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+    font: 0.58rem/1.4 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    color: hsl(var(--primary));
+  }
+  svg text {
+    fill: hsl(var(--muted-foreground));
+    font: 9px monospace;
+    letter-spacing: 0.05em;
+  }
+  .grid,
+  .axis,
+  .reference,
+  .actual,
+  .recovery,
+  .force-arrow,
+  .flow,
+  .constraint,
+  .arm,
+  .feedback,
+  .signal,
+  .object {
+    fill: none;
+    stroke: currentColor;
+  }
+  .grid {
+    opacity: 0.09;
+  }
+  .axis {
+    opacity: 0.35;
+  }
+  .reference {
+    stroke-width: 2;
+    stroke-dasharray: 4 7;
+    opacity: 0.52;
+  }
+  .actual {
+    color: hsl(var(--signal));
+    stroke-width: 2.2;
+  }
+  .recovery {
+    stroke-width: 2;
+  }
+  .event {
+    fill: hsl(var(--signal));
+  }
+  .force-arrow {
+    color: hsl(var(--signal));
+    stroke-width: 2;
+  }
+  .flow {
+    stroke-width: 2;
+    stroke-dasharray: 3 6;
+  }
+  .block rect {
+    fill: hsl(var(--background));
+    stroke: currentColor;
+  }
+  .qp-block rect {
+    fill: hsl(var(--primary) / 0.11);
+    stroke-width: 2;
+  }
+  .force-block {
+    color: hsl(var(--signal));
+  }
+  .dynamics-block {
+    color: hsl(var(--foreground));
+  }
+  .constraint {
+    stroke-dasharray: 3 5;
+    opacity: 0.5;
+  }
+  .arm {
+    color: hsl(var(--foreground));
+    stroke-width: 13;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .arm circle {
+    fill: hsl(var(--card));
+    stroke: currentColor;
+    stroke-width: 4;
+  }
+  .feedback {
+    stroke-dasharray: 3 7;
+    opacity: 0.5;
+  }
+  .partner circle {
+    fill: hsl(var(--card));
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .partner-a {
+    color: hsl(var(--signal));
+  }
+  .partner-b {
+    color: hsl(var(--primary));
+  }
+  .object {
+    color: hsl(var(--foreground));
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .signal {
+    stroke-width: 1.7;
+  }
+  .signal-a {
+    color: hsl(var(--signal));
+  }
+  .signal-b {
+    opacity: 0.58;
+  }
+  .history-window {
+    fill: hsl(var(--primary) / 0.06);
+    stroke: hsl(var(--primary));
+    stroke-dasharray: 4 6;
+  }
+  .prediction {
+    fill: hsl(var(--primary) / 0.12);
+    stroke: none;
+  }
+  @media (max-width: 560px) {
+    figcaption span:last-child {
+      display: none;
+    }
+  }
+</style>

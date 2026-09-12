@@ -7,6 +7,41 @@
 # abstract: shown on the publication detail page. If omitted, falls back to
 #   the bib entry's own `abstract` field (if present); this override wins.
 muraccioliDemonstratingControlFramework2025:
+  status: published
   website: 'https://industry-ready-phri.github.io'
   video: 'https://youtu.be/lo9FRXFrVPw'
   featured: true
+  highlights:
+    - 'Demonstrates compliance, null-space compliance, and dual compliance in static and dynamic interaction.'
+    - 'Combines second-order QP safety constraints with real-time torque control.'
+    - 'Provides an open, reproducible implementation built on mc_rtc.'
+celerier2025explicit:
+  status: in-revision
+  code: 'https://github.com/mathieu-celerier/explicit_compliance_controller'
+  video: 'https://youtu.be/T1H7nLsjT4Y'
+  featured: true
+  abstract: >-
+    Robots operating in close physical contact must reconcile precise motion,
+    context-dependent compliance, and safety. This work introduces a
+    quadratic-programming torque-control framework that incorporates external
+    torque estimates into inverse dynamics, embeds a task- and direction-level
+    explicit compliance parameter, and formulates force-aware position,
+    velocity, torque, and collision constraints. The framework is evaluated
+    experimentally across interaction scenarios including null-space and
+    full-body compliance and task-space inertia shaping.
+  highlights:
+    - 'Sets compliance per task and direction through the matrix Γₖ.'
+    - 'Compensates estimated external efforts before deliberately restoring compliant motion.'
+    - 'Integrates force-aware safety constraints in the same acceleration-level QP.'
+cariou2025safe:
+  status: accepted
+  abstract: >-
+    This work introduces Acc-CBF-QP, an acceleration-based safety filter that
+    constrains reinforcement-learning policies onto a safe set at runtime. The
+    unified quadratic program enforces joint position, velocity, torque, and
+    collision constraints without modifying policy training, and is evaluated
+    in simulation and on Kinova Gen3 and Unitree H1 hardware.
+  highlights:
+    - 'Filters learned commands at runtime through acceleration-based control barrier functions.'
+    - 'Enforces position, velocity, torque, and collision constraints in one QP.'
+    - 'Accepted at IROS 2026 with an open arXiv manuscript.'

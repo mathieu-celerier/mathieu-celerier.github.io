@@ -1,0 +1,483 @@
+---
+import { explicitCompliance } from '@/data/research'
+
+import PageLayout from '@/layouts/BaseLayout.astro'
+import ExperimentGallery from '@/components/ExperimentGallery.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import ResearchNotebook from '@/components/ResearchNotebook.astro'
+import ResearchPlate from '@/components/ResearchPlate.astro'
+
+const gallery = [
+  {
+    index: '01',
+    status: 'Physical experiment · real time',
+    title: 'Directional compliance',
+    caption:
+      'The compliance parameter is assigned at task level and can differ across Cartesian directions.',
+    notice:
+      'Compare the commanded compliant direction with the directions that continue to preserve the task.',
+    videoId: 'T1H7nLsjT4Y'
+  },
+  {
+    index: '02',
+    status: 'Physical demonstration · RSS 2025',
+    title: 'Dual compliance',
+    caption:
+      'The main task responds when contact is relevant to it, while the remaining motion can stay compliant in the null space.',
+    notice:
+      'The behavior changes with where the interaction enters the kinematic chain, not only with force magnitude.',
+    videoId: 'xdfSfx82-tM'
+  },
+  {
+    index: '03',
+    status: 'Controller architecture',
+    title: 'One optimization problem',
+    caption:
+      'External-effort response, inverse dynamics, and hard feasibility constraints meet at acceleration level.',
+    notice:
+      'Compliance changes the selected response; torque, position, velocity, and collision limits remain constraints.',
+    plate: 'control' as const
+  },
+  {
+    index: '04',
+    status: 'Physical demonstration · RSS 2025',
+    title: 'Safety constraints under contact',
+    caption:
+      'Second-order QP constraints regulate motion near kinematic and collision boundaries during interaction.',
+    notice:
+      'Watch the response as the robot approaches a boundary—the constraint modifies motion before a limit is crossed.',
+    videoId: 'zyTgQUdR_oc'
+  }
+]
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ResearchProject',
+  name: 'Explicit safety and compliance on torque-controlled robots for physical interaction',
+  description: explicitCompliance.question,
+  creator: { '@type': 'Person', name: 'Mathieu Celerier' },
+  url: 'https://mathieu-celerier.github.io/research/explicit-compliance',
+  codeRepository: 'https://github.com/mathieu-celerier/explicit_compliance_controller'
+}
+---
+
+<PageLayout
+  meta={{
+    title: 'Explicit compliance',
+    description:
+      'A research case study on task-level compliance, force-aware safety, and constrained torque control.',
+    ogImage: '/og/research/explicit-compliance.png'
+  }}
+  {structuredData}
+  highlightColor='hsl(var(--primary))'
+>
+  <a class='back-link' href='/research'>← Research overview</a>
+  <PageIntro
+    kicker='Flagship case study'
+    title='Compliance is a control decision, not the absence of control.'
+    copy={explicitCompliance.question}
+  />
+
+  <div class='case-status'>
+    <div><span>Status</span><strong>{explicitCompliance.status}</strong></div>
+    <div><span>Last reviewed</span><strong>{explicitCompliance.updated}</strong></div>
+    <div><span>Research object</span><strong>Torque-controlled physical interaction</strong></div>
+  </div>
+
+  <section class='problem' data-reveal>
+    <div>
+      <p class='section-label'>The control problem</p>
+      <h2>Contact creates two demands that cannot be solved independently.</h2>
+    </div>
+    <div class='problem-copy'>
+      <p>
+        Accurate force compensation helps a robot preserve a motion in spite of external effort. In
+        physical interaction, that same accuracy can make the system resist the person. Simply
+        reducing every gain sacrifices task precision and does not express which motion should be
+        allowed.
+      </p>
+      <p>
+        The approach separates those decisions: estimate the force-induced motion, then use a
+        task-level matrix Γₖ to select how much of it is deliberately retained in each direction.
+        Feasibility and safety remain explicit constraints in the quadratic program.
+      </p>
+    </div>
+  </section>
+
+  <section class='equation-section' data-reveal>
+    <ResearchNotebook />
+    <div>
+      <p class='section-label'>The parameter</p>
+      <h2>One matrix expresses where the robot should yield.</h2>
+      <p>
+        Γₖ belongs to a task rather than to the robot as a whole. A translation can comply while an
+        orientation stays fixed; a main task can remain precise while redundancy yields; and the
+        same formulation can render a chosen virtual dynamic response.
+      </p>
+      <p class='terminology'>
+        <strong>Terminology matters.</strong> Compliance relates force to displacement, while apparent
+        inertia relates force to acceleration. The controller can shape both, but they are not interchangeable
+        concepts.
+      </p>
+    </div>
+  </section>
+
+  <section class='parameter-cases' aria-label='Compliance parameter cases'>
+    {
+      explicitCompliance.complianceCases.map((item, index) => (
+        <article data-reveal>
+          <>
+            <span>0{index + 1}</span>
+            <code>{item.value}</code>
+            <h3>{item.title}</h3>
+            <p>{item.note}</p>
+          </>
+        </article>
+      ))
+    }
+  </section>
+
+  <section class='architecture' data-reveal>
+    <header>
+      <p class='section-label'>Controller architecture</p>
+      <h2>The response and the limits live in the same optimization.</h2>
+    </header>
+    <ResearchPlate mode='control' />
+    <ol>
+      <li>
+        <span>01</span><div>
+          <strong>Estimate</strong><p>
+            Map measured or observed interaction efforts to generalized torque.
+          </p>
+        </div>
+      </li>
+      <li>
+        <span>02</span><div>
+          <strong>Select</strong><p>
+            Apply Γₖ per task and direction to define the desired response.
+          </p>
+        </div>
+      </li>
+      <li>
+        <span>03</span><div>
+          <strong>Constrain</strong><p>
+            Enforce torque, joint, velocity, and collision conditions inside the QP.
+          </p>
+        </div>
+      </li>
+      <li>
+        <span>04</span><div>
+          <strong>Execute</strong><p>
+            Send the feasible acceleration through inverse dynamics and low-level torque control.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class='evidence'>
+    <header class='section-heading' data-reveal>
+      <p class='section-label'>Experimental record</p>
+      <div>
+        <h2>See what the formulation changes.</h2><p>
+          Every item states what is happening and what to inspect.
+        </p>
+      </div>
+    </header>
+    <ExperimentGallery items={gallery} heading='Explicit compliance experiments' />
+  </section>
+
+  <section class='limits' data-reveal>
+    <header>
+      <p class='section-label'>Scope and open work</p>
+      <h2>What this case study does not claim.</h2>
+    </header>
+    <ol>
+      {
+        explicitCompliance.limits.map((item, index) => (
+          <li>
+            <span>0{index + 1}</span>
+            {item}
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class='case-links' data-reveal>
+    <div><p class='section-label'>Continue</p><h2>Paper, implementation, and context.</h2></div>
+    <nav aria-label='Case study resources'>
+      <a href='/publications/celerier2025explicit'><span>Research dossier</span><i>→</i></a>
+      <a
+        href='https://github.com/mathieu-celerier/explicit_compliance_controller'
+        target='_blank'
+        rel='noreferrer'><span>Controller source</span><i>↗</i></a
+      >
+      <a href='/research/thesis'><span>Doctoral thesis</span><i>→</i></a>
+    </nav>
+  </section>
+</PageLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin: 1.5rem 0 2rem;
+    color: hsl(var(--primary));
+    font-size: 0.86rem;
+  }
+  .section-label,
+  .case-status span {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.67rem/1.5 monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .case-status {
+    display: grid;
+    grid-template-columns: 0.8fr 0.55fr 1fr;
+    margin: 2.5rem 0 7rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .case-status div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem;
+  }
+  .case-status div + div {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .case-status strong {
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+  .problem {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    padding-bottom: 7rem;
+  }
+  h2 {
+    margin: 0.7rem 0 1.2rem;
+    font-size: clamp(2.2rem, 4vw, 4rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .problem-copy p,
+  .equation-section > div > p,
+  .section-heading p,
+  .parameter-cases p {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.75;
+  }
+  .problem-copy p:first-child {
+    margin-top: 0;
+  }
+  .equation-section {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 5rem;
+    align-items: center;
+    padding: 6rem 0;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .equation-section h2 {
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+  }
+  .terminology {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .terminology strong {
+    color: hsl(var(--foreground));
+  }
+  .parameter-cases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 8rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .parameter-cases article {
+    min-height: 18rem;
+    padding: 2rem 1.5rem;
+    border-right: 1px solid hsl(var(--border));
+  }
+  .parameter-cases article:last-child {
+    border-right: 0;
+  }
+  .parameter-cases span {
+    color: hsl(var(--primary));
+    font: 0.65rem monospace;
+  }
+  .parameter-cases code {
+    display: block;
+    margin: 2.5rem 0 1rem;
+    font-size: 1.25rem;
+    color: hsl(var(--signal));
+  }
+  .parameter-cases h3 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 500;
+  }
+  .architecture {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 3rem;
+    align-items: end;
+  }
+  .architecture header {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: 2rem;
+  }
+  .architecture header h2 {
+    margin-top: 0;
+  }
+  .architecture ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .architecture li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .architecture li > span {
+    color: hsl(var(--primary));
+    font: 0.65rem monospace;
+  }
+  .architecture strong {
+    font-weight: 500;
+  }
+  .architecture p {
+    margin: 0.25rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.88rem;
+  }
+  .evidence {
+    padding-top: 8rem;
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  .section-heading h2 {
+    margin: 0;
+  }
+  .section-heading p {
+    max-width: 38rem;
+  }
+  .limits {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 4rem;
+    margin-top: 8rem;
+    padding: 3rem;
+    border: 1px solid hsl(var(--signal) / 0.45);
+    background: hsl(var(--signal) / 0.035);
+  }
+  .limits h2 {
+    font-size: clamp(2rem, 3.4vw, 3.2rem);
+  }
+  .limits ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .limits li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .limits li span {
+    color: hsl(var(--signal));
+    font: 0.65rem monospace;
+  }
+  .case-links {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 4rem;
+    padding: 8rem 0 2rem;
+  }
+  .case-links h2 {
+    font-size: clamp(2rem, 3.5vw, 3.4rem);
+  }
+  .case-links nav {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .case-links a {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .case-links i {
+    font-style: normal;
+  }
+  @media (max-width: 800px) {
+    .case-status,
+    .problem,
+    .equation-section,
+    .architecture,
+    .limits,
+    .case-links {
+      grid-template-columns: 1fr;
+    }
+    .case-status {
+      grid-template-columns: 1fr;
+      margin-bottom: 4rem;
+    }
+    .case-status div + div {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .problem {
+      gap: 1rem;
+      padding-bottom: 4rem;
+    }
+    .equation-section {
+      gap: 3rem;
+      padding: 4rem 0;
+    }
+    .parameter-cases {
+      grid-template-columns: 1fr;
+      margin-bottom: 5rem;
+    }
+    .parameter-cases article {
+      min-height: 0;
+      border-right: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .architecture header,
+    .section-heading {
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+    }
+    .evidence {
+      padding-top: 5rem;
+    }
+    .limits {
+      gap: 1rem;
+      margin-top: 5rem;
+      padding: 1.5rem;
+    }
+    .case-links {
+      gap: 1rem;
+      padding-top: 5rem;
+    }
+  }
+</style>

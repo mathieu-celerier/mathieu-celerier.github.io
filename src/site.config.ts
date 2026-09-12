@@ -51,11 +51,10 @@ export const theme: ThemeUserConfig = {
     useTitle: true,
     searchButton: true,
     menu: [
-      // { title: 'Blog', link: '/blog' },
-      { title: 'News', link: '/news' },
-      { title: 'CV', link: '/cv' },
+      { title: 'Research', link: '/research' },
       { title: 'Publications', link: '/publications' },
-      { title: 'Talks', link: '/talks' },
+      { title: 'Activity', link: '/activity' },
+      { title: 'CV', link: '/cv' },
       { title: 'About', link: '/about' }
     ]
   },

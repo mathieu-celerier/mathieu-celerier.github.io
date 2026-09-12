@@ -19,9 +19,20 @@ const typeLabels: Record<string, string> = {
   demo: 'Demo',
   other: 'Other'
 }
+const statusLabels: Record<string, string> = {
+  published: 'Published',
+  accepted: 'Accepted',
+  submitted: 'Submitted',
+  'in-revision': 'In revision',
+  ongoing: 'Ongoing work'
+}
 
 const bibtexHref = `/bibtex/${entry.data.bibkey}.bib`
 const detailHref = `/publications/${entry.data.bibkey}`
+const recordType =
+  entry.data.status === 'in-revision'
+    ? 'Manuscript'
+    : (typeLabels[entry.data.type] ?? entry.data.type)
 ---
 
 <div
@@ -44,7 +55,10 @@ const detailHref = `/publications/${entry.data.bibkey}`
       ) : null
     }
     <div class='pub-meta-row'>
-      <span class='pub-type-badge'>{typeLabels[entry.data.type] ?? entry.data.type}</span>
+      <span class='pub-type-badge'>{recordType}</span>
+      <span class:list={['pub-status-badge', `status-${entry.data.status}`]}
+        >{statusLabels[entry.data.status]}</span
+      >
       {entry.data.featured ? <span class='pub-featured-badge'>Featured</span> : null}
       {
         entry.data.citations ? (
@@ -64,39 +78,48 @@ const detailHref = `/publications/${entry.data.bibkey}`
     }
 
     <div class='pub-links'>
+      <a class='pub-dossier-link' href={detailHref}>Open dossier →</a>
       {
-        entry.data.website ? (
+        !compact && entry.data.website ? (
           <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
         ) : null
       }
       {
-        entry.data.url ? (
+        !compact && entry.data.url ? (
           <Button href={entry.data.url} target='_blank' variant='ahead' title='Paper' />
         ) : null
       }
       {
-        entry.data.pdf ? (
+        !compact && entry.data.pdf ? (
           <Button href={entry.data.pdf} target='_blank' variant='ahead' title='PDF' />
         ) : null
       }
       {
-        entry.data.code ? (
+        !compact && entry.data.code ? (
           <Button href={entry.data.code} target='_blank' variant='ahead' title='Code' />
         ) : null
       }
       {
-        entry.data.video ? (
+        !compact && entry.data.video ? (
           <Button href={entry.data.video} target='_blank' variant='ahead' title='Video' />
         ) : null
       }
-      <Button href={bibtexHref} download variant='ahead' title='Download .bib' />
-      <Button
-        as='button'
-        type='button'
-        data-copy-bibtex={bibtexHref}
-        variant='ahead'
-        title='Copy BibTeX'
-      />
+      {
+        !compact ? (
+          <Button href={bibtexHref} download variant='ahead' title='Download .bib' />
+        ) : null
+      }
+      {
+        !compact ? (
+          <Button
+            as='button'
+            type='button'
+            data-copy-bibtex={bibtexHref}
+            variant='ahead'
+            title='Copy BibTeX'
+          />
+        ) : null
+      }
     </div>
   </article>
 </div>
@@ -161,6 +184,7 @@ const detailHref = `/publications/${entry.data.bibkey}`
   }
 
   .pub-type-badge,
+  .pub-status-badge,
   .pub-featured-badge,
   .pub-citation-badge {
     display: inline-flex;
@@ -184,6 +208,17 @@ const detailHref = `/publications/${entry.data.bibkey}`
     color: hsl(var(--primary) / 1);
   }
 
+  .pub-status-badge {
+    border: 1px solid hsl(var(--border));
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+  }
+  .pub-status-badge.status-accepted,
+  .pub-status-badge.status-in-revision {
+    border-color: hsl(var(--signal) / 0.45);
+    color: hsl(var(--signal));
+  }
+
   .pub-citation-badge {
     background: transparent;
     border: 1px solid hsl(var(--border) / 1);
@@ -203,6 +238,11 @@ const detailHref = `/publications/${entry.data.bibkey}`
     flex-wrap: wrap;
     gap: 0.55rem;
     margin-top: 0.6rem;
+  }
+  .pub-dossier-link {
+    align-self: center;
+    color: hsl(var(--primary));
+    font-size: 0.84rem;
   }
 
   .pub-thumb {

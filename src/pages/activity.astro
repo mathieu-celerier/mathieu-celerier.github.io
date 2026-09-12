@@ -1,0 +1,345 @@
+---
+import { collaborativeInsertion } from '@/data/research'
+import { loadTalks } from '@/lib/talks-data-loader'
+
+import { Button } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import NewsList from '@/components/NewsList.astro'
+import PageIntro from '@/components/PageIntro.astro'
+import YouTube from '@/components/YouTube.astro'
+
+const talks = loadTalks()
+  .filter((talk) => !Number.isNaN(Date.parse(talk.date)))
+  .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+function youtubeId(url?: string): string | null {
+  if (!url) return null
+  try {
+    const parsed = new URL(url)
+    if (parsed.hostname.includes('youtu.be')) return parsed.pathname.slice(1) || null
+    if (parsed.hostname.includes('youtube.com')) return parsed.searchParams.get('v')
+  } catch {}
+  return null
+}
+
+const featuredTalk = talks[0]
+const featuredVideo = youtubeId(featuredTalk?.links?.video)
+---
+
+<PageLayout
+  meta={{
+    title: 'Activity',
+    description: 'Talks, research notes, publications, and milestones.',
+    ogImage: '/og/activity.png'
+  }}
+  highlightColor='hsl(var(--primary))'
+>
+  <PageIntro
+    kicker='Activity'
+    title='Talks, demonstrations, and research milestones.'
+    copy='A curated record of public presentations and meaningful steps in my research.'
+  />
+
+  <nav class='activity-index' aria-label='Activity sections'>
+    <a href='#ongoing'>Ongoing now <span>↓</span></a>
+    <a href='#featured'>Featured presentation <span>↓</span></a>
+    <a href='#talks'>Talks & media <span>↓</span></a>
+    <a href='#updates'>Research log <span>↓</span></a>
+  </nav>
+
+  <section class='ongoing' id='ongoing' data-reveal>
+    <div>
+      <p class='section-label'>Current project · {collaborativeInsertion.updated}</p>
+      <h2>{collaborativeInsertion.question}</h2>
+    </div>
+    <div>
+      <p>{collaborativeInsertion.currentLimit}</p>
+      <a href='/research/collaborative-insertion'>Open the living project →</a>
+    </div>
+  </section>
+
+  {
+    featuredTalk ? (
+      <section class='featured' id='featured' data-reveal>
+        <div class='featured-copy'>
+          <p class='section-label'>Featured presentation · {formatDate(featuredTalk.date)}</p>
+          <h2>{featuredTalk.title}</h2>
+          <p>
+            {featuredTalk.event} · {featuredTalk.location}
+          </p>
+          <p class='featured-note'>
+            A live demonstration of torque-based interaction modes, including compliance, null-space
+            compliance, and dual compliance under real-time safety constraints.
+          </p>
+          <div class='activity-links'>
+            {featuredTalk.links?.video ? (
+              <Button
+                href={featuredTalk.links.video}
+                target='_blank'
+                variant='ahead'
+                title='Video'
+              />
+            ) : null}
+            {featuredTalk.links?.website ? (
+              <Button
+                href={featuredTalk.links.website}
+                target='_blank'
+                variant='ahead'
+                title='Project page'
+              />
+            ) : null}
+          </div>
+        </div>
+        {featuredVideo ? (
+          <div class='featured-video'>
+            <YouTube id={featuredVideo} title={featuredTalk.title} />
+          </div>
+        ) : null}
+      </section>
+    ) : null
+  }
+
+  <section class='talks' id='talks'>
+    <header class='section-heading'>
+      <p class='section-label'>Talks & media</p>
+      <h2>Public presentations.</h2>
+    </header>
+    <div class='talk-list'>
+      {
+        talks.map((talk, index) => (
+          <article data-reveal>
+            <span class='talk-index'>0{index + 1}</span>
+            <time datetime={talk.date}>{formatDate(talk.date)}</time>
+            <div>
+              <h3>{talk.title}</h3>
+              <p>
+                {talk.event} · {talk.location}
+              </p>
+            </div>
+            <div class='talk-actions'>
+              {talk.links?.slides ? (
+                <a href={talk.links.slides} target='_blank' rel='noreferrer'>
+                  Slides ↗
+                </a>
+              ) : null}
+              {talk.links?.video ? (
+                <a href={talk.links.video} target='_blank' rel='noreferrer'>
+                  Video ↗
+                </a>
+              ) : null}
+              {talk.links?.poster ? (
+                <a href={talk.links.poster} target='_blank' rel='noreferrer'>
+                  Poster ↗
+                </a>
+              ) : null}
+              {talk.links?.website ? (
+                <a href={talk.links.website} target='_blank' rel='noreferrer'>
+                  Website ↗
+                </a>
+              ) : null}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class='updates' id='updates'>
+    <header class='section-heading'>
+      <p class='section-label'>Research log</p>
+      <h2>Selected milestones.</h2>
+    </header>
+    <NewsList showHeading={false} />
+  </section>
+</PageLayout>
+
+<style>
+  .section-label,
+  .talk-index {
+    margin: 0;
+    color: hsl(var(--primary));
+    font: 0.68rem/1.5 monospace;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .activity-index {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 2.5rem 0 6rem;
+    border-block: 1px solid hsl(var(--border));
+  }
+  .activity-index a {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    font-size: 0.84rem;
+  }
+  .activity-index a + a {
+    border-left: 1px solid hsl(var(--border));
+  }
+  .activity-index a:hover {
+    background: hsl(var(--primary) / 0.07);
+  }
+  .activity-index span {
+    color: hsl(var(--primary));
+  }
+  .ongoing {
+    display: grid;
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: 4rem;
+    align-items: end;
+    margin-bottom: 6rem;
+    padding: 2.5rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--primary) / 0.045);
+    scroll-margin-top: 2rem;
+  }
+  .ongoing h2 {
+    margin: 0.75rem 0 0;
+    font-size: clamp(2rem, 3.7vw, 3.5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+  .ongoing p:not(.section-label) {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.65;
+  }
+  .ongoing a {
+    color: hsl(var(--primary));
+    font-size: 0.86rem;
+  }
+  .featured {
+    display: grid;
+    grid-template-columns: minmax(20rem, 0.8fr) minmax(28rem, 1.2fr);
+    gap: 3rem;
+    align-items: center;
+    padding: 3rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--primary) / 0.045);
+    scroll-margin-top: 2rem;
+  }
+  .featured h2,
+  .section-heading h2 {
+    margin: 0.75rem 0 1rem;
+    font-size: clamp(2rem, 4vw, 3.7rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+  .featured-copy > p:not(.section-label),
+  .talk-list p {
+    color: hsl(var(--muted-foreground));
+    line-height: 1.6;
+  }
+  .featured-note {
+    margin-top: 1.5rem;
+  }
+  .activity-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1.5rem;
+  }
+  .featured-video {
+    overflow: hidden;
+    border: 1px solid hsl(var(--border));
+    border-radius: 7px;
+  }
+  .talks,
+  .updates {
+    padding-top: 7rem;
+    scroll-margin-top: 2rem;
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 2rem;
+  }
+  .section-heading h2 {
+    margin: 0;
+  }
+  .talk-list {
+    border-top: 1px solid hsl(var(--border));
+  }
+  .talk-list article {
+    display: grid;
+    grid-template-columns: 3rem 9rem minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .talk-list time {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.85rem;
+  }
+  .talk-list h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .talk-list p {
+    margin: 0.4rem 0 0;
+  }
+  .talk-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+  }
+  .talk-actions a {
+    color: hsl(var(--primary));
+  }
+  @media (max-width: 800px) {
+    .activity-index {
+      grid-template-columns: 1fr;
+      margin-bottom: 4rem;
+    }
+    .ongoing {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-bottom: 4rem;
+      padding: 1.4rem;
+    }
+    .activity-index a + a {
+      border-left: 0;
+      border-top: 1px solid hsl(var(--border));
+    }
+    .featured {
+      grid-template-columns: 1fr;
+      padding: 1.4rem;
+    }
+    .featured-video {
+      order: -1;
+    }
+    .section-heading {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+    .talks,
+    .updates {
+      padding-top: 5rem;
+    }
+    .talk-list article {
+      grid-template-columns: 2rem 1fr;
+      gap: 0.6rem 1rem;
+    }
+    .talk-list time,
+    .talk-list article > div {
+      grid-column: 2;
+    }
+  }
+</style>

@@ -5,7 +5,7 @@ import { loadCV } from '@/lib/cv-data-loader'
 import { homeSelection } from '@/lib/home-selection'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
-import LabField from '@/components/LabField.astro'
+import ResearchHero from '@/components/ResearchHero.astro'
 import RobotLab from '@/components/RobotLab.astro'
 
 const cv = loadCV()
@@ -22,7 +22,7 @@ const news = (await getCollection('news'))
 
 <PageLayout meta={{ title: 'Home', ogImage: '/og/home.png' }}>
   <main>
-    <LabField />
+    <ResearchHero />
 
     <section class='now' id='now' aria-labelledby='now-title' data-reveal>
       <div class='now-index'>
@@ -45,14 +45,14 @@ const news = (await getCollection('news'))
         </div>
         <p>
           My PhD addressed online motion generation and safe, adaptable torque control for sustained
-          physical interaction. My postdoctoral project asks how learned models can predict
-          collaborative motion and interaction forces.
+          physical interaction. My postdoctoral project asks how a learned policy can take over one
+          partner’s role in a collaborative manipulation task.
         </p>
       </header>
       <div class='track-list'>
         {
           researchTracks.map((track) => (
-            <article class={`track track-${track.id}`} data-reveal>
+            <article id={`research-${track.id}`} class={`track track-${track.id}`} data-reveal>
               <div class='track-topline'>
                 <span>
                   {track.index} / {track.title}
@@ -202,7 +202,7 @@ const news = (await getCollection('news'))
       <div class='log-heading'>
         <p class='eyebrow'>Recent activity</p>
         <h2 id='log-title'>Updates.</h2>
-        <a class='text-action' href='/news'>All updates ↗</a>
+        <a class='text-action' href='/activity#updates'>All activity ↗</a>
       </div>
       <ol>
         {
