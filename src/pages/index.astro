@@ -6,7 +6,7 @@ import { homeSelection } from '@/lib/home-selection'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ResearchHero from '@/components/ResearchHero.astro'
-import RobotLab from '@/components/RobotLab.astro'
+import ComplianceLab from '@/components/ComplianceLab.astro'
 
 const cv = loadCV()
 const allPublications = await getCollection('publications')
@@ -132,14 +132,14 @@ const news = (await getCollection('news'))
       <header class='experiment-header'>
         <div>
           <p class='eyebrow'>Interactive research model</p>
-          <h2 id='experiment-title'>From stiff to compliant.</h2>
+          <h2 id='experiment-title'>From compliance to virtual dynamics.</h2>
         </div>
         <p>
-          This 2D model reduces the task compliance matrix Γₖ from my PhD work to one scalar γₖ.
-          Move the target to compare a stiff task at 0 with a fully compliant task at 1.
+          In my compliance framework Γₖ is not a stiffness knob: it sets the inertia a task shows to a
+          push. Generalised, the same mechanism lets the arm render an object that is not there.
         </p>
       </header>
-      <RobotLab context='experiment' />
+      <ComplianceLab modes={['door']} compact />
     </section>
 
     <section class='evidence' aria-labelledby='evidence-title'>

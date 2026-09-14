@@ -6,6 +6,7 @@ import ExperimentGallery from '@/components/ExperimentGallery.astro'
 import PageIntro from '@/components/PageIntro.astro'
 import ResearchNotebook from '@/components/ResearchNotebook.astro'
 import ResearchPlate from '@/components/ResearchPlate.astro'
+import ComplianceLab from '@/components/ComplianceLab.astro'
 
 const gallery = [
   {
@@ -135,6 +136,27 @@ const structuredData = {
         </article>
       ))
     }
+  </section>
+
+  <section class='virtual-dynamics' id='virtual-dynamics'>
+    <header>
+      <p class='section-label'>From compliance to virtual dynamics</p>
+      <h2>Γₖ shapes inertia — and, generalised, renders an object.</h2>
+      <div class='vd-copy'>
+        <p>
+          With the external wrench compensated, a push reaches the task only through the injected
+          deviation ΓₖΛₖ⁻¹F̂ₑ. The task therefore responds with effective inertia ΛₖΓₖ⁻¹: Γₖ = αI
+          scales it by 1/α, and its eigen-directions make the response anisotropic.
+        </p>
+        <p>
+          Γₖ cannot synthesise a wrench or cancel the arm’s configuration-dependent inertia.
+          Replacing the deviation with Λᵥ⁻¹(F̂ₑ + Fᵥ(x, ẋ)) does both, with the same QP, constraints
+          and error analysis. The virtual door below uses a scalar inertia along its arc, rigid
+          directions elsewhere, and Fᵥ,θ = −mᵥ g r<sub>c</sub> cos θ − bᵥ θ̇ − cᵥ sign(θ̇).
+        </p>
+      </div>
+    </header>
+    <ComplianceLab />
   </section>
 
   <section class='architecture' data-reveal>
@@ -293,9 +315,34 @@ const structuredData = {
   .terminology strong {
     color: hsl(var(--foreground));
   }
+  .virtual-dynamics {
+    margin: 0 0 8rem;
+    scroll-margin-top: 2rem;
+  }
+  .virtual-dynamics header {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 1rem 4rem;
+    margin-bottom: 2.5rem;
+  }
+  .virtual-dynamics header .section-label {
+    grid-column: 1 / -1;
+  }
+  .virtual-dynamics h2 {
+    margin: 0;
+  }
+  .vd-copy p {
+    margin: 0 0 1rem;
+    color: hsl(var(--muted-foreground));
+  }
+  @media (max-width: 860px) {
+    .virtual-dynamics header {
+      grid-template-columns: 1fr;
+    }
+  }
   .parameter-cases {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     margin-bottom: 8rem;
     border-bottom: 1px solid hsl(var(--border));
   }

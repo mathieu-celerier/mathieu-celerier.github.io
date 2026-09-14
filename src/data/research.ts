@@ -6,18 +6,23 @@ export const explicitCompliance = {
   complianceCases: [
     {
       value: 'Γₖ = 0',
-      title: 'Preserve the nominal task',
-      note: 'Estimated external effort is compensated; the selected task direction remains rigid.'
-    },
-    {
-      value: '0 < Γₖ < I',
-      title: 'Shape the response',
-      note: 'Each task direction can retain a chosen fraction of the force-induced motion.'
+      title: 'Infinite effective inertia',
+      note: 'Estimated external effort is fully compensated; a push cannot move the task, which is also where estimation error is most exposed.'
     },
     {
       value: 'Γₖ = I',
-      title: 'Follow the contact',
-      note: 'The task retains the external-force response and becomes insensitive to estimation error.'
+      title: 'Matched inertia',
+      note: 'The task responds to a push with the arm’s own task-space inertia — classical compliance, and immune to estimation error.'
+    },
+    {
+      value: 'Γₖ = R diag(γ) Rᵀ',
+      title: 'Shaped, per direction',
+      note: 'Eigen-directions and eigenvalues give each direction its own inertia ratio; any positive value is admissible.'
+    },
+    {
+      value: 'Λᵥ⁻¹(F̂ₑ + Fᵥ)',
+      title: 'Rendered dynamics',
+      note: 'A chosen virtual inertia and state-dependent wrench let the task emulate an object, such as a door with weight and friction.'
     }
   ],
   limits: [
