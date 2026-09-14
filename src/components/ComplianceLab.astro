@@ -1,0 +1,1066 @@
+---
+import { DOOR, doorHandle, forwardKinematics, inverseKinematics, toView } from '../lib/compliance-sim.js'
+
+type Mode = 'inertia' | 'directional' | 'estimation' | 'door'
+
+interface Props {
+  modes?: Mode[]
+  compact?: boolean
+}
+
+const { modes = ['inertia', 'directional', 'estimation', 'door'], compact = false } = Astro.props
+const uid = `cl-${modes.join('-')}`
+const initial = modes[0]
+
+const HOME: [number, number] = [1.25, 0.75]
+const start = initial === 'door' ? doorHandle(DOOR.rest) : HOME
+const { elbow, tip } = forwardKinematics(inverseKinematics(start))
+const [bx, by] = toView([0, 0])
+const [ex, ey] = toView(elbow)
+const [tx, ty] = toView(tip)
+const armPath = `M${bx} ${by}L${ex.toFixed(1)} ${ey.toFixed(1)}L${tx.toFixed(1)} ${ty.toFixed(1)}`
+const gripAngle = (Math.atan2(ty - ey, tx - ex) * 180) / Math.PI
+const [hx, hy] = toView(DOOR.hinge)
+
+const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
+  inertia: {
+    tab: 'Inertia',
+    title: 'Γ is an inertia ratio.',
+    lead: 'With external force compensated, a push reaches the task only through ΓΛ⁻¹. Γ = αI makes the task respond with effective inertia Λ/α: α → 0 cannot be moved, α = 1 is the arm’s own inertia, α > 1 is lighter than the arm.'
+  },
+  directional: {
+    tab: 'Direction',
+    title: 'Each direction can yield differently.',
+    lead: 'The eigenvectors of Γ pick directions and its eigenvalues pick how each one responds. The ellipse is the resulting mobility ΓΛ⁻¹ — including the arm’s own configuration-dependent anisotropy, which Γ can reshape but not remove.'
+  },
+  estimation: {
+    tab: 'Estimation error',
+    title: 'Rigid directions pay for estimation error.',
+    lead: 'Compensation relies on an estimated external torque. Its error reaches the task as (I − Γ) J M⁻¹ ε_τ: a fully compliant direction is immune, a rigid one takes the error in full.'
+  },
+  door: {
+    tab: 'Virtual door',
+    title: compact ? 'Push a door that isn’t there.' : 'Γ generalised: render an object.',
+    lead: 'Replace ΓΛ⁻¹ with a chosen inertia and add a virtual wrench, ë = Λᵥ⁻¹(F̂ₑ + Fᵥ). The arm stays rigid off the arc of a virtual hinge; along it the handle has inertia Iᵥ, weight and friction — so it moves like a door.'
+  }
+}
+---
+
+<compliance-lab
+  class:list={['lab', { compact }]}
+  data-modes={modes.join(',')}
+  data-mode={initial}
+>
+  <div class='lab-heading'>
+    <span><i></i> EXPERIMENT 01 / Γ AS DYNAMICS</span>
+    <span>CONCEPTUAL PLANAR SIMULATION · ILLUSTRATIVE PARAMETERS</span>
+  </div>
+
+  <div class='lab-body'>
+    <div class='lab-panel'>
+      {
+        modes.length > 1 && (
+          <div class='lab-tabs' role='tablist' aria-label='Behaviour to explore' hidden>
+            {modes.map((m) => (
+              <button
+                type='button'
+                role='tab'
+                id={`${uid}-tab-${m}`}
+                aria-controls={`${uid}-panel-${m}`}
+                aria-selected={m === initial ? 'true' : 'false'}
+                tabindex={m === initial ? 0 : -1}
+                data-tab={m}
+              >
+                {copy[m].tab}
+              </button>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        modes.map((m) => (
+          <section
+            class='lab-mode'
+            role={modes.length > 1 ? 'tabpanel' : undefined}
+            id={`${uid}-panel-${m}`}
+            aria-labelledby={modes.length > 1 ? `${uid}-tab-${m}` : undefined}
+            data-panel={m}
+            hidden={m !== initial}
+          >
+            <h3>{copy[m].title}</h3>
+            <p class='lab-lead'>{copy[m].lead}</p>
+            <div class='lab-controls' hidden>
+              {m === 'inertia' && (
+                <label>
+                  <span>Γ = αI</span>
+                  <output data-out='alpha'>0.60</output>
+                  <input type='range' data-param='alpha' min='0' max='2' step='0.01' value='0.6' aria-label='Isotropic compliance alpha' />
+                  <span class='ends'><span>0 · immovable</span><span>1 · own inertia</span><span>2 · lighter</span></span>
+                </label>
+              )}
+              {(m === 'directional' || m === 'estimation') && (
+                <>
+                  <label>
+                    <span>Direction of γ₁</span>
+                    <output data-out={`${m}Angle`}>{m === 'estimation' ? '0°' : '30°'}</output>
+                    <input type='range' data-param={`${m}Angle`} min='0' max='180' step='1' value={m === 'estimation' ? '0' : '30'} aria-label='Direction of the first compliance eigenvector in degrees' />
+                  </label>
+                  <label>
+                    <span>γ₁ along</span>
+                    <output data-out={`${m}G1`}>{m === 'estimation' ? '1.00' : '1.00'}</output>
+                    <input type='range' data-param={`${m}G1`} min='0' max='2' step='0.01' value='1' aria-label='Compliance eigenvalue along the chosen direction' />
+                  </label>
+                  <label>
+                    <span>γ₂ across</span>
+                    <output data-out={`${m}G2`}>0.00</output>
+                    <input type='range' data-param={`${m}G2`} min='0' max='2' step='0.01' value='0' aria-label='Compliance eigenvalue across the chosen direction' />
+                  </label>
+                </>
+              )}
+              {m === 'estimation' && (
+                <label>
+                  <span>Torque estimation error</span>
+                  <output data-out='errorMagnitude'>0.6 N·m</output>
+                  <input type='range' data-param='errorMagnitude' min='0' max='1.5' step='0.05' value='0.6' aria-label='Magnitude of the external torque estimation error in newton metres' />
+                </label>
+              )}
+              {m === 'door' && (
+                <>
+                  <label>
+                    <span>Virtual inertia Iᵥ</span>
+                    <output data-out='inertia'>0.40 kg·m²</output>
+                    <input type='range' data-param='inertia' min='0.05' max='1.5' step='0.01' value='0.4' aria-label='Virtual door inertia in kilogram square metres' />
+                  </label>
+                  <label>
+                    <span>Weight mᵥ</span>
+                    <output data-out='mass'>0.0 kg</output>
+                    <input type='range' data-param='mass' min='0' max='3' step='0.1' value='0' aria-label='Virtual door mass in kilograms' />
+                    <span class='ends'><span>0 · vertical hinge</span><span>hatch · 3</span></span>
+                  </label>
+                  <label>
+                    <span>Viscous friction bᵥ</span>
+                    <output data-out='viscous'>0.30</output>
+                    <input type='range' data-param='viscous' min='0' max='2' step='0.01' value='0.3' aria-label='Virtual viscous friction coefficient' />
+                  </label>
+                  <label>
+                    <span>Coulomb friction cᵥ</span>
+                    <output data-out='coulomb'>0.20 N·m</output>
+                    <input type='range' data-param='coulomb' min='0' max='1.5' step='0.01' value='0.2' aria-label='Virtual Coulomb friction in newton metres' />
+                  </label>
+                </>
+              )}
+            </div>
+          </section>
+        ))
+      }
+
+      <details class='lab-push' hidden>
+        <summary>Push without a pointer</summary>
+        <div>
+          <label>
+            <span>Push direction</span>
+            <output data-out='pushAngle'>90°</output>
+            <input type='range' data-param='pushAngle' min='0' max='355' step='5' value='90' aria-label='Direction of the applied push in degrees, zero is right, ninety is up' />
+          </label>
+          <label>
+            <span>Push force</span>
+            <output data-out='pushForce'>0 N</output>
+            <input type='range' data-param='pushForce' min='0' max='30' step='1' value='0' aria-label='Magnitude of the applied push in newtons' />
+          </label>
+        </div>
+      </details>
+
+      <div class='lab-actions' hidden>
+        <button type='button' data-reset>Reset ↺</button>
+        {
+          compact && (
+            <a href='/research/explicit-compliance#virtual-dynamics'>
+              Explore inertia, direction and estimation error →
+            </a>
+          )
+        }
+      </div>
+      <noscript><p class='lab-lead'>The interactive simulation needs JavaScript.</p></noscript>
+    </div>
+
+    <figure class='lab-stage'>
+      <svg class='scene' viewBox='80 60 800 500' role='img' aria-labelledby={`${uid}-title`}>
+        <title id={`${uid}-title`}>
+          Two-link robot arm; drag its end-effector to apply a force and watch the response
+        </title>
+        <defs>
+          <linearGradient id={`${uid}-metal`} x1='0' x2='1' y1='0' y2='1'
+            ><stop class='metal-light'></stop><stop offset='.5' class='metal-mid'></stop><stop
+              offset='1'
+              class='metal-dark'></stop></linearGradient
+          >
+          <linearGradient id={`${uid}-blue`} x1='0' x2='1' y1='0' y2='1'
+            ><stop stop-color='#91c6ff'></stop><stop offset='.5' stop-color='#397cf1'></stop><stop
+              offset='1'
+              stop-color='#183e9e'></stop></linearGradient
+          >
+          <pattern id={`${uid}-grid`} width='42' height='42' patternUnits='userSpaceOnUse'
+            ><path d='M42 0H0V42' fill='none' stroke='currentColor' stroke-opacity='.1'></path></pattern
+          >
+          <marker id={`${uid}-arrow`} viewBox='0 0 10 10' refX='8' refY='5' markerWidth='6' markerHeight='6' orient='auto-start-reverse'>
+            <path class='arrowhead' d='M0 0L10 5L0 10Z'></path>
+          </marker>
+        </defs>
+
+        <rect class='grid' x='80' y='60' width='800' height='500' fill={`url(#${uid}-grid)`}></rect>
+        <path class='reach' data-reach d=''></path>
+
+        <g class='door' data-door-layer display={initial !== 'door' ? 'none' : undefined}>
+          <path class='door-range' data-door-range d=''></path>
+          <path class='door-panel' data-door-panel d={`M${hx} ${hy}L${hx - 170} ${hy}`}></path>
+          <path class='door-weight' data-door-weight d='' marker-end={`url(#${uid}-arrow)`}></path>
+          <path class='door-mount' d={`M${hx + 14} ${hy - 70}V${hy + 70}M${hx + 14} ${hy - 60}l14 -14M${hx + 14} ${hy - 30}l14 -14M${hx + 14} ${hy}l14 -14M${hx + 14} ${hy + 30}l14 -14M${hx + 14} ${hy + 60}l14 -14M${hx} ${hy}H${hx + 14}`}></path>
+          <circle class='door-hinge' cx={hx} cy={hy} r='11'></circle>
+          <text class='door-label' data-door-label x={hx - 18} y={hy - 20} text-anchor='end'>θ 180°</text>
+        </g>
+
+        <g class='ellipse' data-ellipse-layer display={initial === 'door' ? 'none' : undefined}>
+          <ellipse data-ellipse cx={tx} cy={ty} rx='40' ry='40'></ellipse>
+          <path data-ellipse-axes d=''></path>
+          <text data-ellipse-label x={tx} y={ty + 90} text-anchor='middle'>mobility ΓΛ⁻¹</text>
+        </g>
+
+        <g class='reference' data-reference display={initial === 'door' ? 'none' : undefined}>
+          <path d='M-9 0H9M0-9V9'></path>
+        </g>
+
+        <path class='force' data-force d='' marker-end={`url(#${uid}-arrow)`}></path>
+
+        <path d={`M${bx - 45} ${by + 32}Q${bx} ${by + 7} ${bx + 45} ${by + 32}V${by + 54}Q${bx} ${by + 81} ${bx - 45} ${by + 54}Z`} fill={`url(#${uid}-metal)`} stroke='var(--lab-edge)' stroke-width='2'></path>
+        <ellipse cx={bx} cy={by + 32} rx='45' ry='15' fill={`url(#${uid}-blue)`}></ellipse>
+        <g fill='none' stroke-linecap='round' stroke-linejoin='round'>
+          <path data-arm-outline d={armPath} stroke='var(--lab-edge)' stroke-width='43'></path>
+          <path data-arm d={armPath} stroke={`url(#${uid}-metal)`} stroke-width='38'></path>
+          <path data-arm-highlight d={armPath} stroke='var(--lab-highlight)' stroke-width='3' opacity='.7'></path>
+        </g>
+        <g data-elbow transform={`translate(${ex.toFixed(1)} ${ey.toFixed(1)})`}
+          ><circle r='29' fill={`url(#${uid}-blue)`} stroke='var(--lab-edge)' stroke-width='2'></circle><circle r='18' fill={`url(#${uid}-metal)`}></circle><circle r='6' fill='var(--lab-edge)'></circle></g
+        >
+        <g transform={`translate(${bx} ${by})`}
+          ><circle r='27' fill={`url(#${uid}-blue)`}></circle><circle r='16' fill={`url(#${uid}-metal)`}></circle><circle r='6' fill='var(--lab-edge)'></circle></g
+        >
+        <g data-gripper transform={`translate(${tx.toFixed(1)} ${ty.toFixed(1)}) rotate(${gripAngle.toFixed(1)})`}
+          ><circle r='15' fill={`url(#${uid}-blue)`}></circle><path d='M12-10L33-10L38-4M12 10L33 10L38 4' fill='none' stroke='var(--lab-grip)' stroke-width='7' stroke-linecap='round'></path></g
+        >
+
+        <g class='hand' data-hand display='none' aria-hidden='true'>
+          <circle r='6'></circle>
+          <path d='M0 0C-12 4-20 12-25 21M0 0C-10-6-16-14-20-23M11-3C3-13-1-23-2-34'></path>
+        </g>
+
+        <circle class='handle' data-handle cx={tx.toFixed(1)} cy={ty.toFixed(1)} r='52'></circle>
+
+        <text class='telemetry' data-telemetry x='860' y='545' text-anchor='end'></text>
+      </svg>
+      <p class='stage-hint' hidden>Drag the <strong>end-effector</strong> to push it.</p>
+
+      <svg class='chart' viewBox='0 0 600 132' aria-hidden='true'>
+        <path class='chart-grid' d='M0 66H600M0 8H600M0 124H600'></path>
+        <polyline class='series-a' data-series='a' points=''></polyline>
+        <polyline class='series-b' data-series='b' points=''></polyline>
+      </svg>
+      <figcaption class='chart-legend'>
+        <span class='key-a' data-legend='a'></span>
+        <span class='key-b' data-legend='b'></span>
+        <span class='chart-window'>last 4 s</span>
+      </figcaption>
+    </figure>
+  </div>
+</compliance-lab>
+
+<script>
+  import {
+    DOOR,
+    REACH,
+    doorHandle,
+    eigenSym,
+    forwardKinematics,
+    fromView,
+    gammaDirectional,
+    gammaIsotropic,
+    handForce,
+    identityMinus,
+    inverse,
+    inverseKinematics,
+    jacobian,
+    massMatrix,
+    mul,
+    stepCompliant,
+    stepDoor,
+    taskInverseInertia,
+    toView,
+    torqueErrorSource,
+    transpose
+  } from '../lib/compliance-sim.js'
+
+  type Vec2 = [number, number]
+  type Mat2 = [number, number, number, number]
+  type Mode = 'inertia' | 'directional' | 'estimation' | 'door'
+
+  const HOME: Vec2 = [1.25, 0.75]
+  const DT = 0.001
+  const KP = 10
+  const KD = 6
+  const SAMPLES = 240
+  const deg = (r: number) => (r * 180) / Math.PI
+  const rad = (d: number) => (d * Math.PI) / 180
+
+  class ComplianceLab extends HTMLElement {
+    cleanup?: () => void
+
+    connectedCallback() {
+      const q = <T extends Element>(s: string) => this.querySelector<T>(s)
+      const all = <T extends Element>(s: string) => Array.from(this.querySelectorAll<T>(s))
+      const modes = (this.dataset.modes ?? 'door').split(',') as Mode[]
+      const svg = q<SVGSVGElement>('.scene')!
+      const armPaths = all<SVGPathElement>('[data-arm],[data-arm-outline],[data-arm-highlight]')
+      const elbowEl = q<SVGGElement>('[data-elbow]')!
+      const gripper = q<SVGGElement>('[data-gripper]')!
+      const handle = q<SVGCircleElement>('[data-handle]')!
+      const handEl = q<SVGGElement>('[data-hand]')!
+      const forceEl = q<SVGPathElement>('[data-force]')!
+      const ellipseLayer = q<SVGGElement>('[data-ellipse-layer]')!
+      const ellipse = q<SVGEllipseElement>('[data-ellipse]')!
+      const ellipseAxes = q<SVGPathElement>('[data-ellipse-axes]')!
+      const ellipseLabel = q<SVGTextElement>('[data-ellipse-label]')!
+      const reference = q<SVGGElement>('[data-reference]')!
+      const doorLayer = q<SVGGElement>('[data-door-layer]')!
+      const doorPanel = q<SVGPathElement>('[data-door-panel]')!
+      const doorWeight = q<SVGPathElement>('[data-door-weight]')!
+      const doorLabel = q<SVGTextElement>('[data-door-label]')!
+      const telemetry = q<SVGTextElement>('[data-telemetry]')!
+      const seriesA = q<SVGPolylineElement>('[data-series="a"]')!
+      const seriesB = q<SVGPolylineElement>('[data-series="b"]')!
+      const legendA = q<HTMLElement>('[data-legend="a"]')!
+      const legendB = q<HTMLElement>('[data-legend="b"]')!
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)')
+
+      const params: Record<string, number> = {}
+      for (const input of all<HTMLInputElement>('input[data-param]')) params[input.dataset.param!] = Number(input.value)
+
+      let mode: Mode = (this.dataset.mode as Mode) ?? modes[0]
+      let compliant = { x: [...HOME] as Vec2, v: [0, 0] as Vec2 }
+      let door = { theta: DOOR.rest, omega: 0 }
+      let hand: Vec2 | null = null
+      let limited = false
+      let atStop = false
+      let lastForce: Vec2 = [0, 0]
+      let lastError: Vec2 = [0, 0]
+      let lastApplied = 0
+      let frame = 0
+      let previous = 0
+      let visible = true
+      let sampleClock = 0
+      let bufA: number[] = []
+      let bufB: number[] = []
+      let noise = torqueErrorSource(7)
+
+      const gamma = (): Mat2 => {
+        if (mode === 'inertia') return gammaIsotropic(params.alpha) as Mat2
+        const prefix = mode === 'estimation' ? 'estimation' : 'directional'
+        return gammaDirectional(rad(params[`${prefix}Angle`]), params[`${prefix}G1`], params[`${prefix}G2`]) as Mat2
+      }
+      const effector = (): Vec2 => (mode === 'door' ? (doorHandle(door.theta) as Vec2) : compliant.x)
+      const effectorVelocity = (): Vec2 =>
+        mode === 'door'
+          ? [-DOOR.radius * door.omega * Math.sin(door.theta), DOOR.radius * door.omega * Math.cos(door.theta)]
+          : compliant.v
+      const pushForce = (): Vec2 => [
+        params.pushForce * Math.cos(rad(params.pushAngle)),
+        params.pushForce * Math.sin(rad(params.pushAngle))
+      ]
+      const currentForce = (): Vec2 =>
+        hand ? (handForce(hand, effector(), effectorVelocity()) as Vec2) : pushForce()
+
+      const step = () => {
+        const force = currentForce()
+        lastForce = force
+        if (mode === 'door') {
+          const r = stepDoor(door, { inertia: params.inertia, mass: params.mass, viscous: params.viscous, coulomb: params.coulomb, force }, DT)
+          door = { theta: r.theta, omega: r.omega }
+          atStop = r.stop
+          lastApplied = r.applied
+          return
+        }
+        const torqueError = (mode === 'estimation' ? noise(DT, params.errorMagnitude) : [0, 0]) as Vec2
+        const r = stepCompliant(compliant, { reference: HOME, gamma: gamma(), force, torqueError, kp: KP, kd: KD }, DT)
+        compliant = { x: r.x as Vec2, v: r.v as Vec2 }
+        limited = r.limited
+        lastError = r.parts.error as Vec2
+      }
+
+      const settled = () => {
+        if (hand || params.pushForce > 0) return false
+        if (mode === 'estimation' && params.errorMagnitude > 0) return false
+        if (mode === 'door') {
+          const accel = Math.abs(stepDoor(door, { inertia: params.inertia, mass: params.mass, viscous: params.viscous, coulomb: params.coulomb, force: [0, 0] }, DT).omega - door.omega) / DT
+          return Math.abs(door.omega) < 1e-3 && (accel < 5e-2 || atStop)
+        }
+        return Math.hypot(...compliant.v) < 1e-4 && Math.hypot(compliant.x[0] - HOME[0], compliant.x[1] - HOME[1]) < 1e-4
+      }
+
+      const setPath = (el: SVGPathElement, d: string) => el.setAttribute('d', d)
+      const show = (el: SVGElement, visible: boolean) =>
+        visible ? el.removeAttribute('display') : el.setAttribute('display', 'none')
+      const fmt = (p: Vec2) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`
+
+      const drawEllipse = (center: Vec2, A: Mat2, scale: number, label: string) => {
+        const { major, minor, angle } = eigenSym(A)
+        const rx = Math.min(170, Math.max(3, scale * Math.sqrt(Math.max(major, 0))))
+        const ry = Math.min(170, Math.max(3, scale * Math.sqrt(Math.max(minor, 0))))
+        const rot = -deg(angle)
+        ellipse.setAttribute('cx', center[0].toFixed(1))
+        ellipse.setAttribute('cy', center[1].toFixed(1))
+        ellipse.setAttribute('rx', rx.toFixed(1))
+        ellipse.setAttribute('ry', ry.toFixed(1))
+        ellipse.setAttribute('transform', `rotate(${rot.toFixed(1)} ${center[0].toFixed(1)} ${center[1].toFixed(1)})`)
+        const c = Math.cos(angle),
+          s = Math.sin(angle)
+        setPath(
+          ellipseAxes,
+          `M${center[0] - rx * c} ${center[1] + rx * s}L${center[0] + rx * c} ${center[1] - rx * s}M${center[0] + ry * s} ${center[1] + ry * c}L${center[0] - ry * s} ${center[1] - ry * c}`
+        )
+        ellipseLabel.setAttribute('x', center[0].toFixed(1))
+        ellipseLabel.setAttribute('y', (center[1] - Math.max(rx, ry) - 14).toFixed(1))
+        ellipseLabel.textContent = label
+      }
+
+      const drawChart = () => {
+        const line = (buf: number[]) =>
+          buf.map((v, i) => `${((i / (SAMPLES - 1)) * 600).toFixed(1)},${(66 - Math.max(-1, Math.min(1, v)) * 58).toFixed(1)}`).join(' ')
+        seriesA.setAttribute('points', line(bufA))
+        seriesB.setAttribute('points', line(bufB))
+      }
+
+      const sample = () => {
+        let a = 0,
+          b = 0
+        if (mode === 'door') {
+          a = (door.theta - DOOR.rest) / (Math.PI / 2)
+          b = lastApplied / 20
+          legendA.textContent = `θ ${deg(door.theta).toFixed(0)}°`
+          legendB.textContent = `applied torque ${lastApplied.toFixed(1)} N·m`
+        } else if (mode === 'estimation') {
+          const dev = Math.hypot(compliant.x[0] - HOME[0], compliant.x[1] - HOME[1])
+          a = dev / 0.08
+          b = Math.hypot(...lastError) / 3
+          legendA.textContent = `task drift ${(dev * 100).toFixed(1)} cm`
+          legendB.textContent = `error acceleration ${Math.hypot(...lastError).toFixed(1)} m/s²`
+        } else {
+          const speed = Math.hypot(...compliant.v)
+          a = speed / 2
+          b = Math.hypot(...lastForce) / 30
+          legendA.textContent = `speed ${speed.toFixed(2)} m/s`
+          legendB.textContent = `push ${Math.hypot(...lastForce).toFixed(0)} N`
+        }
+        bufA.push(a)
+        bufB.push(b)
+        if (bufA.length > SAMPLES) bufA.shift()
+        if (bufB.length > SAMPLES) bufB.shift()
+      }
+
+      const render = () => {
+        const p = effector()
+        const joints = inverseKinematics(p)
+        const { elbow, tip } = forwardKinematics(joints)
+        const base = toView([0, 0]) as Vec2
+        const e = toView(elbow) as Vec2
+        const t = toView(tip) as Vec2
+        const d = `M${fmt(base)}L${fmt(e)}L${fmt(t)}`
+        armPaths.forEach((el) => setPath(el, d))
+        elbowEl.setAttribute('transform', `translate(${fmt(e)})`)
+        gripper.setAttribute('transform', `translate(${fmt(t)}) rotate(${deg(Math.atan2(t[1] - e[1], t[0] - e[0])).toFixed(1)})`)
+        handle.setAttribute('cx', t[0].toFixed(1))
+        handle.setAttribute('cy', t[1].toFixed(1))
+
+        const force = lastForce
+        const pushing = Math.hypot(...force) > 0.05
+        if (pushing) {
+          const tipOfArrow = hand ? (toView(hand) as Vec2) : ([t[0] + force[0] * 4, t[1] - force[1] * 4] as Vec2)
+          setPath(forceEl, `M${fmt(t)}L${fmt(tipOfArrow)}`)
+        } else setPath(forceEl, '')
+        show(handEl, !!hand)
+        if (hand) handEl.setAttribute('transform', `translate(${fmt(toView(hand) as Vec2)})`)
+
+        if (mode === 'door') {
+          const h = toView(DOOR.hinge) as Vec2
+          const end = toView([
+            DOOR.hinge[0] + (DOOR.radius + 0.06) * Math.cos(door.theta),
+            DOOR.hinge[1] + (DOOR.radius + 0.06) * Math.sin(door.theta)
+          ]) as Vec2
+          setPath(doorPanel, `M${fmt(h)}L${fmt(end)}`)
+          if (params.mass > 0) {
+            const com = toView([
+              DOOR.hinge[0] + (DOOR.radius / 2) * Math.cos(door.theta),
+              DOOR.hinge[1] + (DOOR.radius / 2) * Math.sin(door.theta)
+            ]) as Vec2
+            setPath(doorWeight, `M${fmt(com)}L${com[0].toFixed(1)} ${(com[1] + 18 + params.mass * 14).toFixed(1)}`)
+          } else setPath(doorWeight, '')
+          doorLabel.textContent = `θ ${deg(door.theta).toFixed(0)}°`
+          telemetry.textContent = `Iᵥ ${params.inertia.toFixed(2)} · mᵥ ${params.mass.toFixed(1)} kg · ${atStop ? 'DOOR STOP' : pushing ? 'PUSHED' : Math.abs(door.omega) > 1e-3 ? 'SWINGING' : 'AT REST'}`
+        } else {
+          const center = t
+          const reachView = toView(HOME) as Vec2
+          reference.setAttribute('transform', `translate(${fmt(reachView)})`)
+          if (mode === 'estimation') {
+            const A = mul(identityMinus(gamma()), mul(jacobian(joints), inverse(massMatrix(joints)))) as Mat2
+            const spread = mul(A, transpose(A)) as Mat2
+            drawEllipse(center, spread, 90 * Math.max(params.errorMagnitude, 0.05), 'error spread (I − Γ) J M⁻¹')
+          } else {
+            drawEllipse(center, mul(gamma(), taskInverseInertia(joints) as Mat2) as Mat2, 58, 'mobility ΓΛ⁻¹')
+          }
+          const g = gamma()
+          const label =
+            mode === 'inertia'
+              ? `Γ = ${params.alpha.toFixed(2)} I · effective inertia ${params.alpha < 0.005 ? '∞' : `${(1 / params.alpha).toFixed(2)} × Λ`}`
+              : `Γ eigenvalues ${eigenSym(g).major.toFixed(2)} / ${Math.max(0, eigenSym(g).minor).toFixed(2)}`
+          telemetry.textContent = `${label}${limited ? ' · SAFETY LIMITED' : ''}`
+        }
+        drawChart()
+      }
+
+      const loop = (now: number) => {
+        const elapsed = previous ? Math.min(0.05, (now - previous) / 1000) : DT
+        previous = now
+        const steps = Math.max(1, Math.round(elapsed / DT))
+        for (let i = 0; i < steps; i++) step()
+        sampleClock += elapsed
+        while (sampleClock >= 4 / SAMPLES) {
+          sample()
+          sampleClock -= 4 / SAMPLES
+        }
+        render()
+        if (visible && !settled()) frame = requestAnimationFrame(loop)
+        else {
+          frame = 0
+          previous = 0
+        }
+      }
+
+      const fastForward = (seconds: number) => {
+        const n = Math.round(seconds / DT)
+        const every = Math.round(4 / SAMPLES / DT)
+        for (let i = 0; i < n && !settled(); i++) {
+          step()
+          if (i % every === 0) sample()
+        }
+        render()
+      }
+
+      const wake = () => {
+        if (reduced.matches && !hand) {
+          cancelAnimationFrame(frame)
+          frame = 0
+          fastForward(mode === 'estimation' ? 4 : 8)
+          return
+        }
+        if (!frame && visible) frame = requestAnimationFrame(loop)
+      }
+
+      const resetState = () => {
+        compliant = { x: [...HOME] as Vec2, v: [0, 0] }
+        door = { theta: DOOR.rest, omega: 0 }
+        noise = torqueErrorSource(7)
+        bufA = []
+        bufB = []
+        lastForce = [0, 0]
+        lastError = [0, 0]
+        lastApplied = 0
+      }
+
+      const selectMode = (next: Mode, focus = false) => {
+        mode = next
+        this.dataset.mode = next
+        for (const tab of all<HTMLButtonElement>('[data-tab]')) {
+          const on = tab.dataset.tab === next
+          tab.setAttribute('aria-selected', String(on))
+          tab.tabIndex = on ? 0 : -1
+          if (on && focus) tab.focus()
+        }
+        for (const panel of all<HTMLElement>('[data-panel]')) panel.hidden = panel.dataset.panel !== next
+        show(doorLayer, next === 'door')
+        show(ellipseLayer, next !== 'door')
+        show(reference, next !== 'door')
+        resetState()
+        sample()
+        render()
+        wake()
+      }
+
+      const controller = new AbortController()
+      const on = { signal: controller.signal }
+
+      for (const el of all<HTMLElement>('.lab-controls,.lab-tabs,.lab-push,.lab-actions,.stage-hint')) el.hidden = false
+
+      for (const input of all<HTMLInputElement>('input[data-param]')) {
+        input.addEventListener(
+          'input',
+          () => {
+            const key = input.dataset.param!
+            const v = Number(input.value)
+            params[key] = v
+            const out = q<HTMLOutputElement>(`[data-out="${key}"]`)
+            if (out) {
+              const unit =
+                key.endsWith('Angle') ? `${v}°`
+                : key === 'pushForce' ? `${v} N`
+                : key === 'errorMagnitude' ? `${v.toFixed(2)} N·m`
+                : key === 'inertia' ? `${v.toFixed(2)} kg·m²`
+                : key === 'mass' ? `${v.toFixed(1)} kg`
+                : key === 'coulomb' ? `${v.toFixed(2)} N·m`
+                : v.toFixed(2)
+              out.value = unit
+            }
+            render()
+            wake()
+          },
+          on
+        )
+      }
+
+      const tabs = all<HTMLButtonElement>('[data-tab]')
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => selectMode(tab.dataset.tab as Mode), on)
+        tab.addEventListener(
+          'keydown',
+          (event) => {
+            const delta = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
+            if (event.key === 'Home' || event.key === 'End' || delta) {
+              event.preventDefault()
+              const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (i + delta + tabs.length) % tabs.length
+              selectMode(tabs[next].dataset.tab as Mode, true)
+            }
+          },
+          on
+        )
+      })
+
+      q('[data-reset]')!.addEventListener('click', () => selectMode(mode), on)
+
+      const toModel = (event: PointerEvent): Vec2 | null => {
+        const matrix = svg.getScreenCTM()
+        if (!matrix) return null
+        const pt = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse())
+        return fromView([pt.x, pt.y]) as Vec2
+      }
+      handle.addEventListener(
+        'pointerdown',
+        (event) => {
+          event.preventDefault()
+          handle.setPointerCapture(event.pointerId)
+          hand = toModel(event)
+          this.classList.add('is-dragging')
+          wake()
+        },
+        on
+      )
+      handle.addEventListener(
+        'pointermove',
+        (event) => {
+          if (!hand) return
+          hand = toModel(event) ?? hand
+          if (!frame) wake()
+        },
+        on
+      )
+      const release = () => {
+        if (!hand) return
+        hand = null
+        this.classList.remove('is-dragging')
+        wake()
+      }
+      handle.addEventListener('pointerup', release, on)
+      handle.addEventListener('pointercancel', release, on)
+      handle.addEventListener('lostpointercapture', release, on)
+
+      const observer = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting
+        if (visible) wake()
+      })
+      observer.observe(this)
+      reduced.addEventListener('change', wake, on)
+
+      const reachPath = () => {
+        const c = toView([0, 0]) as Vec2
+        const r = REACH.max * 210
+        return `M${c[0] - r} ${c[1]}A${r} ${r} 0 0 1 ${c[0] + r} ${c[1]}`
+      }
+      setPath(q<SVGPathElement>('[data-reach]')!, reachPath())
+      const rv = DOOR.radius * 210
+      const a0 = toView(doorHandle(DOOR.minAngle)) as Vec2
+      const a1 = toView(doorHandle(DOOR.maxAngle)) as Vec2
+      setPath(q<SVGPathElement>('[data-door-range]')!, `M${fmt(a0)}A${rv} ${rv} 0 0 0 ${fmt(a1)}`)
+
+      selectMode(mode)
+
+      this.cleanup = () => {
+        controller.abort()
+        observer.disconnect()
+        cancelAnimationFrame(frame)
+      }
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.()
+    }
+  }
+
+  if (!customElements.get('compliance-lab')) customElements.define('compliance-lab', ComplianceLab)
+</script>
+
+<style>
+  .lab {
+    --lab-edge: #3a4a63;
+    --lab-highlight: #fff;
+    --lab-grip: #283b5e;
+    display: block;
+    border: 1px solid hsl(var(--border));
+    border-radius: 12px;
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
+    overflow: hidden;
+  }
+  :global(html.dark) .lab {
+    --lab-edge: #182b50;
+    --lab-highlight: #e3edff;
+    --lab-grip: #a5c4f7;
+  }
+  .metal-light {
+    stop-color: #f7faff;
+  }
+  .metal-mid {
+    stop-color: #bac9df;
+  }
+  .metal-dark {
+    stop-color: #586f98;
+  }
+  .lab-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.6rem;
+    border-bottom: 1px solid hsl(var(--border));
+    font: 0.66rem/1.4 monospace;
+    letter-spacing: 0.05em;
+    color: hsl(var(--muted-foreground));
+  }
+  .lab-heading span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: hsl(var(--foreground));
+  }
+  .lab-heading i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+  }
+  .lab-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+  }
+  .lab-panel {
+    padding: 1.8rem 1.6rem;
+    border-right: 1px solid hsl(var(--border));
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+  }
+  .lab-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .lab-tabs button {
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 999px;
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.76rem;
+    cursor: pointer;
+  }
+  .lab-tabs button[aria-selected='true'] {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+  .lab-mode h3 {
+    margin: 0 0 0.7rem;
+    font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+  }
+  .lab-lead {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: hsl(var(--muted-foreground));
+  }
+  .lab-controls {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.4rem;
+  }
+  label {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.35rem;
+    font: 0.7rem/1.3 monospace;
+  }
+  output {
+    color: hsl(var(--primary));
+    font-variant-numeric: tabular-nums;
+  }
+  input[type='range'] {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 28px;
+    margin: 0;
+    accent-color: hsl(var(--primary));
+  }
+  .ends {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.58rem;
+    color: hsl(var(--muted-foreground));
+  }
+  .lab-push {
+    font: 0.7rem/1.3 monospace;
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 0.6rem;
+  }
+  .lab-push summary {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: hsl(var(--muted-foreground));
+  }
+  .lab-push > div {
+    display: grid;
+    gap: 1rem;
+    padding: 0.4rem 0 0.2rem;
+  }
+  .lab-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: auto;
+  }
+  .lab-actions button {
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .lab-actions a {
+    font-size: 0.85rem;
+    color: hsl(var(--primary));
+  }
+  .lab-stage {
+    margin: 0;
+    padding: 1rem 1.2rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .scene {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    color: hsl(var(--primary));
+  }
+  .grid {
+    color: hsl(var(--foreground));
+  }
+  .reach {
+    fill: none;
+    stroke: hsl(var(--muted-foreground));
+    stroke-opacity: 0.35;
+    stroke-dasharray: 3 7;
+  }
+  .reference path {
+    stroke: hsl(var(--muted-foreground));
+    stroke-width: 2;
+  }
+  .ellipse ellipse {
+    fill: hsl(var(--primary) / 0.1);
+    stroke: hsl(var(--primary));
+    stroke-width: 2;
+  }
+  .ellipse path {
+    stroke: hsl(var(--primary));
+    stroke-opacity: 0.55;
+    stroke-dasharray: 4 5;
+  }
+  .ellipse text,
+  .door-label,
+  .telemetry {
+    fill: hsl(var(--muted-foreground));
+    font: 12px monospace;
+    letter-spacing: 0.04em;
+  }
+  .door-range {
+    fill: none;
+    stroke: hsl(var(--muted-foreground));
+    stroke-opacity: 0.45;
+    stroke-dasharray: 4 7;
+  }
+  .door-panel {
+    stroke: hsl(var(--foreground));
+    stroke-width: 12;
+    stroke-linecap: round;
+    opacity: 0.85;
+  }
+  .arrowhead {
+    fill: hsl(var(--signal));
+  }
+  .door-weight {
+    stroke: hsl(var(--signal));
+    color: hsl(var(--signal));
+    stroke-width: 3;
+  }
+  .door-mount {
+    fill: none;
+    stroke: hsl(var(--foreground));
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    opacity: 0.6;
+  }
+  .door-hinge {
+    fill: hsl(var(--card));
+    stroke: hsl(var(--foreground));
+    stroke-width: 4;
+  }
+  .force {
+    fill: none;
+    stroke: hsl(var(--signal));
+    color: hsl(var(--signal));
+    stroke-width: 3.5;
+    stroke-dasharray: 6 5;
+  }
+  .hand {
+    color: hsl(var(--signal));
+    pointer-events: none;
+  }
+  .hand circle {
+    fill: currentColor;
+  }
+  .hand path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .handle {
+    fill: transparent;
+    stroke: hsl(var(--primary));
+    stroke-width: 1.5;
+    stroke-dasharray: 3 6;
+    cursor: grab;
+    touch-action: none;
+  }
+  .is-dragging .handle {
+    cursor: grabbing;
+    stroke-opacity: 0;
+  }
+  .stage-hint {
+    margin: 0.3rem 0 0;
+    font-size: 0.78rem;
+    color: hsl(var(--muted-foreground));
+    text-align: center;
+  }
+  .stage-hint strong {
+    font-weight: 500;
+    color: hsl(var(--primary));
+  }
+  .chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 0.8rem;
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 0.5rem;
+  }
+  .chart-grid {
+    stroke: hsl(var(--border));
+    stroke-dasharray: 2 5;
+  }
+  .chart polyline {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .series-a {
+    stroke: hsl(var(--primary));
+  }
+  .series-b {
+    stroke: hsl(var(--signal));
+  }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    font: 0.68rem/1.3 monospace;
+    color: hsl(var(--muted-foreground));
+  }
+  .chart-legend span::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 2px;
+    margin-right: 0.45rem;
+    vertical-align: middle;
+  }
+  .key-a::before {
+    background: hsl(var(--primary));
+  }
+  .key-b::before {
+    background: hsl(var(--signal));
+  }
+  .chart-window {
+    margin-left: auto;
+  }
+  .chart-window::before {
+    display: none !important;
+  }
+  .compact .lab-body {
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.5fr);
+  }
+  @media (max-width: 860px) {
+    .lab-body,
+    .compact .lab-body {
+      grid-template-columns: 1fr;
+    }
+    .lab-panel {
+      border-right: 0;
+      border-bottom: 1px solid hsl(var(--border));
+      padding: 1.4rem 1.2rem;
+    }
+    .lab-stage {
+      order: -1;
+      padding: 0.8rem;
+      border-bottom: 1px solid hsl(var(--border));
+    }
+    .lab-heading span:last-child {
+      display: none;
+    }
+  }
+</style>
