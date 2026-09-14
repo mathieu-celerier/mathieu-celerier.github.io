@@ -7,6 +7,7 @@ import { homeSelection } from '@/lib/home-selection'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ResearchHero from '@/components/ResearchHero.astro'
 import ComplianceLab from '@/components/ComplianceLab.astro'
+import Tex from '@/components/Tex.astro'
 
 const cv = loadCV()
 const allPublications = await getCollection('publications')
@@ -135,8 +136,8 @@ const news = (await getCollection('news'))
           <h2 id='experiment-title'>From compliance to virtual dynamics.</h2>
         </div>
         <p>
-          In my compliance framework Γₖ is not a stiffness knob: it sets the inertia a task shows to a
-          push. Generalised, the same mechanism lets the arm render an object that is not there.
+          <Tex text={String.raw`In my compliance framework $\Gamma_k$ is not a stiffness knob: it sets the inertia a task shows to a push. Generalised, the same mechanism lets the arm render an object that is not there.`}
+          />
         </p>
       </header>
       <ComplianceLab modes={['door']} compact />

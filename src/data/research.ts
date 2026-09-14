@@ -5,22 +5,22 @@ export const explicitCompliance = {
     'How can a torque-controlled robot remain precise where a task demands it, yield where contact demands it, and keep hard limits active in both cases?',
   complianceCases: [
     {
-      value: 'Γₖ = 0',
+      value: String.raw`\Gamma_k = 0`,
       title: 'Infinite effective inertia',
       note: 'Estimated external effort is fully compensated; a push cannot move the task, which is also where estimation error is most exposed.'
     },
     {
-      value: 'Γₖ = I',
+      value: String.raw`\Gamma_k = I`,
       title: 'Matched inertia',
       note: 'The task responds to a push with the arm’s own task-space inertia — classical compliance, and immune to estimation error.'
     },
     {
-      value: 'Γₖ = R diag(γ) Rᵀ',
+      value: String.raw`{\Gamma_k = R\,\operatorname{diag}(\gamma_1, \gamma_2)\,R^{\top}}`,
       title: 'Shaped, per direction',
       note: 'Eigen-directions and eigenvalues give each direction its own inertia ratio; any positive value is admissible.'
     },
     {
-      value: 'Λᵥ⁻¹(F̂ₑ + Fᵥ)',
+      value: String.raw`\mathbf{\Lambda}_v^{-1}\big(\hat{\mathbf{F}}_e + \mathbf{F}_v\big)`,
       title: 'Rendered dynamics',
       note: 'A chosen virtual inertia and state-dependent wrench let the task emulate an object, such as a door with weight and friction.'
     }

@@ -7,6 +7,7 @@ import PageIntro from '@/components/PageIntro.astro'
 import ResearchNotebook from '@/components/ResearchNotebook.astro'
 import ResearchPlate from '@/components/ResearchPlate.astro'
 import ComplianceLab from '@/components/ComplianceLab.astro'
+import Tex from '@/components/Tex.astro'
 
 const gallery = [
   {
@@ -98,8 +99,8 @@ const structuredData = {
         allowed.
       </p>
       <p>
-        The approach separates those decisions: estimate the force-induced motion, then use a
-        task-level matrix Γₖ to select how much of it is deliberately retained in each direction.
+        <Tex text={String.raw`The approach separates those decisions: estimate the force-induced motion, then use a task-level matrix $\Gamma_k$ to select how much of it is deliberately retained in each direction.`}
+        />
         Feasibility and safety remain explicit constraints in the quadratic program.
       </p>
     </div>
@@ -111,7 +112,7 @@ const structuredData = {
       <p class='section-label'>The parameter</p>
       <h2>One matrix expresses where the robot should yield.</h2>
       <p>
-        Γₖ belongs to a task rather than to the robot as a whole. A translation can comply while an
+        <Tex text={String.raw`$\Gamma_k$`} /> belongs to a task rather than to the robot as a whole. A translation can comply while an
         orientation stays fixed; a main task can remain precise while redundancy yields; and the
         same formulation can render a chosen virtual dynamic response.
       </p>
@@ -129,7 +130,7 @@ const structuredData = {
         <article data-reveal>
           <>
             <span>0{index + 1}</span>
-            <code>{item.value}</code>
+            <div class='case-math'><Tex expr={item.value} /></div>
             <h3>{item.title}</h3>
             <p>{item.note}</p>
           </>
@@ -141,19 +142,27 @@ const structuredData = {
   <section class='virtual-dynamics' id='virtual-dynamics'>
     <header>
       <p class='section-label'>From compliance to virtual dynamics</p>
-      <h2>Γₖ shapes inertia — and, generalised, renders an object.</h2>
+      <h2><Tex text={String.raw`$\Gamma_k$ shapes inertia — and, generalised, renders an object.`} /></h2>
       <div class='vd-copy'>
         <p>
-          With the external wrench compensated, a push reaches the task only through the injected
-          deviation ΓₖΛₖ⁻¹F̂ₑ. The task therefore responds with effective inertia ΛₖΓₖ⁻¹: Γₖ = αI
-          scales it by 1/α, and its eigen-directions make the response anisotropic.
+          With the external wrench compensated, a push reaches the task only through the deviation
+          injected into its reference acceleration,
+        </p>
+        <Tex display expr={String.raw`\ddot{\mathbf{e}}^f_k = \Gamma_k\,\mathbf{\Lambda}_k^{-1}\,\hat{\mathbf{F}}_e,`} />
+        <p>
+          <Tex text={String.raw`so the task responds with effective inertia $\mathbf{\Lambda}_k\Gamma_k^{-1}$: $\Gamma_k = \alpha I$ scales it by $1/\alpha$, and its eigen-directions make the response anisotropic.`}
+          />
         </p>
         <p>
-          Γₖ cannot synthesise a wrench or cancel the arm’s configuration-dependent inertia.
-          Replacing the deviation with Λᵥ⁻¹(F̂ₑ + Fᵥ(x, ẋ)) does both, with the same QP, constraints
-          and error analysis. The virtual door below uses a scalar inertia along its arc, rigid
-          directions elsewhere, and Fᵥ,θ = −mᵥ g r<sub>c</sub> cos θ − bᵥ θ̇ − cᵥ sign(θ̇).
+          <Tex text={String.raw`$\Gamma_k$ cannot synthesise a wrench or cancel the arm’s configuration-dependent inertia. Replacing the deviation with`}
+          />
         </p>
+        <Tex display expr={String.raw`\ddot{\mathbf{e}}^f_k = \mathbf{\Lambda}_v^{-1}\big(\hat{\mathbf{F}}_e + \mathbf{F}_v(\mathbf{x}, \dot{\mathbf{x}})\big)`} />
+        <p>
+          does both, with the same QP, constraints and error analysis. The virtual door below uses a
+          scalar inertia along its arc, rigid directions elsewhere, and the virtual wrench
+        </p>
+        <Tex display expr={String.raw`F_{v,\theta} = -m_v\, g\, r_c \cos\theta - b_v\,\dot{\theta} - c_v\,\operatorname{sign}(\dot{\theta}).`} />
       </div>
     </header>
     <ComplianceLab />
@@ -176,7 +185,7 @@ const structuredData = {
       <li>
         <span>02</span><div>
           <strong>Select</strong><p>
-            Apply Γₖ per task and direction to define the desired response.
+            <Tex text={String.raw`Apply $\Gamma_k$ per task and direction to define the desired response.`} />
           </p>
         </div>
       </li>
@@ -335,6 +344,13 @@ const structuredData = {
     margin: 0 0 1rem;
     color: hsl(var(--muted-foreground));
   }
+  .virtual-dynamics h2 :global(.katex) {
+    font-size: 0.86em;
+  }
+  .vd-copy :global(.katex-display) {
+    margin: 0.4rem 0 1.2rem;
+    color: hsl(var(--foreground));
+  }
   @media (max-width: 860px) {
     .virtual-dynamics header {
       grid-template-columns: 1fr;
@@ -358,10 +374,9 @@ const structuredData = {
     color: hsl(var(--primary));
     font: 0.65rem monospace;
   }
-  .parameter-cases code {
-    display: block;
+  .parameter-cases .case-math {
     margin: 2.5rem 0 1rem;
-    font-size: 1.25rem;
+    font-size: 1.05rem;
     color: hsl(var(--signal));
   }
   .parameter-cases h3 {

@@ -5,6 +5,7 @@ import projects from '@/data/projects.generated.json'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import PageIntro from '@/components/PageIntro.astro'
 import ResearchPlate from '@/components/ResearchPlate.astro'
+import Tex from '@/components/Tex.astro'
 
 const software = projects[0]?.links ?? []
 ---
@@ -71,9 +72,8 @@ const software = projects[0]?.links ?? []
       <p class='section-label'>02 / Compliance and safety · Doctoral work</p>
       <h2>Making compliance explicit inside constrained torque control.</h2>
       <p>
-        Compensating an estimated external force makes acceleration tracking precise under contact,
-        but it also makes the robot stiff by default. The compliance matrix Γₖ deliberately restores
-        the selected part of the force-induced motion, per task and per direction.
+        <Tex text={String.raw`Compensating an estimated external force makes acceleration tracking precise under contact, but it also makes the robot stiff by default. The compliance matrix $\Gamma_k$ deliberately restores the selected part of the force-induced motion, per task and per direction.`}
+        />
       </p>
       <p>
         The same quadratic program combines that response with torque, position, velocity, and
