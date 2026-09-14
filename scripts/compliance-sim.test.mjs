@@ -7,6 +7,7 @@ import {
   doorEnergy,
   doorHandle,
   eigenSym,
+  errorSpread,
   forwardKinematics,
   gammaDirectional,
   gammaIsotropic,
@@ -104,4 +105,31 @@ test('a push along the tangent opens the door; a radial push does not', () => {
   const radial = stepDoor({ theta: t, omega: 0 }, { ...p, force: [10 * Math.cos(t), 10 * Math.sin(t)] }, 0.01)
   assert.ok(tangential.omega > 0)
   close(radial.omega, 0)
+})
+
+const axis = (angle) => ((angle % Math.PI) + Math.PI) % Math.PI
+
+test('the Γ ellipse points along the chosen direction, and a push moves the task along it', () => {
+  const x = [1.25, 0.75]
+  const q = inverseKinematics(x)
+  for (const angle of [0, Math.PI / 6, 1.2, 2.5]) {
+    const gamma = gammaDirectional(angle, 1, 0)
+    close(axis(eigenSym(gamma).angle), axis(angle), 1e-9)
+    for (const force of [[10, 0], [0, 10], [-4, 7]]) {
+      const a = compliantAcceleration({ ...base, x, gamma, force }).shaped
+      if (Math.hypot(...a) < 1e-9) continue
+      close(axis(Math.atan2(a[1], a[0])), axis(angle), 1e-9)
+    }
+  }
+  assert.ok(q)
+})
+
+test('estimation error spreads along the rigid direction, perpendicular to the compliant one', () => {
+  const q = inverseKinematics([1.25, 0.75])
+  for (const angle of [0, 0.7, 2]) {
+    const spread = errorSpread(gammaDirectional(angle, 1, 0), q)
+    close(spread[1], spread[2])
+    close(axis(eigenSym(spread).angle), axis(angle + Math.PI / 2), 1e-9)
+    close(eigenSym(spread).minor, 0, 1e-9)
+  }
 })

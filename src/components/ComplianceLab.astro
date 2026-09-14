@@ -31,12 +31,12 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
   directional: {
     tab: 'Direction',
     title: 'Each direction can yield differently.',
-    lead: 'The eigenvectors of Γ pick directions and its eigenvalues pick how each one responds. The ellipse is the resulting mobility ΓΛ⁻¹ — including the arm’s own configuration-dependent anisotropy, which Γ can reshape but not remove.'
+    lead: 'The eigenvectors of Γ pick directions and its eigenvalues set each one’s inertia ratio: with γ₂ = 0 the task can only be pushed along γ₁. Γ scales the arm’s own response, drawn dashed — at most poses the arm is already several times easier to move in one direction than another, and Γ alone does not remove that.'
   },
   estimation: {
     tab: 'Estimation error',
     title: 'Rigid directions pay for estimation error.',
-    lead: 'Compensation relies on an estimated external torque. Its error reaches the task as (I − Γ) J M⁻¹ ε_τ: a fully compliant direction is immune, a rigid one takes the error in full.'
+    lead: 'Compensation relies on an estimated external torque. Its error reaches the task as (I − Γ) J M⁻¹ ε_τ, so it lands on the directions you declared rigid: the orange spread sits across the blue Γ, and a fully compliant direction is immune.'
   },
   door: {
     tab: 'Virtual door',
@@ -220,11 +220,6 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
           <text class='door-label' data-door-label x={hx - 18} y={hy - 20} text-anchor='end'>θ 180°</text>
         </g>
 
-        <g class='ellipse' data-ellipse-layer display={initial === 'door' ? 'none' : undefined}>
-          <ellipse data-ellipse cx={tx} cy={ty} rx='40' ry='40'></ellipse>
-          <path data-ellipse-axes d=''></path>
-          <text data-ellipse-label x={tx} y={ty + 90} text-anchor='middle'>mobility ΓΛ⁻¹</text>
-        </g>
 
         <g class='reference' data-reference display={initial === 'door' ? 'none' : undefined}>
           <path d='M-9 0H9M0-9V9'></path>
@@ -248,6 +243,18 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
         <g data-gripper transform={`translate(${tx.toFixed(1)} ${ty.toFixed(1)}) rotate(${gripAngle.toFixed(1)})`}
           ><circle r='15' fill={`url(#${uid}-blue)`}></circle><path d='M12-10L33-10L38-4M12 10L33 10L38 4' fill='none' stroke='var(--lab-grip)' stroke-width='7' stroke-linecap='round'></path></g
         >
+
+        <g class='ellipses' data-ellipse-layer display={initial === 'door' ? 'none' : undefined}>
+          {
+            (['arm', 'gamma', 'error'] as const).map((kind) => (
+              <g class={`shape shape-${kind}`} data-shape={kind}>
+                <ellipse cx={tx} cy={ty} rx='0' ry='0'></ellipse>
+                <path d=''></path>
+                <text x={tx} y={ty} text-anchor='middle'></text>
+              </g>
+            ))
+          }
+        </g>
 
         <g class='hand' data-hand display='none' aria-hidden='true'>
           <circle r='6'></circle>
@@ -285,18 +292,14 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     gammaDirectional,
     gammaIsotropic,
     handForce,
-    identityMinus,
-    inverse,
+    errorSpread,
     inverseKinematics,
-    jacobian,
-    massMatrix,
     mul,
     stepCompliant,
     stepDoor,
     taskInverseInertia,
     toView,
-    torqueErrorSource,
-    transpose
+    torqueErrorSource
   } from '../lib/compliance-sim.js'
 
   type Vec2 = [number, number]
@@ -326,9 +329,12 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       const handEl = q<SVGGElement>('[data-hand]')!
       const forceEl = q<SVGPathElement>('[data-force]')!
       const ellipseLayer = q<SVGGElement>('[data-ellipse-layer]')!
-      const ellipse = q<SVGEllipseElement>('[data-ellipse]')!
-      const ellipseAxes = q<SVGPathElement>('[data-ellipse-axes]')!
-      const ellipseLabel = q<SVGTextElement>('[data-ellipse-label]')!
+      const shapes = Object.fromEntries(
+        (['arm', 'gamma', 'error'] as const).map((kind) => {
+          const g = q<SVGGElement>(`[data-shape="${kind}"]`)!
+          return [kind, { g, ellipse: g.querySelector('ellipse')!, axes: g.querySelector('path')!, label: g.querySelector('text')! }]
+        })
+      ) as Record<'arm' | 'gamma' | 'error', { g: SVGGElement; ellipse: SVGEllipseElement; axes: SVGPathElement; label: SVGTextElement }>
       const reference = q<SVGGElement>('[data-reference]')!
       const doorLayer = q<SVGGElement>('[data-door-layer]')!
       const doorPanel = q<SVGPathElement>('[data-door-panel]')!
@@ -410,25 +416,38 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
         visible ? el.removeAttribute('display') : el.setAttribute('display', 'none')
       const fmt = (p: Vec2) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`
 
-      const drawEllipse = (center: Vec2, A: Mat2, scale: number, label: string) => {
+      // A must be symmetric; radius = scale · f(eigenvalue), f linear for ratios, sqrt for covariances.
+      const drawShape = (
+        kind: 'arm' | 'gamma' | 'error',
+        center: Vec2,
+        A: Mat2 | null,
+        scale: number,
+        label: string,
+        labelBelow = false,
+        radius = (l: number) => Math.sqrt(l)
+      ) => {
+        const shape = shapes[kind]
+        show(shape.g, !!A)
+        if (!A) return
         const { major, minor, angle } = eigenSym(A)
-        const rx = Math.min(170, Math.max(3, scale * Math.sqrt(Math.max(major, 0))))
-        const ry = Math.min(170, Math.max(3, scale * Math.sqrt(Math.max(minor, 0))))
-        const rot = -deg(angle)
-        ellipse.setAttribute('cx', center[0].toFixed(1))
-        ellipse.setAttribute('cy', center[1].toFixed(1))
-        ellipse.setAttribute('rx', rx.toFixed(1))
-        ellipse.setAttribute('ry', ry.toFixed(1))
-        ellipse.setAttribute('transform', `rotate(${rot.toFixed(1)} ${center[0].toFixed(1)} ${center[1].toFixed(1)})`)
+        const rx = Math.min(180, Math.max(2.5, scale * radius(Math.max(major, 0))))
+        const ry = Math.min(180, Math.max(2.5, scale * radius(Math.max(minor, 0))))
+        const [cx, cy] = [center[0].toFixed(1), center[1].toFixed(1)]
+        shape.ellipse.setAttribute('cx', cx)
+        shape.ellipse.setAttribute('cy', cy)
+        shape.ellipse.setAttribute('rx', rx.toFixed(1))
+        shape.ellipse.setAttribute('ry', ry.toFixed(1))
+        shape.ellipse.setAttribute('transform', `rotate(${(-deg(angle)).toFixed(1)} ${cx} ${cy})`)
         const c = Math.cos(angle),
           s = Math.sin(angle)
         setPath(
-          ellipseAxes,
+          shape.axes,
           `M${center[0] - rx * c} ${center[1] + rx * s}L${center[0] + rx * c} ${center[1] - rx * s}M${center[0] + ry * s} ${center[1] + ry * c}L${center[0] - ry * s} ${center[1] - ry * c}`
         )
-        ellipseLabel.setAttribute('x', center[0].toFixed(1))
-        ellipseLabel.setAttribute('y', (center[1] - Math.max(rx, ry) - 14).toFixed(1))
-        ellipseLabel.textContent = label
+        const reach = Math.max(rx, ry)
+        shape.label.setAttribute('x', cx)
+        shape.label.setAttribute('y', (labelBelow ? center[1] + reach + 22 : center[1] - reach - 12).toFixed(1))
+        shape.label.textContent = label
       }
 
       const drawChart = () => {
@@ -508,12 +527,21 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
           const center = t
           const reachView = toView(HOME) as Vec2
           reference.setAttribute('transform', `translate(${fmt(reachView)})`)
-          if (mode === 'estimation') {
-            const A = mul(identityMinus(gamma()), mul(jacobian(joints), inverse(massMatrix(joints)))) as Mat2
-            const spread = mul(A, transpose(A)) as Mat2
-            drawEllipse(center, spread, 90 * Math.max(params.errorMagnitude, 0.05), 'error spread (I − Γ) J M⁻¹')
+          const arm = taskInverseInertia(joints) as Mat2
+          const linear = (l: number) => l
+          if (mode === 'inertia') {
+            drawShape('gamma', center, mul(gammaIsotropic(params.alpha) as Mat2, arm) as Mat2, 75, 'response to a push αΛ⁻¹')
+            drawShape('arm', center, null, 0, '')
+            drawShape('error', center, null, 0, '')
           } else {
-            drawEllipse(center, mul(gamma(), taskInverseInertia(joints) as Mat2) as Mat2, 58, 'mobility ΓΛ⁻¹')
+            drawShape('gamma', center, gamma(), 95, 'Γ', false, linear)
+            if (mode === 'directional') {
+              drawShape('arm', center, arm, 75, 'arm alone Λ⁻¹', true)
+              drawShape('error', center, null, 0, '')
+            } else {
+              drawShape('arm', center, null, 0, '')
+              drawShape('error', center, errorSpread(gamma(), joints) as Mat2, 140 * Math.max(params.errorMagnitude, 0.05), 'estimation error', true)
+            }
           }
           const g = gamma()
           const label =
@@ -900,17 +928,56 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     stroke: hsl(var(--muted-foreground));
     stroke-width: 2;
   }
-  .ellipse ellipse {
-    fill: hsl(var(--primary) / 0.1);
-    stroke: hsl(var(--primary));
+  .shape ellipse {
     stroke-width: 2;
   }
-  .ellipse path {
-    stroke: hsl(var(--primary));
-    stroke-opacity: 0.55;
-    stroke-dasharray: 4 5;
+  .shape {
+    pointer-events: none;
   }
-  .ellipse text,
+  .shape path {
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+  .shape text {
+    font: 13px monospace;
+    paint-order: stroke;
+    stroke: hsl(var(--card));
+    stroke-width: 4px;
+    letter-spacing: 0.04em;
+  }
+  .shape-gamma ellipse {
+    fill: hsl(var(--primary) / 0.1);
+    stroke: hsl(var(--primary));
+  }
+  .shape-gamma path {
+    stroke: hsl(var(--primary));
+  }
+  .shape-gamma text {
+    fill: hsl(var(--primary));
+  }
+  .shape-arm ellipse {
+    fill: none;
+    stroke: hsl(var(--muted-foreground));
+    stroke-opacity: 0.55;
+    stroke-dasharray: 3 5;
+    stroke-width: 1.5;
+  }
+  .shape-arm path {
+    stroke: none;
+  }
+  .shape-arm text {
+    fill: hsl(var(--muted-foreground));
+  }
+  .shape-error ellipse {
+    fill: hsl(var(--signal) / 0.12);
+    stroke: hsl(var(--signal));
+  }
+  .shape-error path {
+    stroke: hsl(var(--signal));
+  }
+  .shape-error text {
+    fill: hsl(var(--signal));
+  }
   .door-label,
   .telemetry {
     fill: hsl(var(--muted-foreground));

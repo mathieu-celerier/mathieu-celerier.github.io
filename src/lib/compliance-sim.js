@@ -154,6 +154,16 @@ export function stepCompliant(state, params, dt) {
   return { x, v, limited, parts }
 }
 
+/**
+ * Covariance shape of the task acceleration error for isotropic torque-estimation error:
+ * A Aᵀ with A = (I − Γ) J M⁻¹. Symmetric, so its axes can be drawn directly.
+ * @param {Mat2} gamma @param {Vec2} q @returns {Mat2}
+ */
+export function errorSpread(gamma, q, arm = ARM) {
+  const A = mul(identityMinus(gamma), mul(jacobian(q, arm), inverse(massMatrix(q, arm))))
+  return mul(A, transpose(A))
+}
+
 /** @param {number} theta @returns {Vec2} */
 export const doorHandle = (theta, door = DOOR) => [
   door.hinge[0] + door.radius * Math.cos(theta),
