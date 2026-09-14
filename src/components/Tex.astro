@@ -1,0 +1,17 @@
+---
+import 'katex/dist/katex.min.css'
+import { renderInline, renderTex } from '../lib/tex.js'
+
+interface Props {
+  /** A single TeX expression. */
+  expr?: string
+  /** Prose with `$…$` inline math. */
+  text?: string
+  display?: boolean
+}
+
+const { expr, text, display = false } = Astro.props
+const html = text !== undefined ? renderInline(text) : renderTex(expr ?? '', { display })
+---
+
+<Fragment set:html={html} />
