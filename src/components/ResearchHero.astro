@@ -21,7 +21,7 @@ const { basics } = loadCV()
     </p>
     <div class='hero-actions'>
       <a href='#now'>Current research <span aria-hidden='true'>↓</span></a>
-      <a href='/publications'>View publications ↗</a>
+      <a href='/publications'>View publications →</a>
     </div>
   </div>
 
@@ -63,14 +63,14 @@ const { basics } = loadCV()
       <g class='workspace'>
         <path d='M78 500A310 310 0 01666 326'></path>
         <path d='M115 500A274 274 0 01627 338'></path>
-        <text x='80' y='476'>CONSTRAINED WORKSPACE</text>
+        <text x='40' y='362'>CONSTRAINED WORKSPACE</text>
       </g>
 
       <g class='target'>
         <path d='M531 520H671V565H531Z'></path>
         <path d='M583 520V552H619V520'></path>
         <path d='M601 492V574M570 536H632'></path>
-        <text x='643' y='563'>TARGET</text>
+        <text x='682' y='548'>TARGET</text>
       </g>
 
       <g class='planned-motion'>
@@ -693,6 +693,12 @@ const { basics } = loadCV()
       animation: none !important;
     }
     .progress-dot {
+      display: none;
+    }
+  }
+  /* Below this width the diagram's annotations shrink past reading size: keep the drawing, drop the specks. */
+  @media (max-width: 600px) {
+    svg text {
       display: none;
     }
   }

@@ -9,13 +9,23 @@ interface Props {
 }
 
 const { id, title, subtitle, dates, current = false, compact = false } = Astro.props
+// Break a range after its dash so each end stays on one line in the narrow date column.
+const [from, to] = dates.split(/\s+[–-]\s+/)
 ---
 
 <article
   id={id}
   class:list={['cv-entry', current && 'cv-entry-current', compact && 'cv-entry-compact']}
 >
-  <div class='cv-entry-date'>{dates}</div>
+  <div class='cv-entry-date'>
+    {to ? (
+      <>
+        <span>{from} –</span> <span>{to}</span>
+      </>
+    ) : (
+      dates
+    )}
+  </div>
   <div class='cv-entry-body'>
     <div class='cv-entry-top'>
       <h3>{title}</h3>
@@ -30,7 +40,7 @@ const { id, title, subtitle, dates, current = false, compact = false } = Astro.p
   .cv-entry {
     position: relative;
     display: grid;
-    grid-template-columns: 8rem minmax(0, 1fr);
+    grid-template-columns: 9rem minmax(0, 1fr);
     gap: 1.25rem;
     padding: 1.35rem 0;
     border-radius: 0;
@@ -71,6 +81,10 @@ const { id, title, subtitle, dates, current = false, compact = false } = Astro.p
     line-height: 1.4;
     color: hsl(var(--muted-foreground) / 1);
     font-variant-numeric: tabular-nums;
+  }
+
+  .cv-entry-date span {
+    white-space: nowrap;
   }
 
   .cv-entry-body {
@@ -115,6 +129,7 @@ const { id, title, subtitle, dates, current = false, compact = false } = Astro.p
   .cv-entry :global(ul) {
     margin: 0.3rem 0 0;
     padding-left: 1.15rem;
+    list-style: disc;
     color: hsl(var(--muted-foreground) / 1);
     line-height: 1.7;
   }

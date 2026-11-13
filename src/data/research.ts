@@ -17,7 +17,7 @@ export const explicitCompliance = {
     {
       value: String.raw`{\Gamma_k = R\,\operatorname{diag}(\gamma_1, \gamma_2)\,R^{\top}}`,
       title: 'Shaped, per direction',
-      note: 'Eigen-directions and eigenvalues give each direction its own inertia ratio; any positive value is admissible.'
+      note: 'Eigen-directions and eigenvalues give each direction its own inertia ratio; any value from zero upward is admissible.'
     },
     {
       value: String.raw`\mathbf{\Lambda}_v^{-1}\big(\hat{\mathbf{F}}_e + \mathbf{F}_v\big)`,
@@ -61,7 +61,7 @@ export const collaborativeInsertion = {
       note: 'Overall rate across six interaction regimes, from a paired evaluation with verified policy serving.'
     },
     {
-      value: '1236',
+      value: '1,236',
       label: 'training episodes',
       note: 'Collected from two structurally different simulated partners across the regime matrix.'
     },

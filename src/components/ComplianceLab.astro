@@ -41,7 +41,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
   },
   door: {
     tab: 'Virtual door',
-    title: compact ? 'Push a door that isn’t there.' : String.raw`$\Gamma$ generalised: render an object.`,
+    title: compact ? 'Push a door that isn’t there.' : String.raw`$\Gamma$ generalized: render an object.`,
     lead: String.raw`Replace $\Gamma\Lambda^{-1}$ with a chosen inertia and add a virtual wrench, $\ddot{e} = \Lambda_v^{-1}(\hat{F}_e + F_v)$. The arm stays rigid off the arc of a virtual hinge; along it the handle has inertia $I_v$, weight and friction — so it moves like a door.`
   }
 }
@@ -61,7 +61,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     <div class='lab-panel'>
       {
         modes.length > 1 && (
-          <div class='lab-tabs' role='tablist' aria-label='Behaviour to explore' hidden>
+          <div class='lab-tabs' role='tablist' aria-label='Behavior to explore' hidden>
             {modes.map((m) => (
               <button
                 type='button'
@@ -157,7 +157,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       }
 
       <details class='lab-push' hidden>
-        <summary>Push without a pointer</summary>
+        <summary>Set a steady push by hand</summary>
         <div>
           <label>
             <span>Push direction</span>
@@ -173,6 +173,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       </details>
 
       <div class='lab-actions' hidden>
+        <button type='button' class='primary' data-nudge>Give it a push</button>
         <button type='button' data-reset>Reset ↺</button>
         {
           compact && (
@@ -264,9 +265,11 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
 
         <circle class='handle' data-handle cx={tx.toFixed(1)} cy={ty.toFixed(1)} r='52'></circle>
 
-        <text class='telemetry' data-telemetry x='860' y='545' text-anchor='end'></text>
       </svg>
-      <p class='stage-hint' hidden>Drag the <strong>end-effector</strong> to push it.</p>
+      <p class='telemetry' data-telemetry aria-live='off'></p>
+      <p class='stage-hint' hidden>
+        Drag the <strong>end-effector</strong> to push it, or use <strong>Give it a push</strong>.
+      </p>
 
       <svg class='chart' viewBox='0 0 600 132' aria-hidden='true'>
         <path class='chart-grid' d='M0 66H600M0 8H600M0 124H600'></path>
@@ -341,7 +344,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       const doorPanel = q<SVGPathElement>('[data-door-panel]')!
       const doorWeight = q<SVGPathElement>('[data-door-weight]')!
       const doorLabel = q<SVGTextElement>('[data-door-label]')!
-      const telemetry = q<SVGTextElement>('[data-telemetry]')!
+      const telemetry = q<HTMLElement>('[data-telemetry]')!
       const seriesA = q<SVGPolylineElement>('[data-series="a"]')!
       const seriesB = q<SVGPolylineElement>('[data-series="b"]')!
       const legendA = q<HTMLElement>('[data-legend="a"]')!
@@ -360,6 +363,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       let lastForce: Vec2 = [0, 0]
       let lastError: Vec2 = [0, 0]
       let lastApplied = 0
+      let nudge = 0
       let frame = 0
       let previous = 0
       let visible = true
@@ -382,11 +386,20 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
         params.pushForce * Math.cos(rad(params.pushAngle)),
         params.pushForce * Math.sin(rad(params.pushAngle))
       ]
+      // A short scripted shove, so the behavior can be seen without dragging: along the door's
+      // arc in door mode, otherwise in the direction set under "steady push".
+      const nudgeForce = (): Vec2 => {
+        if (mode === 'door') return [-3 * Math.sin(door.theta), 3 * Math.cos(door.theta)]
+        return [14 * Math.cos(rad(params.pushAngle)), 14 * Math.sin(rad(params.pushAngle))]
+      }
       const currentForce = (): Vec2 =>
-        hand ? (handForce(hand, effector(), effectorVelocity()) as Vec2) : pushForce()
+        hand ? (handForce(hand, effector(), effectorVelocity()) as Vec2)
+        : nudge > 0 ? nudgeForce()
+        : pushForce()
 
       const step = () => {
         const force = currentForce()
+        if (nudge > 0) nudge -= DT
         lastForce = force
         if (mode === 'door') {
           const r = stepDoor(door, { inertia: params.inertia, mass: params.mass, viscous: params.viscous, coulomb: params.coulomb, force }, DT)
@@ -403,7 +416,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       }
 
       const settled = () => {
-        if (hand || params.pushForce > 0) return false
+        if (hand || nudge > 0 || params.pushForce > 0) return false
         if (mode === 'estimation' && params.errorMagnitude > 0) return false
         if (mode === 'door') {
           const accel = Math.abs(stepDoor(door, { inertia: params.inertia, mass: params.mass, viscous: params.viscous, coulomb: params.coulomb, force: [0, 0] }, DT).omega - door.omega) / DT
@@ -587,6 +600,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
           cancelAnimationFrame(frame)
           frame = 0
           fastForward(mode === 'estimation' ? 4 : 8)
+          nudge = 0
           return
         }
         if (!frame && visible) frame = requestAnimationFrame(loop)
@@ -601,6 +615,7 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
         lastForce = [0, 0]
         lastError = [0, 0]
         lastApplied = 0
+        nudge = 0
       }
 
       const selectMode = (next: Mode, focus = false) => {
@@ -671,6 +686,14 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
       })
 
       q('[data-reset]')!.addEventListener('click', () => selectMode(mode), on)
+      q('[data-nudge]')!.addEventListener(
+        'click',
+        () => {
+          nudge = 0.3
+          wake()
+        },
+        on
+      )
 
       const toModel = (event: PointerEvent): Vec2 | null => {
         const matrix = svg.getScreenCTM()
@@ -803,15 +826,15 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     gap: 1.3rem;
   }
   .lab-tabs {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.4rem;
   }
   .lab-tabs button {
     min-height: 44px;
     padding: 0 0.75rem;
     border: 1px solid hsl(var(--border));
-    border-radius: 999px;
+    border-radius: 8px;
     background: transparent;
     color: hsl(var(--muted-foreground));
     font-size: 0.76rem;
@@ -879,8 +902,22 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     min-height: 44px;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
     cursor: pointer;
     color: hsl(var(--muted-foreground));
+    list-style: none;
+  }
+  .lab-push summary::-webkit-details-marker {
+    display: none;
+  }
+  .lab-push summary::before {
+    content: '+';
+    width: 1em;
+    color: hsl(var(--primary));
+    text-align: center;
+  }
+  .lab-push[open] summary::before {
+    content: '−';
   }
   .lab-push > div {
     display: grid;
@@ -903,6 +940,17 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     color: inherit;
     font-size: 0.8rem;
     cursor: pointer;
+  }
+  .lab-actions button:hover {
+    background: hsl(var(--muted));
+  }
+  .lab-actions button.primary {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary));
+    color: hsl(var(--background));
+  }
+  .lab-actions button.primary:hover {
+    background: hsl(var(--primary) / 0.85);
   }
   .lab-actions a {
     font-size: 0.85rem;
@@ -985,11 +1033,19 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
   .shape-error text {
     fill: hsl(var(--signal));
   }
-  .door-label,
-  .telemetry {
+  .door-label {
     fill: hsl(var(--muted-foreground));
     font: 12px monospace;
     letter-spacing: 0.04em;
+  }
+  .telemetry {
+    min-height: 1.3em;
+    margin: 0.2rem 0 0;
+    color: hsl(var(--muted-foreground));
+    font: 0.68rem/1.3 monospace;
+    letter-spacing: 0.04em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
   .door-range {
     fill: none;
@@ -1135,6 +1191,16 @@ const copy: Record<Mode, { tab: string; title: string; lead: string }> = {
     }
     .lab-heading span:last-child {
       display: none;
+    }
+    .telemetry {
+      text-align: center;
+    }
+  }
+  /* The scene is drawn in an 800-unit box: on a phone its labels shrink below reading size. */
+  @media (max-width: 560px) {
+    .shape text,
+    .door-label {
+      font-size: 24px;
     }
   }
 </style>

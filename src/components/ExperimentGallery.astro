@@ -21,7 +21,10 @@ interface Props {
 const { items, heading = 'Experimental evidence' } = Astro.props
 ---
 
-<section class='experiment-gallery' aria-label={heading}>
+<section
+  class:list={['experiment-gallery', items.length % 2 === 1 && 'gallery-odd']}
+  aria-label={heading}
+>
   {
     items.map((item) => (
       <article class='experiment-item' data-reveal>
@@ -106,6 +109,25 @@ const { items, heading = 'Experimental evidence' } = Astro.props
     padding-top: 1rem;
     border-top: 1px solid hsl(var(--border));
     font-size: 0.88rem;
+  }
+  /* An odd number of items would leave an empty cell: run them three across instead. */
+  @media (min-width: 1000px) {
+    .gallery-odd {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .gallery-odd .experiment-item {
+      border-right: 1px solid hsl(var(--border));
+    }
+    .gallery-odd .experiment-item:nth-child(3n) {
+      border-right: 0;
+    }
+    .gallery-odd h3 {
+      font-size: 1.5rem;
+    }
+    .gallery-odd .notice {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
   }
   @media (max-width: 760px) {
     .experiment-gallery {

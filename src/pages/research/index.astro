@@ -368,6 +368,10 @@ const software = projects[0]?.links ?? []
   .software-grid a:nth-child(odd) {
     border-right: 1px solid hsl(var(--border));
   }
+  .software-grid a:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
   .software-grid span {
     color: hsl(var(--primary));
     font: 0.65rem monospace;

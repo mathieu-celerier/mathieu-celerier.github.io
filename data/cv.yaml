@@ -31,7 +31,9 @@ experience:
     organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
     short_organization: 'CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
-    dates: 'February 2026 - Present'
+    dates: 'February 2026 – Present'
+    items:
+      - 'Learning collaborative manipulation from physical interaction: imitation learning for a shared insertion task, developed on a simulation-first benchmark.'
     pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
     pdf_dates: 'February 2026 - Present'
     pdf_organization: 'CNRS-AIST Joint Robotics Laboratory'
@@ -40,7 +42,7 @@ experience:
     organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
     short_organization: 'CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
-    dates: 'June 2025 - December 2025'
+    dates: 'June 2025 – December 2025'
     pdf_description: 'Technical support and research engineering within the joint robotics laboratory.'
     pdf_dates: 'June 2025 - Dec. 2025'
     pdf_skip: true
@@ -49,25 +51,25 @@ experience:
     organization: 'CNRS-AIST Joint Robotics Laboratory (JRL)'
     short_organization: 'CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
-    dates: 'June 2022 - May 2025'
+    dates: 'June 2022 – May 2025'
     items:
       - 'Conducted research on understanding and improving physical human-robot interaction.'
     pdf_title: 'Research Assistant'
     pdf_organization: 'CNRS-AIST Joint Robotics Laboratory'
     pdf_dates: 'June 2022 - May 2025'
-    pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
+    pdf_description: 'Conducted research on understanding and improving physical human-robot interaction.'
     pdf_skip: true
 
   - title: 'Robotics internship'
     organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
     short_organization: 'LIRMM'
     location: 'Montpellier, France'
-    dates: 'February 2021 - July 2021'
+    dates: 'February 2021 – July 2021'
     items:
-      - 'Assisted a Ph.D. student on dual-arm manipulation of deformable objects.'
+      - 'Assisted a PhD student with dual-arm manipulation of deformable objects.'
       - 'Developed C++ robotic applications using the Robot Kinematic Control Library (RKCL) for dual-arm manipulation of deformable objects.'
       - 'Assisted with Python programming for optimization and Python/C++ integration.'
-    pdf_organization: 'Informatic, Robotic and Microelectronic Laboratory of Montpellier (LIRMM)'
+    pdf_organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
     pdf_dates: 'Feb. 2021 - July 2021'
     pdf_items:
       - 'Assisted PhD student on the subject of dual arm manipulation of deformable objects.'
@@ -78,12 +80,12 @@ experience:
     organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
     short_organization: 'LIRMM'
     location: 'Montpellier, France'
-    dates: 'May 2020 - Aug. 2020'
+    dates: 'May 2020 – August 2020'
     items:
       - 'Developed a V-REP (CoppeliaSim) simulation model of the HOAP-3 robot.'
       - 'Developed C++ robotic applications using the Robot Kinematic Control Library (RKCL) for dual-arm manipulation of deformable objects.'
       - 'Assisted with Python programming for optimization and Python/C++ integration.'
-    pdf_organization: 'Informatic, Robotic and Microelectronic Laboratory of Montpellier (LIRMM)'
+    pdf_organization: 'Informatics, Robotics and Microelectronics Laboratory of Montpellier (LIRMM)'
     pdf_dates: 'May 2020 - Aug. 2020'
     pdf_items:
       - 'V-REP (CoppeliaSim) simulation model of HOAP-3 robot.'
@@ -93,7 +95,7 @@ experience:
   - title: 'Undergraduate internship'
     organization: 'Bristol Robotics Laboratory'
     location: 'Bristol, United Kingdom'
-    dates: 'June 2019 - August 2019'
+    dates: 'June 2019 – August 2019'
     items:
       - "Developed a web application based on Blockly for Anki's Vector robot to support robotics outreach for children during UK Robotics Week."
       - "Developed a ROS1 wrapper for Anki's Vector robot API and implemented the ROS Navigation Stack on the robot."
@@ -103,15 +105,16 @@ experience:
       - "Development of a ROS1 wrapper for Anki's Vector robot API, and implementation of the ROS Navigation Stack on the robot."
 
 education:
-  - degree: 'Ph.D'
+  - degree: 'PhD'
     area: ''
-    institution: 'University of Montpellier ~ CNRS-AIST Joint Robotics Laboratory'
+    institution: 'University of Montpellier · CNRS-AIST Joint Robotics Laboratory'
     short_institution: 'UM / CNRS-AIST JRL'
     location: 'Tsukuba, Japan'
-    dates: 'September 2021 - December 2025'
+    dates: 'September 2021 – December 2025'
     items:
-      - 'Advisors: Gentiane Venture, Mehdi Benallegue'
-      - 'Conducted research on understanding and improving physical human-robot interaction.'
+      - 'Thesis: Sustained Physical Human-Robot Interaction: From Human-Inspired Motions to Safe, Adaptable, Precise Control toward Human-Centered Industry.'
+      - 'Advisors: Gentiane Venture, Mehdi Benallegue. Reviewers: Guillaume Morel, Arash Ajoudani.'
+      - 'Defended 16 December 2025.'
     pdf_dates: 'Sep. 2022 - Jan. 2026'
     pdf_description: 'Conduct research on understanding and improving physical human-robot interaction.'
     pdf_items: []
@@ -122,18 +125,18 @@ education:
     short_institution: 'UQAC'
     location: 'Remote from France due to COVID-19'
     short_location: 'Remote, France'
-    dates: 'September 2020 - December 2020'
+    dates: 'September 2020 – December 2020'
     items:
-      - 'Courses on neural networks, quantitative methods for engineers, engineering project management, and advanced numeric communication systems.'
+      - 'Courses on neural networks, quantitative methods for engineers, engineering project management, and advanced digital communication systems.'
     pdf_dates: 'Sep. 2020 - Dec. 2020'
-    pdf_description: 'Courses on Neural Networks, Quantitative methods for engineers, Engineering project management and Advance numeric communication systems.'
+    pdf_description: 'Courses on Neural Networks, Quantitative methods for engineers, Engineering project management and Advanced digital communication systems.'
     pdf_items: []
 
-  - degree: 'Master degree in Engineering'
+  - degree: 'Master’s degree in Engineering'
     area: 'Microelectronics and Automation, specialized in Robotics'
     institution: 'Polytech Montpellier'
     location: 'Montpellier, France'
-    dates: 'September 2018 - August 2021'
+    dates: 'September 2018 – August 2021'
     items:
       - 'Smart Bird Feeder project: C programming on STM32, low-power constraints, logging system, picture capture on bird arrival, and SD card storage.'
       - 'Gravity torque computing for compliance project: developed a Python URDF parser, recursive tree exploration, and gravity torque computation in Python/C++.'
@@ -154,12 +157,10 @@ education:
     area: ''
     institution: 'IUT of Nimes'
     location: 'Nimes, France'
-    dates: 'September 2016 - August 2018'
+    dates: 'September 2016 – August 2018'
     items:
-      - 'Machine learning project to recognize poker cards.'
-      - 'C++ programming.'
-      - 'Neural-network-based recognition.'
-      - 'Self-taught and implemented neural network algorithms (MLP/CNN) from scratch in Python and MATLAB.'
+      - 'Machine-learning project recognizing poker cards with a neural network, implemented in C++.'
+      - 'Taught myself neural networks (MLP/CNN) and implemented them from scratch in Python and MATLAB.'
     pdf_dates: 'Sep. 2016 - Aug. 2018'
     pdf_institution: 'IUT of Nîmes'
     pdf_location: 'Nîmes, France'

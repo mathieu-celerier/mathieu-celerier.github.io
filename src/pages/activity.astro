@@ -1,4 +1,5 @@
 ---
+import { labSnapshot } from '@/data/lab-home'
 import { collaborativeInsertion } from '@/data/research'
 import { loadTalks } from '@/lib/talks-data-loader'
 
@@ -32,12 +33,14 @@ function youtubeId(url?: string): string | null {
 
 const featuredTalk = talks[0]
 const featuredVideo = youtubeId(featuredTalk?.links?.video)
+// The featured talk is not repeated in the list below it.
+const otherTalks = talks.slice(1)
 ---
 
 <PageLayout
   meta={{
     title: 'Activity',
-    description: 'Talks, research notes, publications, and milestones.',
+    description: 'Talks, demonstrations, and research milestones, with the project currently under way.',
     ogImage: '/og/activity.png'
   }}
   highlightColor='hsl(var(--primary))'
@@ -50,8 +53,8 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
 
   <nav class='activity-index' aria-label='Activity sections'>
     <a href='#ongoing'>Ongoing now <span>↓</span></a>
-    <a href='#featured'>Featured presentation <span>↓</span></a>
-    <a href='#talks'>Talks & media <span>↓</span></a>
+    <a href='#talks'>{otherTalks.length ? 'Featured presentation' : 'Presentations'} <span>↓</span></a>
+    {otherTalks.length ? <a href='#more-talks'>More talks <span>↓</span></a> : null}
     <a href='#updates'>Research log <span>↓</span></a>
   </nav>
 
@@ -61,14 +64,15 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
       <h2>{collaborativeInsertion.question}</h2>
     </div>
     <div>
-      <p>{collaborativeInsertion.currentLimit}</p>
-      <a href='/research/collaborative-insertion'>Open the living project →</a>
+      <p>{labSnapshot.note}</p>
+      <p class='ongoing-status'><span>Status</span>{collaborativeInsertion.status}</p>
+      <a href='/research/collaborative-insertion'>Results, limits, and next steps →</a>
     </div>
   </section>
 
   {
     featuredTalk ? (
-      <section class='featured' id='featured' data-reveal>
+      <section class='featured' id='talks' data-reveal>
         <div class='featured-copy'>
           <p class='section-label'>Featured presentation · {formatDate(featuredTalk.date)}</p>
           <h2>{featuredTalk.title}</h2>
@@ -107,16 +111,17 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
     ) : null
   }
 
-  <section class='talks' id='talks'>
+  {
+    otherTalks.length ? (
+  <section class='talks' id='more-talks'>
     <header class='section-heading'>
       <p class='section-label'>Talks & media</p>
-      <h2>Public presentations.</h2>
+      <h2>More presentations.</h2>
     </header>
     <div class='talk-list'>
-      {
-        talks.map((talk, index) => (
+      {otherTalks.map((talk, index) => (
           <article data-reveal>
-            <span class='talk-index'>0{index + 1}</span>
+            <span class='talk-index'>0{index + 2}</span>
             <time datetime={talk.date}>{formatDate(talk.date)}</time>
             <div>
               <h3>{talk.title}</h3>
@@ -147,17 +152,18 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
               ) : null}
             </div>
           </article>
-        ))
-      }
+        ))}
     </div>
   </section>
+    ) : null
+  }
 
   <section class='updates' id='updates'>
     <header class='section-heading'>
       <p class='section-label'>Research log</p>
       <h2>Selected milestones.</h2>
     </header>
-    <NewsList showHeading={false} />
+    <NewsList showHeading={false} dateFormat='en-GB' />
   </section>
 </PageLayout>
 
@@ -172,7 +178,7 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
   }
   .activity-index {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
     margin: 2.5rem 0 6rem;
     border-block: 1px solid hsl(var(--border));
   }
@@ -214,6 +220,20 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
     color: hsl(var(--muted-foreground));
     line-height: 1.65;
   }
+  .ongoing-status {
+    display: grid;
+    gap: 0.2rem;
+    margin: 1rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid hsl(var(--border));
+    font-size: 0.86rem;
+  }
+  .ongoing-status span {
+    color: hsl(var(--primary));
+    font: 0.62rem/1.5 monospace;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
   .ongoing a {
     color: hsl(var(--primary));
     font-size: 0.86rem;
@@ -235,6 +255,13 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.045em;
+  }
+  /* A full paper title, not a headline: set it at reading size so it does not run to eight lines. */
+  .featured h2 {
+    font-size: clamp(1.5rem, 2.3vw, 2.1rem);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
   }
   .featured-copy > p:not(.section-label),
   .talk-list p {
@@ -305,7 +332,6 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
   }
   @media (max-width: 800px) {
     .activity-index {
-      grid-template-columns: 1fr;
       margin-bottom: 4rem;
     }
     .ongoing {
@@ -313,10 +339,6 @@ const featuredVideo = youtubeId(featuredTalk?.links?.video)
       gap: 1rem;
       margin-bottom: 4rem;
       padding: 1.4rem;
-    }
-    .activity-index a + a {
-      border-left: 0;
-      border-top: 1px solid hsl(var(--border));
     }
     .featured {
       grid-template-columns: 1fr;

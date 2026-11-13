@@ -110,6 +110,12 @@ a {
   color: hsl(var(--link) / var(--un-text-opacity, 1));
 }
 
+/* Running prose: the reset zeroes paragraph margins, so consecutive unclassed
+   paragraphs would otherwise read as one block. */
+main p:not([class]) + p:not([class]) {
+  margin-top: 0.9em !important;
+}
+
 /* Scroll reveal (Phase 4)
    Progressive enhancement: elements are visible by default. JS adds
    `.reveal-init` on load (before observing), so content stays visible

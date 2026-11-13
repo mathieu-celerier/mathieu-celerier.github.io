@@ -31,10 +31,10 @@ const titles = {
         <path class='recovery' d='M292 122C326 95 351 75 402 73' />
         <circle class='event' cx='292' cy='122' r='8' />
         <path class='force-arrow' d='M292 54V104' />
-        <text x='307' y='56'>
+        <text x='280' y='50' text-anchor='end'>
           EXTERNAL DISTURBANCE
         </text>
-        <text x='402' y='102'>
+        <text x='585' y='56' text-anchor='end'>
           CLOSEST CANONICAL TRAJECTORY
         </text>
         <text x='498' y='226'>
@@ -49,14 +49,14 @@ const titles = {
   {
     mode === 'control' && (
       <svg viewBox='0 0 640 300' role='img' aria-label={titles[mode]}>
-        <path class='flow' d='M62 150H146M254 150H344M452 150H567' />
+        <path class='flow' d='M62 150H146M254 150H344M452 150H532' />
         <g class='block force-block'>
           <>
             <rect x='42' y='111' width='105' height='78' rx='5' />
-            <text x='63' y='144'>
+            <text x='94.5' y='144' text-anchor='middle'>
               EXTERNAL
             </text>
-            <text x='77' y='162'>
+            <text x='94.5' y='162' text-anchor='middle'>
               FORCE
             </text>
           </>
@@ -64,13 +64,13 @@ const titles = {
         <g class='block qp-block'>
           <>
             <rect x='147' y='91' width='108' height='118' rx='5' />
-            <text x='184' y='139'>
+            <text x='201' y='139' text-anchor='middle'>
               QP
             </text>
-            <text x='164' y='160'>
+            <text x='201' y='160' text-anchor='middle'>
               Γₖ RESPONSE
             </text>
-            <text x='167' y='180'>
+            <text x='201' y='180' text-anchor='middle'>
               + SAFETY
             </text>
           </>
@@ -78,15 +78,15 @@ const titles = {
         <g class='block dynamics-block'>
           <>
             <rect x='344' y='105' width='109' height='90' rx='5' />
-            <text x='361' y='144'>
+            <text x='398.5' y='144' text-anchor='middle'>
               INVERSE
             </text>
-            <text x='357' y='163'>
+            <text x='398.5' y='163' text-anchor='middle'>
               DYNAMICS
             </text>
           </>
         </g>
-        <g class='arm' transform='translate(566 151)'>
+        <g class='arm' transform='translate(546 158) scale(0.68)'>
           <>
             <path d='M-4 82V30L43 -2L76 24L111 -24' />
             <circle cx='-4' cy='30' r='9' />
@@ -96,13 +96,13 @@ const titles = {
           </>
         </g>
         <path class='constraint' d='M171 69H426' />
-        <text x='203' y='58'>
+        <text x='298' y='58' text-anchor='middle'>
           TORQUE · POSITION · VELOCITY · COLLISION
         </text>
-        <text x='50' y='230'>
+        <text x='94.5' y='226' text-anchor='middle'>
           MEASURED / ESTIMATED
         </text>
-        <text x='344' y='230'>
+        <text x='398.5' y='226' text-anchor='middle'>
           COMMANDED ACCELERATION
         </text>
       </svg>
@@ -118,7 +118,7 @@ const titles = {
         <g class='partner partner-a'>
           <>
             <circle cx='75' cy='141' r='30' />
-            <text x='50' y='193'>
+            <text x='75' y='193' text-anchor='middle'>
               PARTNER A
             </text>
           </>
@@ -126,7 +126,7 @@ const titles = {
         <g class='partner partner-b'>
           <>
             <circle cx='565' cy='141' r='30' />
-            <text x='540' y='193'>
+            <text x='565' y='193' text-anchor='middle'>
               PARTNER B
             </text>
           </>
@@ -142,10 +142,10 @@ const titles = {
         />
         <rect class='history-window' x='196' y='83' width='183' height='118' rx='5' />
         <path class='prediction' d='M379 85L491 61V221L379 199Z' />
-        <text x='218' y='72'>
+        <text x='287.5' y='72' text-anchor='middle'>
           INTERACTION HISTORY
         </text>
-        <text x='413' y='238'>
+        <text x='435' y='240' text-anchor='middle'>
           PREDICTED ROLE / INTENT
         </text>
       </svg>
@@ -158,10 +158,10 @@ const titles = {
         <g class='block'>
           <>
             <rect x='38' y='111' width='100' height='78' rx='5' />
-            <text x='58' y='145'>
+            <text x='88' y='145' text-anchor='middle'>
               SENSING
             </text>
-            <text x='55' y='164'>
+            <text x='88' y='164' text-anchor='middle'>
               FORCE / STATE
             </text>
           </>
@@ -169,10 +169,10 @@ const titles = {
         <g class='block'>
           <>
             <rect x='138' y='96' width='101' height='108' rx='5' />
-            <text x='154' y='144'>
+            <text x='188.5' y='144' text-anchor='middle'>
               ESTIMATION
             </text>
-            <text x='154' y='164'>
+            <text x='188.5' y='164' text-anchor='middle'>
               + HISTORY
             </text>
           </>
@@ -180,10 +180,10 @@ const titles = {
         <g class='block'>
           <>
             <rect x='326' y='96' width='102' height='108' rx='5' />
-            <text x='350' y='144'>
+            <text x='377' y='144' text-anchor='middle'>
               CONTROL
             </text>
-            <text x='348' y='164'>
+            <text x='377' y='164' text-anchor='middle'>
               QP / POLICY
             </text>
           </>
@@ -191,16 +191,16 @@ const titles = {
         <g class='block'>
           <>
             <rect x='511' y='111' width='91' height='78' rx='5' />
-            <text x='530' y='145'>
+            <text x='556.5' y='145' text-anchor='middle'>
               ROBOT
             </text>
-            <text x='523' y='164'>
+            <text x='556.5' y='164' text-anchor='middle'>
               INTERACTION
             </text>
           </>
         </g>
         <path class='feedback' d='M557 190C557 257 88 257 88 190' />
-        <text x='246' y='273'>
+        <text x='322' y='276' text-anchor='middle'>
           PHYSICAL FEEDBACK
         </text>
       </svg>
@@ -225,7 +225,7 @@ const titles = {
     padding: 0.7rem 0.85rem;
     border-bottom: 1px solid hsl(var(--border));
     color: hsl(var(--muted-foreground));
-    font: 0.58rem/1.4 monospace;
+    font: 0.62rem/1.4 monospace;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -236,8 +236,8 @@ const titles = {
   }
   svg text {
     fill: hsl(var(--muted-foreground));
-    font: 9px monospace;
-    letter-spacing: 0.05em;
+    font: 11px monospace;
+    letter-spacing: 0.02em;
   }
   .grid,
   .axis,

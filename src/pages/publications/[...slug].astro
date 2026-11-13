@@ -3,7 +3,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { getCollection } from 'astro:content'
 
+import 'katex/dist/katex.min.css'
+
 import { Button } from 'astro-pure/user'
+import { recordKind, typesetProse, venueOrStatus } from '@/lib/publication-meta'
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ResearchPlate from '@/components/ResearchPlate.astro'
 import YouTube from '@/components/YouTube.astro'
@@ -43,14 +46,12 @@ function youtubeId(url: string): string | null {
 }
 
 const ytId = entry.data.video ? youtubeId(entry.data.video) : null
-const visualMode =
-  entry.data.bibkey === 'celerier2025explicit'
-    ? 'control'
-    : entry.data.bibkey === 'muraccioliDemonstratingControlFramework2025'
-      ? 'system'
-      : entry.data.bibkey === 'cariou2025safe'
-        ? 'control'
-        : 'motion'
+// Only records the site has a faithful diagram for get one; a generic plate would misdescribe the rest.
+const visualModes: Record<string, 'control' | 'system'> = {
+  celerier2025explicit: 'control',
+  muraccioliDemonstratingControlFramework2025: 'system'
+}
+const visualMode = visualModes[entry.data.bibkey]
 const metaDescription = entry.data.abstract
   ? `${entry.data.abstract.slice(0, 156).trimEnd()}…`
   : `${entry.data.authors}. ${entry.data.venue ?? typeLabels[entry.data.type]}, ${entry.data.year}.`
@@ -58,13 +59,10 @@ const statusLabels: Record<string, string> = {
   published: 'Published',
   accepted: 'Accepted',
   submitted: 'Submitted',
-  'in-revision': 'Manuscript in revision',
+  'in-revision': 'In revision',
   ongoing: 'Ongoing work'
 }
-const recordType =
-  entry.data.status === 'in-revision'
-    ? 'Manuscript'
-    : (typeLabels[entry.data.type] ?? entry.data.type)
+const recordType = recordKind(entry.data)
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'ScholarlyArticle',
@@ -103,11 +101,7 @@ const scholarlyMeta = {
     <header class='pub-header'>
       <div class='header-main'>
         <p class='pub-kicker'>
-          {
-            entry.data.status === 'published'
-              ? entry.data.venue || typeLabels[entry.data.type]
-              : statusLabels[entry.data.status]
-          }
+          {venueOrStatus(entry.data)}
         </p>
         <h1>{entry.data.title}</h1>
         <p class='authors'>{entry.data.authors}</p>
@@ -131,7 +125,7 @@ const scholarlyMeta = {
       </aside>
     </header>
 
-    <ResearchPlate mode={visualMode} label={entry.data.title} />
+    {visualMode ? <ResearchPlate mode={visualMode} /> : null}
 
     {
       entry.data.highlights?.length ? (
@@ -146,7 +140,7 @@ const scholarlyMeta = {
             {entry.data.highlights.map((highlight, index) => (
               <li>
                 <span>0{index + 1}</span>
-                <p>{highlight}</p>
+                <p set:html={typesetProse(highlight)} />
               </li>
             ))}
           </ol>
@@ -161,15 +155,15 @@ const scholarlyMeta = {
             <section class='detail-section'>
               <p class='section-label'>Abstract</p>
               <h2>The research in detail.</h2>
-              <p class='abstract'>{entry.data.abstract}</p>
+              <p class='abstract' set:html={typesetProse(entry.data.abstract)} />
             </section>
           ) : (
             <section class='detail-section pending-detail'>
               <p class='section-label'>Record</p>
-              <h2>Publication metadata.</h2>
+              <h2>Bibliographic record.</h2>
               <p>
-                This entry currently contains the bibliographic record. Follow the available
-                resources for the complete work.
+                No abstract is stored for this entry yet. The full citation is available under
+                Resources and in the BibTeX source below.
               </p>
             </section>
           )
@@ -245,7 +239,7 @@ const scholarlyMeta = {
             {related.map((item) => (
               <a href={`/publications/${item.data.bibkey}`}>
                 <span>
-                  {item.data.year} / {item.data.venue || item.data.type}
+                  {item.data.year} / {venueOrStatus(item.data)}
                 </span>
                 <strong>{item.data.title}</strong>
                 <i>→</i>

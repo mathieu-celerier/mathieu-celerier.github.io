@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import { labSnapshot, openQuestions, researchTracks } from '@/data/lab-home'
 import { loadCV } from '@/lib/cv-data-loader'
 import { homeSelection } from '@/lib/home-selection'
+import { venueOrStatus } from '@/lib/publication-meta'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
 import ResearchHero from '@/components/ResearchHero.astro'
@@ -16,6 +17,11 @@ const publications = selectedKeys.flatMap((key) => {
   const entry = allPublications.find((item) => item.data.bibkey === key)
   return entry ? [entry] : []
 })
+const trackLinks: Record<string, string> = {
+  trajectory: '/research#motion',
+  control: '/research/explicit-compliance',
+  prediction: '/research/collaborative-insertion'
+}
 const news = (await getCollection('news'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3)
@@ -61,7 +67,9 @@ const news = (await getCollection('news'))
                 <span class={`status status-${track.tone}`}>{track.status}</span>
               </div>
               <div class='track-copy'>
-                <h3>{track.question}</h3>
+                <h3>
+                  <a href={trackLinks[track.id]}>{track.question}</a>
+                </h3>
                 <p>{track.detail}</p>
               </div>
               <div class='track-visual' aria-hidden='true'>
@@ -94,8 +102,8 @@ const news = (await getCollection('news'))
                     <path class='primary-path' d='M59 147C124 126 155 162 221 111S315 57 379 82' />
                     <path class='danger' d='M87 48L50 161M383 71L406 161' />
                     <circle class='marker' cx='221' cy='111' r='11' />
-                    <text x='177' y='103'>
-                      FEASIBLE
+                    <text x='262' y='168'>
+                      FEASIBLE SET
                     </text>
                   </svg>
                 )}
@@ -136,7 +144,7 @@ const news = (await getCollection('news'))
           <h2 id='experiment-title'>From compliance to virtual dynamics.</h2>
         </div>
         <p>
-          <Tex text={String.raw`In my compliance framework $\Gamma_k$ is not a stiffness knob: it sets the inertia a task shows to a push. Generalised, the same mechanism lets the arm render an object that is not there.`}
+          <Tex text={String.raw`In my compliance framework $\Gamma_k$ is not a stiffness knob: it sets the inertia a task shows to a push. Generalized, the same mechanism lets the arm render an object that is not there.`}
           />
         </p>
       </header>
@@ -149,7 +157,7 @@ const news = (await getCollection('news'))
           <p class='eyebrow'>Selected publications</p>
           <h2 id='evidence-title'>Research in detail.</h2>
         </div>
-        <a class='text-action' href='/publications'>Complete publication record ↗</a>
+        <a class='text-action' href='/publications'>Complete publication record →</a>
       </header>
       <div class='publication-stack'>
         {
@@ -158,7 +166,7 @@ const news = (await getCollection('news'))
               <span class='publication-index'>0{index + 1}</span>
               <div class='publication-body'>
                 <p class='publication-meta'>
-                  {entry.data.venue || entry.data.type} / {entry.data.year}
+                  {venueOrStatus(entry.data)} / {entry.data.year}
                 </p>
                 <h3>
                   <a href={`/publications/${entry.data.bibkey}`}>{entry.data.title}</a>
@@ -168,9 +176,10 @@ const news = (await getCollection('news'))
               <a
                 class='publication-link'
                 href={`/publications/${entry.data.bibkey}`}
-                aria-label={`Read ${entry.data.title}`}
+                aria-hidden='true'
+                tabindex='-1'
               >
-                ↗
+                →
               </a>
             </article>
           ))
@@ -182,17 +191,17 @@ const news = (await getCollection('news'))
       <div class='questions-intro'>
         <p class='eyebrow'>Current postdoctoral questions</p>
         <h2 id='questions-title'>Prediction in<br /><em>physical collaboration.</em></h2>
-        <p>Working hypotheses for the benchmark and predictive models now under development.</p>
+        <p>Open questions behind the collaborative-insertion benchmark.</p>
+        <a class='text-action' href='/research/collaborative-insertion'
+          >See where the project stands →</a
+        >
       </div>
       <ol>
         {
           openQuestions.map((question, index) => (
             <li data-reveal>
-              <>
-                <span>Q{index + 1}</span>
-                <p>{question}</p>
-                <i aria-hidden='true'>→</i>
-              </>
+              <span>Q{index + 1}</span>
+              <p>{question}</p>
             </li>
           ))
         }
@@ -203,7 +212,7 @@ const news = (await getCollection('news'))
       <div class='log-heading'>
         <p class='eyebrow'>Recent activity</p>
         <h2 id='log-title'>Updates.</h2>
-        <a class='text-action' href='/activity#updates'>All activity ↗</a>
+        <a class='text-action' href='/activity#updates'>All activity →</a>
       </div>
       <ol>
         {
@@ -224,7 +233,7 @@ const news = (await getCollection('news'))
                     : '/news')
                 }
               >
-                {entry.data.title} ↗
+                {entry.data.title} {entry.data.externalUrl ? '↗' : '→'}
               </a>
             </li>
           ))
@@ -234,7 +243,9 @@ const news = (await getCollection('news'))
 
     <section class='contact'>
       <p><span class='pulse'></span> OPEN TO EXCHANGE</p>
-      <a href={`mailto:${cv.basics.email}`}>Bring a question.<br /><em>Let’s explore it.</em> ↗</a>
+      <a href={`mailto:${cv.basics.email}`} aria-label={`Email ${cv.basics.email}`}
+        >Bring a question.<br /><em>Let’s explore it.</em> ↗</a
+      >
       <div class='contact-detail'>
         <p class='contact-availability'>Worth an email:</p>
         <ul>
@@ -382,6 +393,14 @@ const news = (await getCollection('news'))
     font-weight: 500;
     line-height: 1.12;
     letter-spacing: -0.04em;
+  }
+  .track-copy h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .track-copy h3 a:hover,
+  .track-copy h3 a:focus-visible {
+    color: hsl(var(--primary));
   }
   .track-copy p {
     max-width: 26rem;
@@ -558,8 +577,13 @@ const news = (await getCollection('news'))
     border-radius: 12px;
     background: hsl(var(--muted));
   }
-  .questions-intro > p:last-child {
+  .questions-intro h2 {
+    font-size: clamp(2.2rem, 3.6vw, 3.4rem);
+    line-height: 1.02;
+  }
+  .questions-intro > p:not(.eyebrow) {
     max-width: 25rem;
+    margin: 1.5rem 0 1rem;
     color: hsl(var(--muted-foreground));
   }
   .questions ol {
@@ -570,7 +594,7 @@ const news = (await getCollection('news'))
   }
   .questions li {
     display: grid;
-    grid-template-columns: 3rem 1fr auto;
+    grid-template-columns: 3rem 1fr;
     gap: 1rem;
     align-items: center;
     min-height: 7rem;
@@ -585,10 +609,6 @@ const news = (await getCollection('news'))
     font-size: clamp(1.05rem, 2vw, 1.4rem);
     line-height: 1.35;
   }
-  .questions li i {
-    color: hsl(var(--signal));
-    font-style: normal;
-  }
 
   .log {
     display: grid;
@@ -597,7 +617,8 @@ const news = (await getCollection('news'))
     padding: 8rem 0;
   }
   .log-heading .text-action {
-    margin-top: 1rem;
+    display: inline-block;
+    margin-top: 1.25rem;
   }
   .log ol {
     margin: 0;
@@ -745,7 +766,7 @@ const news = (await getCollection('news'))
       border-radius: 0;
     }
     .questions li {
-      grid-template-columns: 2rem 1fr auto;
+      grid-template-columns: 2rem 1fr;
     }
     .log {
       grid-template-columns: 1fr;

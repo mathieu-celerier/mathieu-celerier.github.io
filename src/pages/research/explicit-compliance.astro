@@ -32,16 +32,6 @@ const gallery = [
   },
   {
     index: '03',
-    status: 'Controller architecture',
-    title: 'One optimization problem',
-    caption:
-      'External-effort response, inverse dynamics, and hard feasibility constraints meet at acceleration level.',
-    notice:
-      'Compliance changes the selected response; torque, position, velocity, and collision limits remain constraints.',
-    plate: 'control' as const
-  },
-  {
-    index: '04',
     status: 'Physical demonstration · RSS 2025',
     title: 'Safety constraints under contact',
     caption:
@@ -142,7 +132,7 @@ const structuredData = {
   <section class='virtual-dynamics' id='virtual-dynamics'>
     <header>
       <p class='section-label'>From compliance to virtual dynamics</p>
-      <h2><Tex text={String.raw`$\Gamma_k$ shapes inertia — and, generalised, renders an object.`} /></h2>
+      <h2><Tex text={String.raw`$\Gamma_k$ shapes inertia — and, generalized, renders an object.`} /></h2>
       <div class='vd-copy'>
         <p>
           With the external wrench compensated, a push reaches the task only through the deviation
@@ -154,7 +144,7 @@ const structuredData = {
           />
         </p>
         <p>
-          <Tex text={String.raw`$\Gamma_k$ cannot synthesise a wrench or cancel the arm’s configuration-dependent inertia. Replacing the deviation with`}
+          <Tex text={String.raw`$\Gamma_k$ cannot synthesize a wrench or cancel the arm’s configuration-dependent inertia. Replacing the deviation with`}
           />
         </p>
         <Tex display expr={String.raw`\ddot{\mathbf{e}}^f_k = \mathbf{\Lambda}_v^{-1}\big(\hat{\mathbf{F}}_e + \mathbf{F}_v(\mathbf{x}, \dot{\mathbf{x}})\big)`} />
@@ -211,7 +201,8 @@ const structuredData = {
       <p class='section-label'>Experimental record</p>
       <div>
         <h2>See what the formulation changes.</h2><p>
-          Every item states what is happening and what to inspect.
+          Recordings on a torque-controlled Kinova Gen3. Each one says what is happening and what
+          to look for.
         </p>
       </div>
     </header>
@@ -386,9 +377,9 @@ const structuredData = {
   }
   .architecture {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-columns: 1fr 1fr;
     gap: 3rem;
-    align-items: end;
+    align-items: center;
   }
   .architecture header {
     grid-column: 1 / -1;
@@ -438,6 +429,10 @@ const structuredData = {
   }
   .section-heading p {
     max-width: 38rem;
+  }
+  .section-heading div p {
+    margin: 0.9rem 0 0;
+    color: hsl(var(--muted-foreground));
   }
   .limits {
     display: grid;

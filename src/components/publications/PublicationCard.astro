@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content'
 
 import { Button } from 'astro-pure/user'
+import { recordKind, venueOrStatus } from '@/lib/publication-meta'
 
 interface Props {
   entry: CollectionEntry<'publications'>
@@ -10,15 +11,6 @@ interface Props {
 
 const { entry, compact = false } = Astro.props
 
-const typeLabels: Record<string, string> = {
-  journal: 'Journal',
-  conference: 'Conference',
-  workshop: 'Workshop',
-  preprint: 'Preprint',
-  thesis: 'Thesis',
-  demo: 'Demo',
-  other: 'Other'
-}
 const statusLabels: Record<string, string> = {
   published: 'Published',
   accepted: 'Accepted',
@@ -29,10 +21,9 @@ const statusLabels: Record<string, string> = {
 
 const bibtexHref = `/bibtex/${entry.data.bibkey}.bib`
 const detailHref = `/publications/${entry.data.bibkey}`
-const recordType =
-  entry.data.status === 'in-revision'
-    ? 'Manuscript'
-    : (typeLabels[entry.data.type] ?? entry.data.type)
+const recordType = recordKind(entry.data)
+const venue = venueOrStatus(entry.data)
+const paperHref = entry.data.url ?? (entry.data.doi ? `https://doi.org/${entry.data.doi}` : undefined)
 ---
 
 <div
@@ -46,7 +37,7 @@ const recordType =
   data-reveal
 >
   <article class:list={['pub-card', entry.data.featured && 'pub-card-featured']}>
-    <p class='pub-venue'>{entry.data.venue}</p>
+    <p class='pub-venue'>{venue}</p>
     <h2><a href={detailHref}>{entry.data.title}</a></h2>
     <p class='pub-authors'>{entry.data.authors}</p>
     {
@@ -79,6 +70,34 @@ const recordType =
 
     <div class='pub-links'>
       <a class='pub-dossier-link' href={detailHref}>Open dossier →</a>
+      {
+        compact && paperHref ? (
+          <a class='pub-dossier-link' href={paperHref} target='_blank' rel='noreferrer'>
+            Paper ↗
+          </a>
+        ) : null
+      }
+      {
+        compact && entry.data.video ? (
+          <a class='pub-dossier-link' href={entry.data.video} target='_blank' rel='noreferrer'>
+            Video ↗
+          </a>
+        ) : null
+      }
+      {
+        compact && entry.data.code ? (
+          <a class='pub-dossier-link' href={entry.data.code} target='_blank' rel='noreferrer'>
+            Code ↗
+          </a>
+        ) : null
+      }
+      {
+        compact && entry.data.website ? (
+          <a class='pub-dossier-link' href={entry.data.website} target='_blank' rel='noreferrer'>
+            Project page ↗
+          </a>
+        ) : null
+      }
       {
         !compact && entry.data.website ? (
           <Button href={entry.data.website} target='_blank' variant='ahead' title='Project page' />
@@ -236,7 +255,7 @@ const recordType =
   .pub-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.55rem;
+    gap: 0.55rem 1.1rem;
     margin-top: 0.6rem;
   }
   .pub-dossier-link {

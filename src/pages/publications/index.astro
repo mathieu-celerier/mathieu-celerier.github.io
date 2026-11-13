@@ -1,6 +1,9 @@
 ---
 import { getCollection } from 'astro:content'
+import 'katex/dist/katex.min.css'
+
 import { loadCV } from '@/lib/cv-data-loader'
+import { typesetProse, venueOrStatus } from '@/lib/publication-meta'
 
 import PageLayout from '@/layouts/BaseLayout.astro'
 import PageIntro from '@/components/PageIntro.astro'
@@ -14,6 +17,14 @@ const entries = (await getCollection('publications')).sort((a, b) => {
 })
 const featured = entries.filter((entry) => entry.data.featured)
 const cv = loadCV()
+const reviewed = entries.filter((entry) => ['published', 'accepted'].includes(entry.data.status))
+const pending = entries.length - reviewed.length
+const recordSummary = [
+  `${reviewed.length} peer-reviewed paper${reviewed.length === 1 ? '' : 's'}`,
+  pending ? `${pending} manuscript${pending === 1 ? '' : 's'}` : null
+]
+  .filter(Boolean)
+  .join(' · ')
 const years = [...new Set(entries.map((entry) => entry.data.year))].sort((a, b) => b - a)
 const grouped = years.map((year) => ({
   year,
@@ -33,11 +44,11 @@ const grouped = years.map((year) => ({
   <PageIntro
     kicker='Research output'
     title='Publications and technical contributions.'
-    copy='Selected work in physical human–robot interaction, constrained control, robot learning, and manipulation.'
+    copy='Papers and manuscripts on physical human–robot interaction, constrained torque control, safe robot learning, and manipulation.'
   />
 
   <div class='publication-summary'>
-    <div><span>Public record</span><strong>{entries.length} research records</strong></div>
+    <div><span>Public record</span><strong>{recordSummary}</strong></div>
     <div><span>Covered period</span><strong>{Math.min(...years)}—{Math.max(...years)}</strong></div>
     <div><span>Primary area</span><strong>Physical human–robot interaction</strong></div>
     {
@@ -65,17 +76,14 @@ const grouped = years.map((year) => ({
               <div class='selected-index'>
                 0{index + 1} / {entry.data.year}
               </div>
-              <p class='selected-venue'>
-                {entry.data.status === 'published'
-                  ? entry.data.venue || entry.data.type
-                  : entry.data.status.replace('-', ' ')}
-              </p>
+              <p class='selected-venue'>{venueOrStatus(entry.data)}</p>
               <h3>
                 <a href={`/publications/${entry.data.bibkey}`}>{entry.data.title}</a>
               </h3>
-              <p class='selected-contribution'>
-                {entry.data.highlights?.[0] ?? entry.data.abstract}
-              </p>
+              <p
+                class='selected-contribution'
+                set:html={typesetProse(entry.data.highlights?.[0] ?? entry.data.abstract ?? '')}
+              />
               <div class='selected-links'>
                 <a href={`/publications/${entry.data.bibkey}`}>Open dossier →</a>
                 {entry.data.video ? (
@@ -119,7 +127,7 @@ const grouped = years.map((year) => ({
 <style>
   .publication-summary {
     display: grid;
-    grid-template-columns: 0.55fr 0.55fr 1fr 0.8fr;
+    grid-template-columns: 1fr 0.5fr 1fr 0.7fr;
     margin: 2.5rem 0 7rem;
     border-block: 1px solid hsl(var(--border));
   }

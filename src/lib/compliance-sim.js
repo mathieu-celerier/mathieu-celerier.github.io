@@ -1,6 +1,6 @@
 // @ts-check
 // Planar illustration of the explicit-compliance framework: task dynamics
-// ẍ = ë* + Γ Λ⁻¹ F + (I − Γ) J M⁻¹ ε_τ, and its virtual-dynamics generalisation
+// ẍ = ë* + Γ Λ⁻¹ F + (I − Γ) J M⁻¹ ε_τ, and its virtual-dynamics generalization
 // rendering a hinged door. Model units: links of length 1, SI otherwise.
 
 /** @typedef {[number, number]} Vec2 */
