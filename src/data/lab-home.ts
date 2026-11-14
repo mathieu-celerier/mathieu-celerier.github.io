@@ -4,7 +4,7 @@
  * is independent from any single project or method.
  */
 export const labSnapshot = {
-  updated: 'SEPTEMBER 2026',
+  updated: 'NOVEMBER 2026',
   inquiry: 'Can a robot learn to take over one partner’s role in collaborative insertion?',
   note: 'Current postdoctoral project: learning a relative intent action from causal robot state, interaction history, and online partner estimates in a simulation-first insertion benchmark.',
   heroTitle: 'Learning collaborative insertion',

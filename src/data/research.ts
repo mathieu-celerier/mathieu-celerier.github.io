@@ -1,5 +1,5 @@
 export const explicitCompliance = {
-  updated: 'September 2026',
+  updated: 'November 2026',
   status: 'Manuscript in revision · venue undecided',
   question:
     'How can a torque-controlled robot remain precise where a task demands it, yield where contact demands it, and keep hard limits active in both cases?',
@@ -34,7 +34,7 @@ export const explicitCompliance = {
 } as const
 
 export const collaborativeInsertion = {
-  updated: '9 September 2026',
+  updated: 'November 2026',
   status: 'Simulation-first · physical data collection paused',
   question:
     "Can a policy replace one person's contribution while continuing to collaborate with the other?",
